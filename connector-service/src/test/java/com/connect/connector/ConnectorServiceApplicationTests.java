@@ -1,4 +1,4 @@
-package com.connect.connector_service;
+package com.connect.connector;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

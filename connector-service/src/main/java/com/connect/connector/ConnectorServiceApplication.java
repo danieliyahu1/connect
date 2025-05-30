@@ -1,4 +1,4 @@
-package com.connect.connector_service;
+package com.connect.connector;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
