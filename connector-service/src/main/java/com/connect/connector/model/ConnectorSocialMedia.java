@@ -19,6 +19,12 @@ public class ConnectorSocialMedia {
     @Setter(AccessLevel.NONE)
     private UUID id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "connector_id", nullable = false)
+    private Connector connector;
+
+
+    @Enumerated(EnumType.STRING)
     private SocialMedia platformName;
     private String profileUrl;
 }

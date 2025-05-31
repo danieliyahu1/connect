@@ -1,5 +1,6 @@
 package com.connect.connector.controller;
 
+import com.connect.connector.exception.ExistingConnectorException;
 import com.connect.connector.service.ConnectorService;
 import com.connect.connector.client.AuthServiceClient;
 import com.connect.connector.dto.ConnectorRequestDTO;
@@ -18,42 +19,19 @@ public class ConnectorController {
     AuthServiceClient authService;
     ConnectorService connectorService;
 
-    @GetMapping("/me")
-    public ResponseEntity<ConnectorResponseDTO> getCurrentConnector() {
-        // This method should return the current connector's details.
-        // For now, returning a placeholder object.
-        return ResponseEntity.ok().body(new ConnectorResponseDTO());
-    }
-
-    @PutMapping("/me")
-    public ResponseEntity<ConnectorResponseDTO> updateCurrentConnector(@RequestHeader("Authorization") String authorizationHeader,
-                                                                       @RequestBody @Valid ConnectorRequestDTO connectorRequestDTO) {
-        String accessToken = authorizationHeader.replace("Bearer ", "").trim();
-        UUID userId = authService.getUserIdFromAccessToken(accessToken);
-
-        ConnectorResponseDTO updatedConnector = connectorService.updateConnector(userId, connectorRequestDTO);
-
-        return ResponseEntity.ok(updatedConnector);
-    }
-
-    @GetMapping("/public/{id}")
-    public ResponseEntity<ConnectorResponseDTO> getPublicConnector(String id) {
-        // This method should return a public connector's details by ID.
-        // For now, returning a placeholder object.
-        return ResponseEntity.ok().body(new ConnectorResponseDTO());
+    @PutMapping("public/me")
+    public ResponseEntity<ConnectorResponseDTO> updateConnector(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @Valid @RequestBody ConnectorRequestDTO request
+    ) {
+        UUID userId = authService.getUserIdFromAccessToken(authorizationHeader.replace("Bearer ", "").trim());
+        ConnectorResponseDTO response = connectorService.updateConnector(userId, request);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/internal/create")
-    public ResponseEntity<Void> createInternalConnector(@RequestBody UUID userId) {
-        // This method should create a new internal connector.
-        // For now, returning the created object as a placeholder.
-        return ResponseEntity.ok().body(connectorService.createConnector(userId));
-    }
-
-    @GetMapping("/public/getAll")
-    public ResponseEntity<List<ConnectorResponseDTO>> getAllPublicConnectors() {
-        // This method should return all public connectors.
-        // For now, returning an empty list as a placeholder.
-        return ResponseEntity.ok().body(connectorService.getAllPublicConnectors());
+    public ResponseEntity<Void> createInternalConnector(@RequestBody UUID userId) throws ExistingConnectorException {
+        connectorService.createConnector(userId);
+        return ResponseEntity.ok().build();
     }
 }

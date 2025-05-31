@@ -8,4 +8,5 @@ import java.util.UUID;
 
 @Repository
 public interface ConnectorRepository extends JpaRepository<Connector, UUID> {
+    boolean existsByUserId(UUID userId);
 }

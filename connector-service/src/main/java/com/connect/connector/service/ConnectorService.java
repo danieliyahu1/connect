@@ -2,6 +2,8 @@ package com.connect.connector.service;
 
 import com.connect.connector.dto.ConnectorRequestDTO;
 import com.connect.connector.dto.ConnectorResponseDTO;
+import com.connect.connector.exception.ExistingConnectorException;
+import com.connect.connector.model.Connector;
 import com.connect.connector.repository.ConnectorRepository;
 import com.connect.connector.repository.ConnectorSocialMediaRepository;
 import jakarta.validation.Valid;
@@ -28,21 +30,15 @@ public class ConnectorService {
         response.setCity(connectorRequestDTO.getCity());
         response.setBio(connectorRequestDTO.getBio());
         response.setProfilePictureUrl(connectorRequestDTO.getProfilePictureUrl());
-        response.setSocialMediaLinks(connectorRequestDTO.getSocialMediaLinks());
 
         return response;
     }
 
-    public Void createConnector(UUID userId) {
-        // This method should create a new connector for the user.
-        // For now, returning null as a placeholder.
-        // In a real implementation, you would save the connector to the database and return the created object.
-        return null;
+    public void createConnector(UUID userId) throws ExistingConnectorException {
+        if (connectorRepository.existsByUserId(userId)) {
+            throw new ExistingConnectorException("Connector with this userId already exists.");
+        }
+        connectorRepository.save(new Connector(userId));
     }
 
-    public List<ConnectorResponseDTO> getAllPublicConnectors() {
-        // This method should return all public connectors.
-        // For now, returning an empty list as a placeholder.
-        return List.of(); // Replace with actual logic to fetch connectors from the database.
-    }
 }

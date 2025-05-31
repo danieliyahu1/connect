@@ -1,10 +1,11 @@
 package com.connect.connector.model;
 
+import com.connect.connector.enums.City;
+import com.connect.connector.enums.Country;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -21,24 +22,17 @@ public class Connector {
     private UUID userId;
 
     private String firstName;
-    private String country;
-    private String city;
+
+    @Enumerated(EnumType.STRING)
+    private Country country;
+
+    @Enumerated(EnumType.STRING)
+    private City city;
     private String bio;
     private String profilePictureUrl;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(
-            name = "connector_social_media_links",
-            joinColumns = @JoinColumn(name = "connector_id")
-    )
-    @Column(name = "url")
-    @MapKeyColumn(name = "platform")
-
-    private List<ConnectorSocialMedia> socialMediaLinks;
-
-    public void setUserId(UUID userId) {
-        if(this.userId == null) {
-            this.userId = userId;
-        }
+    public Connector(UUID userId)
+    {
+        this.userId = userId;
     }
 }
