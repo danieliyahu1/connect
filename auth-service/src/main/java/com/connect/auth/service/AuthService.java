@@ -48,6 +48,12 @@ public class AuthService {
         return createAuthResponse(userService.save(user));
     }
 
+    private void checkPasswordsMatch(String password, String confirmedPassword) throws UserExistException {
+        if (!password.equals(confirmedPassword)) {
+            throw new PasswordNotMatchException("Passwords do not match");
+        }
+    }
+
     @Transactional
     public AuthResponseDTO login(LoginRequestDTO loginRequestDTO) throws UnauthorizedException {
         Optional<User> userOpt = userService.findByEmail(loginRequestDTO.getEmail())
@@ -72,9 +78,10 @@ public class AuthService {
         return createAuthResponse(user);
     }
 
-    public void logout(UUID userId) throws RefreshTokenNotFoundException {
+    public void logout(String accessToken) throws RefreshTokenNotFoundException {
         // Logic to handle user logout
         // This would typically involve invalidating the user's session or token.
+        UUID userId = jwtUtil.getUserIdFromAccessToken(accessToken);
         authRepository.deleteByUser_Id(userService.getUserByUserId(userId).getId());
     }
 
@@ -126,5 +133,13 @@ public class AuthService {
                         refreshToken -> refreshToken.getUser().getUserId(),
                         RefreshToken::getToken
                 ));
+    }
+
+    public UUID getUserIdFromAccessToken(String accessToken) {
+        return jwtUtil.getUserIdFromAccessToken(accessToken);
+    }
+
+    public boolean validateAccessToken(String accessToken) {
+        return jwtUtil.validateAccessToken(accessToken);
     }
 }

@@ -29,7 +29,6 @@ public class Connector {
     @Enumerated(EnumType.STRING)
     private City city;
     private String bio;
-    private String profilePictureUrl;
 
     public Connector(UUID userId)
     {

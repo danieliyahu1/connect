@@ -91,4 +91,11 @@ public class JwtUtil {
                 .parseSignedClaims(token)
                 .getPayload();
     }
+
+    public UUID getUserIdFromAccessToken(String accessToken) {
+        validateToken(accessToken);
+        Claims claims = getTokenClaims(accessToken);
+        String userIdStr = claims.getSubject();
+        return UUID.fromString(userIdStr);
+    }
 }

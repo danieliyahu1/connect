@@ -1,5 +1,6 @@
 package com.connect.auth.exception.handler;
 
+import com.connect.auth.exception.PasswordNotMatchException;
 import com.connect.auth.exception.RefreshTokenNotFoundException;
 import com.connect.auth.exception.UnauthorizedException;
 import com.connect.auth.exception.UserExistException;
@@ -43,5 +44,13 @@ public class AuthExceptionHandler {
         errorResponse.put("error", "User Already Exists");
         errorResponse.put("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
+
+    @ExceptionHandler(PasswordNotMatchException.class)
+    public ResponseEntity<Map<String, String>> handlePasswordNotMatchException(PasswordNotMatchException ex) {
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", "Password Mismatch");
+        errorResponse.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 }

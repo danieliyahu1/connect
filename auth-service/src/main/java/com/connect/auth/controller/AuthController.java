@@ -41,8 +41,9 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(UUID userId) throws RefreshTokenNotFoundException {
-        authService.logout(userId);
+    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authorizationHeader) throws RefreshTokenNotFoundException {
+        String accessToken = authorizationHeader.replace("Bearer ", "").trim();
+        authService.logout(accessToken);
         return ResponseEntity.noContent().build(); // 204 No Content
     }
 
@@ -60,5 +61,17 @@ public class AuthController {
     @GetMapping("/getRefreshTokenList")
     public ResponseEntity<Map<UUID, String>> getRefreshTokenList() {
         return ResponseEntity.ok(authService.getRefreshTokenMap());
+    }
+
+    @GetMapping("/getUserIdFromAccessToken")
+    public ResponseEntity<UUID> getUserIdFromAccessToken(@RequestHeader("Authorization") String authorizationHeader) {
+        String accessToken = authorizationHeader.replace("Bearer ", "").trim();
+        return ResponseEntity.ok(authService.getUserIdFromAccessToken(accessToken));
+    }
+
+    @GetMapping("/validateAccessToken")
+    public ResponseEntity<Boolean> validateAccessToken(@RequestHeader("Authorization") String authorizationHeader) {
+        String accessToken = authorizationHeader.replace("Bearer ", "").trim();
+        return ResponseEntity.ok(authService.validateAccessToken(accessToken));
     }
 }

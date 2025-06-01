@@ -31,13 +31,13 @@ WHERE NOT EXISTS (
 CREATE TABLE IF NOT EXISTS "refresh_tokens" (
     id UUID PRIMARY KEY,
     token VARCHAR(255) UNIQUE NOT NULL,
-    user_pk UUID NOT NULL REFERENCES "users"(id),
+    user_id UUID NOT NULL REFERENCES "users"(id),
     issued_at TIMESTAMP NOT NULL,
     expires_at TIMESTAMP NOT NULL
 );
 
 -- Insert the refresh token if no existing refresh token with the same id or token exists
-INSERT INTO "refresh_tokens" (id, token, user_pk, issued_at, expires_at)
+INSERT INTO "refresh_tokens" (id, token, user_id, issued_at, expires_at)
 SELECT 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
        'sample-refresh-token-123456',
        '99999999-8888-7777-6666-555555555555',
