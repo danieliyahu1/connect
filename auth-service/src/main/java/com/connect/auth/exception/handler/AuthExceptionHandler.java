@@ -1,7 +1,7 @@
 package com.connect.auth.exception.handler;
 
 import com.connect.auth.exception.PasswordNotMatchException;
-import com.connect.auth.exception.RefreshTokenNotFoundException;
+import com.connect.auth.exception.InvalidRefreshTokenException;
 import com.connect.auth.exception.UnauthorizedException;
 import com.connect.auth.exception.UserExistException;
 import org.springframework.http.HttpStatus;
@@ -22,8 +22,8 @@ public class AuthExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
 
-    @ExceptionHandler(RefreshTokenNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleRefreshTokenNotFoundException(RefreshTokenNotFoundException ex) {
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    public ResponseEntity<Map<String, String>> handleRefreshTokenNotFoundException(InvalidRefreshTokenException ex) {
         Map<String, String> errorResponse = new HashMap<>();
         errorResponse.put("error", "Refresh Token Not Found");
         errorResponse.put("message", ex.getMessage());

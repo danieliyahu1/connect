@@ -4,19 +4,17 @@ import com.connect.auth.dto.AuthResponseDTO;
 import com.connect.auth.dto.LoginRequestDTO;
 import com.connect.auth.dto.RegisterRequestDTO;
 import com.connect.auth.enums.AuthProvider;
-import com.connect.auth.exception.RefreshTokenNotFoundException;
+import com.connect.auth.exception.PasswordNotMatchException;
+import com.connect.auth.exception.InvalidRefreshTokenException;
 import com.connect.auth.exception.UnauthorizedException;
 import com.connect.auth.exception.UserExistException;
 import com.connect.auth.model.RefreshToken;
 import com.connect.auth.model.User;
 import com.connect.auth.repository.AuthRepository;
 import com.connect.auth.util.JwtUtil;
-import io.jsonwebtoken.JwtException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,20 +33,21 @@ public class AuthService {
     private final AuthRepository authRepository;
 
     @Transactional
-    public AuthResponseDTO register(RegisterRequestDTO registerRequest) throws UserExistException {
+    public AuthResponseDTO register(RegisterRequestDTO registerRequest) throws UserExistException, PasswordNotMatchException {
         // Logic to handle user registration
         // This would typically involve saving the user details to a database
         // and generating an authentication token.
         if (UserExists(registerRequest.getEmail())) {
             throw new UserExistException("User with this email already exists");
         }
+        checkPasswordsMatch(registerRequest.getPassword(), registerRequest.getConfirmedPassword());
         User user = new User(registerRequest.getEmail(),
                 passwordEncoder.encode(registerRequest.getPassword()), AuthProvider.LOCAL);
 
         return createAuthResponse(userService.save(user));
     }
 
-    private void checkPasswordsMatch(String password, String confirmedPassword) throws UserExistException {
+    private void checkPasswordsMatch(String password, String confirmedPassword) throws PasswordNotMatchException {
         if (!password.equals(confirmedPassword)) {
             throw new PasswordNotMatchException("Passwords do not match");
         }
@@ -68,7 +67,7 @@ public class AuthService {
         return createAuthResponse(user);
     }
 
-    public AuthResponseDTO refresh(String refreshToken) throws RefreshTokenNotFoundException {
+    public AuthResponseDTO refresh(String refreshToken) throws InvalidRefreshTokenException {
         // Logic to handle token refresh
         // This would typically involve validating the refresh token
         // and generating a new authentication token.
@@ -78,7 +77,7 @@ public class AuthService {
         return createAuthResponse(user);
     }
 
-    public void logout(String accessToken) throws RefreshTokenNotFoundException {
+    public void logout(String accessToken) throws InvalidRefreshTokenException {
         // Logic to handle user logout
         // This would typically involve invalidating the user's session or token.
         UUID userId = jwtUtil.getUserIdFromAccessToken(accessToken);
@@ -118,9 +117,9 @@ public class AuthService {
                 jwtUtil.getIssuedAt(refreshToken), jwtUtil.getExpiration(refreshToken)));;
     }
 
-    private User getUserByRefreshToken(String refreshToken) throws RefreshTokenNotFoundException {
+    private User getUserByRefreshToken(String refreshToken) throws InvalidRefreshTokenException {
         return authRepository.findByToken(refreshToken)
-                .map(RefreshToken::getUser).orElseThrow( () -> new RefreshTokenNotFoundException("Invalid Refresh token"));
+                .map(RefreshToken::getUser).orElseThrow( () -> new InvalidRefreshTokenException("Invalid Refresh token"));
     }
 
     private boolean UserExists(String email) {
