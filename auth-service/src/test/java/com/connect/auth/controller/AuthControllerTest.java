@@ -4,10 +4,7 @@ import com.connect.auth.configuration.TestSecurityConfig;
 import com.connect.auth.dto.AuthResponseDTO;
 import com.connect.auth.dto.LoginRequestDTO;
 import com.connect.auth.dto.RegisterRequestDTO;
-import com.connect.auth.exception.PasswordNotMatchException;
-import com.connect.auth.exception.InvalidRefreshTokenException;
-import com.connect.auth.exception.UnauthorizedException;
-import com.connect.auth.exception.UserExistException;
+import com.connect.auth.exception.*;
 import com.connect.auth.service.AuthService;
 import com.connect.auth.service.UserService;
 import com.connect.auth.util.JwtUtil;
@@ -252,7 +249,7 @@ public class AuthControllerTest {
 
         mockMvc.perform(post(URIPREFIX + "/refresh")
                         .cookie(new Cookie("refreshToken", "invalid")))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isUnauthorized());
     }
 
 
@@ -271,6 +268,18 @@ public class AuthControllerTest {
     void logout_MissingHeader_BadRequest() throws Exception {
         mockMvc.perform(post(URIPREFIX + "/logout"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void logout_UserNotFound_ReturnsNotFound() throws Exception {
+        Mockito.doThrow(new UserNotFoundException("User not found"))
+                .when(authService).logout(Mockito.anyString());
+
+        mockMvc.perform(post("/auth/logout")
+                        .header("Authorization", "Bearer accessToken"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("User Not Found"))
+                .andExpect(jsonPath("$.message").value("User not found"));
     }
 
     //--------------------------------deleteUser tests---------------------------------

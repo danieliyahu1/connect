@@ -34,8 +34,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (StringUtils.hasText(header) && header.startsWith("Bearer ")) {
             String token = header.substring(7);
             try {
-                if (SecurityContextHolder.getContext().getAuthentication() == null &&
-                        jwtUtil.validateAccessToken(token)) {
+                jwtUtil.validateAccessToken(token);
+
+                if (SecurityContextHolder.getContext().getAuthentication() == null) {
                     UUID userId = jwtUtil.getUserIdFromAccessToken(token);
                     UsernamePasswordAuthenticationToken authentication =
                             new UsernamePasswordAuthenticationToken(userId.toString(), null, Collections.emptyList());
@@ -43,7 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             } catch (Exception e) {
-                logger.debug("Invalid JWT token: " + e.getMessage());            }
+                logger.debug("Invalid access token: " + e.getMessage());            }
         }
         filterChain.doFilter(request, response);
     }

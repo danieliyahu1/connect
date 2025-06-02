@@ -20,21 +20,12 @@ public class UserService {
     public User save(User user) {
         return userRepository.save(user);
     }
+
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
-    public List<User> getAllUsers() { return userRepository.findAll(); }
+    public void deleteByUserId(UUID userId) { userRepository.deleteByUserId(userId); }
 
-    public void deleteUserById(String id) {
-        userRepository.deleteById(UUID.fromString(id));
-    }
-
-    public void deleteByUserId(UUID userId) {
-        userRepository.deleteByUserId(userId);
-    }
-
-    public User getUserByUserId(UUID id) {
-        return userRepository.getUserByUserId(id);
-    }
+    public Optional<User> getUserByUserId(UUID id) { return userRepository.getUserByUserId(id); }
 }

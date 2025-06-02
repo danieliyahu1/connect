@@ -4,10 +4,7 @@ import com.connect.auth.dto.AuthResponseDTO;
 import com.connect.auth.dto.LoginRequestDTO;
 import com.connect.auth.dto.RegisterRequestDTO;
 import com.connect.auth.enums.AuthProvider;
-import com.connect.auth.exception.PasswordNotMatchException;
-import com.connect.auth.exception.InvalidRefreshTokenException;
-import com.connect.auth.exception.UnauthorizedException;
-import com.connect.auth.exception.UserExistException;
+import com.connect.auth.exception.*;
 import com.connect.auth.model.RefreshToken;
 import com.connect.auth.model.User;
 import com.connect.auth.repository.AuthRepository;
@@ -47,12 +44,6 @@ public class AuthService {
         return createAuthResponse(userService.save(user));
     }
 
-    private void checkPasswordsMatch(String password, String confirmedPassword) throws PasswordNotMatchException {
-        if (!password.equals(confirmedPassword)) {
-            throw new PasswordNotMatchException("Passwords do not match");
-        }
-    }
-
     @Transactional
     public AuthResponseDTO login(LoginRequestDTO loginRequestDTO) throws UnauthorizedException {
         Optional<User> userOpt = userService.findByEmail(loginRequestDTO.getEmail())
@@ -77,30 +68,26 @@ public class AuthService {
         return createAuthResponse(user);
     }
 
-    public void logout(String accessToken) throws InvalidRefreshTokenException {
+    public void logout(String accessToken) throws UserNotFoundException {
         // Logic to handle user logout
         // This would typically involve invalidating the user's session or token.
         UUID userId = jwtUtil.getUserIdFromAccessToken(accessToken);
-        authRepository.deleteByUser_Id(userService.getUserByUserId(userId).getId());
+        authRepository.deleteByUser_Id(userService.getUserByUserId(userId).orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId)).getId());
     }
 
     @Transactional
     public void deleteUserByUserId(String userId) {
         // Logic to delete a user by ID
         // This would typically involve removing the user from the database.
-        User user = userService.getUserByUserId(UUID.fromString(userId));
-        if (user == null) {
+        Optional<User> userOpt = userService.getUserByUserId(UUID.fromString(userId));
+        if (userOpt.isEmpty()) {
             return;
         }
+        User user = userOpt.get();
         authRepository.deleteByUser_Id(user.getId());
         userService.deleteByUserId(UUID.fromString(userId));
     }
 
-    public List<User> getAllUsers() {
-        // Logic to retrieve all users
-        // This would typically involve fetching all user records from the database.
-        return userService.getAllUsers();
-    }
     @Transactional
     private AuthResponseDTO createAuthResponse(User user) {
         String accessToken = jwtUtil.generateAccessToken(user.getUserId());
@@ -126,19 +113,9 @@ public class AuthService {
         return userService.findByEmail(email).isPresent();
     }
 
-    public Map<UUID, String> getRefreshTokenMap() {
-        return authRepository.findAll().stream()
-                .collect(Collectors.toMap(
-                        refreshToken -> refreshToken.getUser().getUserId(),
-                        RefreshToken::getToken
-                ));
-    }
-
-    public UUID getUserIdFromAccessToken(String accessToken) {
-        return jwtUtil.getUserIdFromAccessToken(accessToken);
-    }
-
-    public boolean validateAccessToken(String accessToken) {
-        return jwtUtil.validateAccessToken(accessToken);
+    private void checkPasswordsMatch(String password, String confirmedPassword) throws PasswordNotMatchException {
+        if (!password.equals(confirmedPassword)) {
+            throw new PasswordNotMatchException("Passwords do not match");
+        }
     }
 }

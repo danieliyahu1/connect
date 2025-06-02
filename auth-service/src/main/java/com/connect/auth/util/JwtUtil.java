@@ -1,5 +1,7 @@
 package com.connect.auth.util;
 
+import com.connect.auth.exception.InvalidAccessTokenException;
+import com.connect.auth.exception.InvalidRefreshTokenException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -48,16 +50,40 @@ public class JwtUtil {
                 .compact();
     }
 
-    public boolean validateAccessToken(String token) {
+    public void validateAccessToken(String token) throws InvalidAccessTokenException {
+        if(!isValidAccessToken(token)) {
+            throw new InvalidAccessTokenException("Invalid access token");
+        }
+    }
+
+    public void validateRefreshToken(String token) throws InvalidRefreshTokenException {
+        if(!isValidRefreshToken(token)) {
+            throw new InvalidRefreshTokenException("Invalid refresh token");
+        }
+    }
+
+    public boolean isValidAccessToken(String token) {
         validateToken(token);
         Claims claims = getTokenClaims(token);
         return claims.get("token_type", String.class).equals("access");
     }
 
-    public boolean validateRefreshToken(String token) {
+    public boolean isValidRefreshToken(String token) {
         validateToken(token);
         Claims claims = getTokenClaims(token);
         return claims.get("token_type", String.class).equals("refresh");
+    }
+    
+    private void validateToken(String token) {
+        try{
+            Jwts.parser().verifyWith((SecretKey) secretKey)
+                    .build()
+                    .parseSignedClaims(token);
+        } catch(SignatureException e){
+            throw new JwtException("Invalid JWT signature");
+        } catch (JwtException e) {
+            throw new JwtException("Invalid JWT");
+        }
     }
 
     public Instant getIssuedAt(String token) {
@@ -70,18 +96,6 @@ public class JwtUtil {
         Claims claims = getTokenClaims(refreshToken);
 
         return claims.getExpiration().toInstant();
-    }
-
-    private void validateToken(String token) {
-        try{
-            Jwts.parser().verifyWith((SecretKey) secretKey)
-                    .build()
-                    .parseSignedClaims(token);
-        } catch(SignatureException e){
-            throw new JwtException("Invalid JWT signature");
-        } catch (JwtException e) {
-            throw new JwtException("Invalid JWT");
-        }
     }
 
     private Claims getTokenClaims(String token) {

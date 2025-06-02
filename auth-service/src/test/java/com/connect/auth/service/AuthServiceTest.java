@@ -1,8 +1,10 @@
 package com.connect.auth.service;
 
 import com.connect.auth.dto.AuthResponseDTO;
+import com.connect.auth.dto.LoginRequestDTO;
 import com.connect.auth.dto.RegisterRequestDTO;
-import com.connect.auth.enums.AuthProvider;
+import com.connect.auth.exception.*;
+import com.connect.auth.model.RefreshToken;
 import com.connect.auth.model.User;
 import com.connect.auth.repository.AuthRepository;
 import com.connect.auth.util.JwtUtil;
@@ -16,8 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.verify;
@@ -37,8 +38,10 @@ public class AuthServiceTest {
     private AuthService authService;
 
 
+    // Test cases for the register method in AuthService
+
     @Test
-    void register_Successful() throws Exception {
+    void register_WithValidRequest_ReturnsAuthResponseDTO() throws Exception {
         // Arrange
         String email = "test@example.com";
         String password = "password123";
@@ -56,11 +59,14 @@ public class AuthServiceTest {
         when(passwordEncoder.encode(password)).thenReturn(encodedPassword);
 
         User savedUser = mock(User.class);
-        when(userService.save(savedUser)).thenReturn(savedUser);
+        when(userService.save(any(User.class))).thenReturn(savedUser);
 
+        when(savedUser.getUserId()).thenReturn(userId);
+        when(savedUser.getId()).thenReturn(userId);
         when(jwtUtil.generateAccessToken(userId)).thenReturn(accessToken);
         when(jwtUtil.generateRefreshToken(userId)).thenReturn(refreshToken);
 
+        doNothing().when(authRepository).deleteByUser_Id(userId);
         // Act
         AuthResponseDTO response = authService.register(request);
 
@@ -76,5 +82,265 @@ public class AuthServiceTest {
         verify(jwtUtil).generateRefreshToken(userId);
         verify(authRepository).deleteByUser_Id(savedUser.getId());
         verify(authRepository).save(any());
+    }
+
+    @Test
+    void register_WithExistingEmail_ThrowsUserExistException() throws Exception {
+        // Arrange
+        String email = "test@example.com";
+        Optional<User> mockOptionalUser = Optional.of(mock(User.class));        String password = "password123";
+
+        RegisterRequestDTO request = mock(RegisterRequestDTO.class);
+
+        when(request.getEmail()).thenReturn(email);
+        when(userService.findByEmail(email)).thenReturn(mockOptionalUser);
+
+        assertThrows(UserExistException.class, () -> {
+            authService.register(request);
+        });
+    }
+
+    @Test
+    void register_WithMismatchedPasswords_ThrowsPasswordNotMatchException() throws Exception {
+        // Arrange
+        String email = "test@example.com";
+        String password = "password123";
+        String confirmedPassword = "differentPassword";
+        Optional<User> mockOptionalUser = Optional.of(mock(User.class));
+
+        RegisterRequestDTO request = mock(RegisterRequestDTO.class);
+
+        when(request.getEmail()).thenReturn(email);
+        when(request.getPassword()).thenReturn(password);
+        when(request.getConfirmedPassword()).thenReturn(confirmedPassword);
+        when(userService.findByEmail(email)).thenReturn(Optional.empty());
+
+        assertThrows(PasswordNotMatchException.class, () -> {
+            authService.register(request);
+        });
+    }
+
+
+    // Test cases for the login method in AuthService
+
+    @Test
+    void login_WithValidCredentials_ReturnsAuthResponseDTO() throws Exception {
+        // Arrange
+        String email = "test@example.com";
+        String password = "password123";
+        String encodedPassword = "encodedPassword";
+        String accessToken = "accessToken";
+        String refreshToken = "refreshToken";
+        UUID userId = UUID.randomUUID();
+
+        LoginRequestDTO request = mock(LoginRequestDTO.class);
+        User user = mock(User.class);
+
+        when(request.getEmail()).thenReturn(email);
+        when(request.getPassword()).thenReturn(password);
+        when(userService.findByEmail(email)).thenReturn(Optional.of(user));
+        when(user.getEncodedPassword()).thenReturn(encodedPassword);
+        when(passwordEncoder.matches(password, encodedPassword)).thenReturn(true);
+        when(user.getUserId()).thenReturn(userId);
+        when(user.getId()).thenReturn(userId);
+        when(jwtUtil.generateAccessToken(userId)).thenReturn(accessToken);
+        when(jwtUtil.generateRefreshToken(userId)).thenReturn(refreshToken);
+
+        doNothing().when(authRepository).deleteByUser_Id(userId);
+
+        // Act
+        AuthResponseDTO response = authService.login(request);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(accessToken, response.getAccessToken());
+        assertEquals(refreshToken, response.getRefreshToken());
+        verify(userService).findByEmail(email);
+        verify(passwordEncoder).matches(password, encodedPassword);
+        verify(jwtUtil).generateAccessToken(userId);
+        verify(jwtUtil).generateRefreshToken(userId);
+        verify(authRepository).deleteByUser_Id(userId);
+        verify(authRepository).save(any());
+    }
+
+    @Test
+    void login_WithNonExistentEmail_ThrowsUnauthorizedException() {
+        // Arrange
+        String email = "notfound@example.com";
+        String password = "password123";
+        LoginRequestDTO request = mock(LoginRequestDTO.class);
+
+        when(request.getEmail()).thenReturn(email);
+        when(userService.findByEmail(email)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(UnauthorizedException.class, () -> authService.login(request));
+        verify(userService).findByEmail(email);
+    }
+
+    @Test
+    void login_WithIncorrectPassword_ThrowsUnauthorizedException() {
+        // Arrange
+        String email = "test@example.com";
+        String password = "wrongPassword";
+        String encodedPassword = "encodedPassword";
+        LoginRequestDTO request = mock(LoginRequestDTO.class);
+        User user = mock(User.class);
+
+        when(request.getEmail()).thenReturn(email);
+        when(request.getPassword()).thenReturn(password);
+        when(userService.findByEmail(email)).thenReturn(Optional.of(user));
+        when(user.getEncodedPassword()).thenReturn(encodedPassword);
+        when(passwordEncoder.matches(password, encodedPassword)).thenReturn(false);
+
+        // Act & Assert
+        assertThrows(UnauthorizedException.class, () -> authService.login(request));
+        verify(userService).findByEmail(email);
+        verify(passwordEncoder).matches(password, encodedPassword);
+    }
+
+
+    // Test cases for the refresh method in AuthService
+
+    @Test
+    void refresh_WithValidRefreshToken_ReturnsAuthResponseDTO() throws Exception {
+        // Arrange
+        String refreshToken = "validRefreshToken";
+        String accessToken = "newAccessToken";
+        String newRefreshToken = "newRefreshToken";
+        UUID userId = UUID.randomUUID();
+
+        User user = mock(User.class);
+
+        // Mock JWT validation and repository lookup
+        doNothing().when(jwtUtil).validateRefreshToken(refreshToken);
+        when(authRepository.findByToken(refreshToken)).thenReturn(Optional.of(new RefreshToken(refreshToken, user, null, null)));
+        when(user.getUserId()).thenReturn(userId);
+        when(user.getId()).thenReturn(userId);
+        when(jwtUtil.generateAccessToken(userId)).thenReturn(accessToken);
+        when(jwtUtil.generateRefreshToken(userId)).thenReturn(newRefreshToken);
+
+        doNothing().when(authRepository).deleteByUser_Id(userId);
+
+        // Act
+        AuthResponseDTO response = authService.refresh(refreshToken);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(accessToken, response.getAccessToken());
+        assertEquals(newRefreshToken, response.getRefreshToken());
+        verify(jwtUtil).validateRefreshToken(refreshToken);
+        verify(authRepository).findByToken(refreshToken);
+        verify(jwtUtil).generateAccessToken(userId);
+        verify(jwtUtil).generateRefreshToken(userId);
+        verify(authRepository).deleteByUser_Id(userId);
+        verify(authRepository).save(any());
+    }
+
+    @Test
+    void refresh_WithInvalidRefreshToken_ThrowsInvalidRefreshTokenException() throws InvalidRefreshTokenException {
+        // Arrange
+        String refreshToken = "invalidRefreshToken";
+        doThrow(InvalidRefreshTokenException.class).when(jwtUtil).validateRefreshToken(refreshToken);        // Act & Assert
+        assertThrows(InvalidRefreshTokenException.class, () -> authService.refresh(refreshToken));
+        verify(jwtUtil).validateRefreshToken(refreshToken);
+    }
+
+    @Test
+    void refresh_WithNonExistentRefreshToken_ThrowsInvalidRefreshTokenException() throws InvalidRefreshTokenException {
+        // Arrange
+        String refreshToken = "notFoundRefreshToken";
+        doNothing().when(jwtUtil).validateRefreshToken(refreshToken);
+        when(authRepository.findByToken(refreshToken)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(InvalidRefreshTokenException.class, () -> authService.refresh(refreshToken));
+        verify(jwtUtil).validateRefreshToken(refreshToken);
+        verify(authRepository).findByToken(refreshToken);
+    }
+
+    // Test cases for the logout method in AuthService
+
+    @Test
+    void logout_WithValidAccessToken_DeletesRefreshToken() throws InvalidRefreshTokenException, UserNotFoundException {
+        // Arrange
+        String accessToken = "validAccessToken";
+        UUID userId = UUID.randomUUID();
+        User user = mock(User.class);
+        Optional<User> optionalUser = Optional.of(user);
+
+        when(jwtUtil.getUserIdFromAccessToken(accessToken)).thenReturn(userId);
+        when(userService.getUserByUserId(userId)).thenReturn(optionalUser);
+        when(user.getId()).thenReturn(userId);
+        doNothing().when(authRepository).deleteByUser_Id(userId);
+
+        // Act
+        authService.logout(accessToken);
+
+        // Assert
+        verify(jwtUtil).getUserIdFromAccessToken(accessToken);
+        verify(userService).getUserByUserId(userId);
+        verify(authRepository).deleteByUser_Id(userId);
+    }
+
+    @Test
+    void logout_WithInvalidAccessToken_ThrowsException() {
+        // Arrange
+        String accessToken = "invalidAccessToken";
+        when(jwtUtil.getUserIdFromAccessToken(accessToken)).thenThrow(new RuntimeException("Invalid token"));
+
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> authService.logout(accessToken));
+        verify(jwtUtil).getUserIdFromAccessToken(accessToken);
+    }
+
+    @Test
+    void logout_WithNonExistentUser_ThrowsException() {
+        // Arrange
+        String accessToken = "validAccessToken";
+        UUID userId = UUID.randomUUID();
+
+        when(jwtUtil.getUserIdFromAccessToken(accessToken)).thenReturn(userId);
+        when(userService.getUserByUserId(userId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(UserNotFoundException.class, () -> authService.logout(accessToken));
+        verify(jwtUtil).getUserIdFromAccessToken(accessToken);
+        verify(userService).getUserByUserId(userId);
+    }
+
+    // Test cases for the deleteUserByUserId method in AuthService
+
+    @Test
+    void deleteUserByUserId_WithExistingUser_DeletesUserAndRefreshTokens() {
+        // Arrange
+        UUID userId = UUID.randomUUID();
+        String userIdStr = userId.toString();
+        User user = mock(User.class);
+        when(userService.getUserByUserId(userId)).thenReturn(Optional.of(user));
+        when(user.getId()).thenReturn(userId);
+
+        // Act
+        authService.deleteUserByUserId(userIdStr);
+
+        // Assert
+        verify(userService).getUserByUserId(userId);
+        verify(authRepository).deleteByUser_Id(userId);
+        verify(userService).deleteByUserId(userId);
+    }
+
+    @Test
+    void deleteUserByUserId_WithNonExistentUser_DoesNothing() {
+        // Arrange
+        UUID userId = UUID.randomUUID();
+        String userIdStr = userId.toString();
+        when(userService.getUserByUserId(userId)).thenReturn(Optional.empty());
+
+        // Act
+        authService.deleteUserByUserId(userIdStr);
+
+        // Assert
+        verify(userService).getUserByUserId(userId);
+        verifyNoMoreInteractions(authRepository, userService);
     }
 }

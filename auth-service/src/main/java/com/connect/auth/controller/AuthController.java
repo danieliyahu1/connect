@@ -3,10 +3,7 @@ package com.connect.auth.controller;
 import com.connect.auth.dto.AuthResponseDTO;
 import com.connect.auth.dto.LoginRequestDTO;
 import com.connect.auth.dto.RegisterRequestDTO;
-import com.connect.auth.exception.PasswordNotMatchException;
-import com.connect.auth.exception.InvalidRefreshTokenException;
-import com.connect.auth.exception.UnauthorizedException;
-import com.connect.auth.exception.UserExistException;
+import com.connect.auth.exception.*;
 import com.connect.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +36,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authorizationHeader) throws InvalidRefreshTokenException {
+    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authorizationHeader) throws InvalidRefreshTokenException, UserNotFoundException {
         String accessToken = authorizationHeader.replace("Bearer ", "").trim();
         authService.logout(accessToken);
         return ResponseEntity.noContent().build(); // 204 No Content
@@ -58,8 +55,8 @@ public class AuthController {
         return ResponseEntity.ok(userId);
     }
 
-    @GetMapping("/validateAccessToken")
-    public ResponseEntity<Boolean> validateAccessToken(Authentication authentication) {
+    @GetMapping("/isValidAccessToken")
+    public ResponseEntity<Boolean> isValidAccessToken(Authentication authentication) {
         // If this method is called, the token is already validated by the filter
         return ResponseEntity.ok(true);
     }
