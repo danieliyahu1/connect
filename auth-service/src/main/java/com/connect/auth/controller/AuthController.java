@@ -36,7 +36,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authorizationHeader) throws InvalidRefreshTokenException, UserNotFoundException {
+    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authorizationHeader) throws UserNotFoundException, InvalidAccessTokenException {
         String accessToken = authorizationHeader.replace("Bearer ", "").trim();
         authService.logout(accessToken);
         return ResponseEntity.noContent().build(); // 204 No Content

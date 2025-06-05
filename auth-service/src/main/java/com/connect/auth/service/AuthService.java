@@ -68,7 +68,7 @@ public class AuthService {
         return createAuthResponse(user);
     }
 
-    public void logout(String accessToken) throws UserNotFoundException {
+    public void logout(String accessToken) throws UserNotFoundException, InvalidAccessTokenException {
         // Logic to handle user logout
         // This would typically involve invalidating the user's session or token.
         UUID userId = jwtUtil.getUserIdFromAccessToken(accessToken);

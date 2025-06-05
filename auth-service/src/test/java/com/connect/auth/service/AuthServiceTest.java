@@ -262,7 +262,7 @@ public class AuthServiceTest {
     // Test cases for the logout method in AuthService
 
     @Test
-    void logout_WithValidAccessToken_DeletesRefreshToken() throws InvalidRefreshTokenException, UserNotFoundException {
+    void logout_WithValidAccessToken_DeletesRefreshToken() throws InvalidRefreshTokenException, UserNotFoundException, InvalidAccessTokenException {
         // Arrange
         String accessToken = "validAccessToken";
         UUID userId = UUID.randomUUID();
@@ -284,9 +284,9 @@ public class AuthServiceTest {
     }
 
     @Test
-    void logout_WithInvalidAccessToken_ThrowsException() {
+    void logout_WithInvalidToken_ThrowsException() throws InvalidAccessTokenException {
         // Arrange
-        String accessToken = "invalidAccessToken";
+        String accessToken = "invalidToken";
         when(jwtUtil.getUserIdFromAccessToken(accessToken)).thenThrow(new RuntimeException("Invalid token"));
 
         // Act & Assert
@@ -295,7 +295,18 @@ public class AuthServiceTest {
     }
 
     @Test
-    void logout_WithNonExistentUser_ThrowsException() {
+    void logout_WithInvalidAccessToken_ThrowsException() throws InvalidAccessTokenException {
+        // Arrange
+        String accessToken = "invalidAccessToken";
+        when(jwtUtil.getUserIdFromAccessToken(accessToken)).thenThrow(new InvalidAccessTokenException("Invalid access token"));
+
+        // Act & Assert
+        assertThrows(InvalidAccessTokenException.class, () -> authService.logout(accessToken));
+        verify(jwtUtil).getUserIdFromAccessToken(accessToken);
+    }
+
+    @Test
+    void logout_WithNonExistentUser_ThrowsException() throws InvalidAccessTokenException {
         // Arrange
         String accessToken = "validAccessToken";
         UUID userId = UUID.randomUUID();

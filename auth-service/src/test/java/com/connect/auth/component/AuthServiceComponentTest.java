@@ -6,7 +6,6 @@ import com.connect.auth.model.RefreshToken;
 import com.connect.auth.model.User;
 import com.connect.auth.repository.AuthRepository;
 import com.connect.auth.repository.UserRepository;
-import com.connect.auth.service.UserService;
 import com.connect.auth.util.JwtUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -21,6 +20,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.*;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
@@ -28,7 +28,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @EnableAutoConfiguration(exclude = {
@@ -46,7 +45,7 @@ class AuthServiceComponentTest {
     private AuthRepository authRepository;
 
     @MockitoBean
-    private UserRepository userService;
+    private UserRepository userRepository;
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -84,7 +83,7 @@ class AuthServiceComponentTest {
                 "encodedPassword123",
                 AuthProvider.LOCAL
         );
-        when(userService.save(any(User.class))).thenReturn(user);
+        when(userRepository.save(any(User.class))).thenReturn(user);
 
         ResponseEntity<AuthResponseDTO> response = restTemplate.postForEntity(url, entity, AuthResponseDTO.class);
         Assertions.assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -104,7 +103,7 @@ class AuthServiceComponentTest {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<>(requestJson, headers);
 
-        when(userService.findByEmail("existing@example.com")).thenReturn(Optional.of(new User()));
+        when(userRepository.findByEmail("existing@example.com")).thenReturn(Optional.of(new User()));
 
         ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
         Assertions.assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
@@ -124,7 +123,7 @@ class AuthServiceComponentTest {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<>(requestJson, headers);
 
-        when(userService.findByEmail("component-test@example.com")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("component-test@example.com")).thenReturn(Optional.empty());
 
         ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
         Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
@@ -145,11 +144,12 @@ class AuthServiceComponentTest {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<>(requestJson, headers);
+        String encodedPassword = new BCryptPasswordEncoder().encode("password123");
 
-        User user = new User("component-test@example.com", "encodedPassword123", AuthProvider.LOCAL);
-        when(userService.findByEmail("component-test@example.com")).thenReturn(Optional.of(user));
+        User user = new User("component-test@example.com", encodedPassword, AuthProvider.LOCAL);
+        when(userRepository.findByEmail("component-test@example.com")).thenReturn(Optional.of(user));
         // Simulate password match
-        when(userService.save(any(User.class))).thenReturn(user);
+        when(userRepository.save(any(User.class))).thenReturn(user);
 
         ResponseEntity<AuthResponseDTO> response = restTemplate.postForEntity(url, entity, AuthResponseDTO.class);
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -172,7 +172,7 @@ class AuthServiceComponentTest {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<>(requestJson, headers);
 
-        when(userService.findByEmail("component-test@example.com")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("component-test@example.com")).thenReturn(Optional.empty());
 
         ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
         Assertions.assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());

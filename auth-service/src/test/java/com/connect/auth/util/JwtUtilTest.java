@@ -72,7 +72,7 @@ class JwtUtilTest {
     }
 
     @Test
-    void getUserIdFromAccessToken_ReturnsCorrectUserId() {
+    void getUserIdFromAccessToken_ReturnsCorrectUserId() throws InvalidAccessTokenException {
         String accessToken = jwtUtil.generateAccessToken(userId);
         UUID extracted = jwtUtil.getUserIdFromAccessToken(accessToken);
         assertEquals(userId, extracted);

@@ -106,8 +106,8 @@ public class JwtUtil {
                 .getPayload();
     }
 
-    public UUID getUserIdFromAccessToken(String accessToken) {
-        validateToken(accessToken);
+    public UUID getUserIdFromAccessToken(String accessToken) throws InvalidAccessTokenException {
+        validateAccessToken(accessToken);
         Claims claims = getTokenClaims(accessToken);
         String userIdStr = claims.getSubject();
         return UUID.fromString(userIdStr);

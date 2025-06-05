@@ -1,9 +1,6 @@
 package com.connect.auth.configuration;
 
-import com.connect.auth.repository.AuthRepository;
-import com.connect.auth.service.UserService;
 import com.connect.auth.util.JwtUtil;
-import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
