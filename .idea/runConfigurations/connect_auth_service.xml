@@ -15,6 +15,10 @@
               <option name="value" value="" />
             </DockerEnvVarImpl>
             <DockerEnvVarImpl>
+              <option name="name" value="GOOGLE_REDIRECT_URI" />
+              <option name="value" value="http://localhost:4000/login/oauth2/code/google" />
+            </DockerEnvVarImpl>
+            <DockerEnvVarImpl>
               <option name="name" value="JWT_SECRET" />
               <option name="value" value="" />
             </DockerEnvVarImpl>
@@ -37,10 +41,6 @@
             <DockerEnvVarImpl>
               <option name="name" value="SPRING_SQL_INIT_MODE" />
               <option name="value" value="always" />
-            </DockerEnvVarImpl>
-            <DockerEnvVarImpl>
-              <option name="name" value="GOOGLE_REDIRECT_URI" />
-              <option name="value" value="http://localhost:4000/login/oauth2/code/google" />
             </DockerEnvVarImpl>
           </list>
         </option>

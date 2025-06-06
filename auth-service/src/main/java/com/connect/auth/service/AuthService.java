@@ -31,9 +31,6 @@ public class AuthService {
 
     @Transactional
     public AuthResponseDTO register(RegisterRequestDTO registerRequest) throws UserExistException, PasswordNotMatchException {
-        // Logic to handle user registration
-        // This would typically involve saving the user details to a database
-        // and generating an authentication token.
         if (UserExists(registerRequest.getEmail())) {
             throw new UserExistException("User with this email already exists");
         }

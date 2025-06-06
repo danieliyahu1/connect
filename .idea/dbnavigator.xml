@@ -76,7 +76,7 @@
           <token-type value="" />
           <token-config-file value="" />
           <token-profile value="" />
-          <session-user value="admin_user" />
+          <session-user value="" />
         </database>
         <properties>
           <auto-commit value="false" />
