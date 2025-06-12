@@ -1,5 +1,6 @@
 package com.connect.auth.configuration;
 
+import com.connect.auth.security.JwtAuthenticationFilter;
 import com.connect.auth.util.JwtUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
@@ -8,6 +9,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @org.springframework.boot.test.context.TestConfiguration
 @Profile("component-test")
@@ -17,7 +19,13 @@ public class ComponentTestConfig {
     public SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/auth/public/**").permitAll()
+                        .anyRequest().authenticated()
+                )
+                .addFilterBefore(new JwtAuthenticationFilter(this.jwtUtil()), UsernamePasswordAuthenticationFilter.class);
+        ;
         return http.build();
     }
 

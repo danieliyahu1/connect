@@ -1,0 +1,559 @@
+[33mcommit ca4586f87194a34d3cbac23be17caf4bb550279d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: danieliyahu1 <danieliyahu1@gmail.com>
+Date:   Sun Jun 8 16:08:46 2025 +0300
+
+    finishing auth-service
+
+[1mdiff --git a/auth-service/src/main/java/com/connect/auth/controller/AuthController.java b/auth-service/src/main/java/com/connect/auth/controller/AuthController.java[m
+[1mindex 29bcd25..b84936c 100644[m
+[1m--- a/auth-service/src/main/java/com/connect/auth/controller/AuthController.java[m
+[1m+++ b/auth-service/src/main/java/com/connect/auth/controller/AuthController.java[m
+[36m@@ -42,23 +42,11 @@[m [mpublic class AuthController {[m
+     }[m
+ [m
+     @DeleteMapping("/internal/deleteUser")[m
+[31m-    public ResponseEntity<Void> deleteUser(Authentication authentication) {[m
+[32m+[m[32m    public ResponseEntity<Void> deleteUser(Authentication authentication) throws UnauthorizedException {[m
+         authService.deleteUserByUserId(getUserId(authentication));[m
+         return ResponseEntity.noContent().build();[m
+     }[m
+ [m
+[31m-    @GetMapping("/internal/getUserIdFromAccessToken")[m
+[31m-    public ResponseEntity<UUID> getUserIdFromAccessToken(Authentication authentication) {[m
+[31m-        UUID userId = UUID.fromString(authentication.getName());[m
+[31m-        return ResponseEntity.ok(userId);[m
+[31m-    }[m
+[31m-[m
+[31m-    @GetMapping("/internal/isValidAccessToken")[m
+[31m-    public ResponseEntity<Boolean> isValidAccessToken(Authentication authentication) {[m
+[31m-        // If this method is called, the token is already validated by the filter[m
+[31m-        return ResponseEntity.ok(true);[m
+[31m-    }[m
+[31m-[m
+     private String getUserId(Authentication authentication) {[m
+         return authentication.getName();[m
+     }[m
+[1mdiff --git a/auth-service/src/main/java/com/connect/auth/exception/InvalidTokenException.java b/auth-service/src/main/java/com/connect/auth/exception/InvalidTokenException.java[m
+[1mnew file mode 100644[m
+[1mindex 0000000..8ca76c0[m
+[1m--- /dev/null[m
+[1m+++ b/auth-service/src/main/java/com/connect/auth/exception/InvalidTokenException.java[m
+[36m@@ -0,0 +1,7 @@[m
+[32m+[m[32mpackage com.connect.auth.exception;[m
+[32m+[m
+[32m+[m[32mpublic class InvalidTokenException extends Exception {[m
+[32m+[m[32m    public InvalidTokenException(String message) {[m
+[32m+[m[32m        super(message);[m
+[32m+[m[32m    }[m
+[32m+[m[32m}[m
+[1mdiff --git a/auth-service/src/main/java/com/connect/auth/exception/UserNotFoundException.java b/auth-service/src/main/java/com/connect/auth/exception/UserNotFoundException.java[m
+[1mdeleted file mode 100644[m
+[1mindex 378df89..0000000[m
+[1m--- a/auth-service/src/main/java/com/connect/auth/exception/UserNotFoundException.java[m
+[1m+++ /dev/null[m
+[36m@@ -1,7 +0,0 @@[m
+[31m-package com.connect.auth.exception;[m
+[31m-[m
+[31m-public class UserNotFoundException extends Exception {[m
+[31m-    public UserNotFoundException(String message) {[m
+[31m-        super(message);[m
+[31m-    }[m
+[31m-}[m
+[1mdiff --git a/auth-service/src/main/java/com/connect/auth/exception/handler/AuthExceptionHandler.java b/auth-service/src/main/java/com/connect/auth/exception/handler/AuthExceptionHandler.java[m
+[1mindex ed0daf0..473b47e 100644[m
+[1m--- a/auth-service/src/main/java/com/connect/auth/exception/handler/AuthExceptionHandler.java[m
+[1m+++ b/auth-service/src/main/java/com/connect/auth/exception/handler/AuthExceptionHandler.java[m
+[36m@@ -51,12 +51,12 @@[m [mpublic class AuthExceptionHandler {[m
+         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);[m
+     }[m
+ [m
+[31m-    @ExceptionHandler(UserNotFoundException.class)[m
+[31m-    public ResponseEntity<Map<String, String>> handleUserNotFoundException(UserNotFoundException ex) {[m
+[32m+[m[32m    @ExceptionHandler(InvalidTokenException.class)[m
+[32m+[m[32m    public ResponseEntity<Map<String, String>> handleInvalidTokenException(InvalidTokenException ex) {[m
+         Map<String, String> errorResponse = new HashMap<>();[m
+[31m-        errorResponse.put("error", "User Not Found");[m
+[32m+[m[32m        errorResponse.put("error", "Invalid Token");[m
+         errorResponse.put("message", ex.getMessage());[m
+[31m-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);[m
+[32m+[m[32m        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);[m
+     }[m
+ [m
+     @ExceptionHandler(WrongProviderException.class)[m
+[1mdiff --git a/auth-service/src/main/java/com/connect/auth/security/JwtAuthenticationFilter.java b/auth-service/src/main/java/com/connect/auth/security/JwtAuthenticationFilter.java[m
+[1mindex dde08da..5515cbd 100644[m
+[1m--- a/auth-service/src/main/java/com/connect/auth/security/JwtAuthenticationFilter.java[m
+[1m+++ b/auth-service/src/main/java/com/connect/auth/security/JwtAuthenticationFilter.java[m
+[36m@@ -30,6 +30,10 @@[m [mpublic class JwtAuthenticationFilter extends OncePerRequestFilter {[m
+                                     HttpServletResponse response,[m
+                                     FilterChain filterChain)[m
+             throws ServletException, IOException {[m
+[32m+[m[32m        if (request.getRequestURI().startsWith("/auth/public")) {[m
+[32m+[m[32m            filterChain.doFilter(request, response);[m
+[32m+[m[32m            return;[m
+[32m+[m[32m        }[m
+ [m
+         String header = request.getHeader("Authorization");[m
+         if (StringUtils.hasText(header) && header.startsWith("Bearer ")) {[m
+[1mdiff --git a/auth-service/src/main/java/com/connect/auth/service/AuthService.java b/auth-service/src/main/java/com/connect/auth/service/AuthService.java[m
+[1mindex 26fd375..eaeea7e 100644[m
+[1m--- a/auth-service/src/main/java/com/connect/auth/service/AuthService.java[m
+[1m+++ b/auth-service/src/main/java/com/connect/auth/service/AuthService.java[m
+[36m@@ -70,10 +70,10 @@[m [mpublic class AuthService {[m
+     }[m
+ [m
+     @Transactional[m
+[31m-    public void deleteUserByUserId(String userId) {[m
+[32m+[m[32m    public void deleteUserByUserId(String userId) throws UnauthorizedException {[m
+         Optional<User> userOpt = userService.getUserByUserId(UUID.fromString(userId));[m
+         if (userOpt.isEmpty()) {[m
+[31m-            return;[m
+[32m+[m[32m            throw new UnauthorizedException("No user with this userId");[m
+         }[m
+         User user = userOpt.get();[m
+         authRepository.deleteByUser_Id(user.getId());[m
+[1mdiff --git a/auth-service/src/main/java/com/connect/auth/util/JwtUtil.java b/auth-service/src/main/java/com/connect/auth/util/JwtUtil.java[m
+[1mindex 86891a9..3cc8570 100644[m
+[1m--- a/auth-service/src/main/java/com/connect/auth/util/JwtUtil.java[m
+[1m+++ b/auth-service/src/main/java/com/connect/auth/util/JwtUtil.java[m
+[36m@@ -2,6 +2,7 @@[m [mpackage com.connect.auth.util;[m
+ [m
+ import com.connect.auth.exception.InvalidAccessTokenException;[m
+ import com.connect.auth.exception.InvalidRefreshTokenException;[m
+[32m+[m[32mimport com.connect.auth.exception.InvalidTokenException;[m
+ import io.jsonwebtoken.Claims;[m
+ import io.jsonwebtoken.JwtException;[m
+ import io.jsonwebtoken.Jwts;[m
+[36m@@ -52,37 +53,29 @@[m [mpublic class JwtUtil {[m
+     }[m
+ [m
+     public boolean isValidAccessToken(String token) {[m
+[31m-        validateToken(token);[m
+[31m-        Claims claims = getTokenClaims(token);[m
+[31m-        return claims.get("token_type", String.class).equals("access");[m
+[31m-    }[m
+[32m+[m[32m        try{[m
+[32m+[m[32m            validateToken(token);[m
+[32m+[m[32m            Claims claims = getTokenClaims(token);[m
+[32m+[m[32m            return claims.get("token_type", String.class).equals("access");[m
+[32m+[m[32m        }[m
+[32m+[m[32m        catch (InvalidTokenException e)[m
+[32m+[m[32m        {[m
+[32m+[m[32m            return false;[m
+[32m+[m[32m        }[m
+ [m
+[31m-    public boolean isValidRefreshToken(String token) {[m
+[31m-        validateToken(token);[m
+[31m-        Claims claims = getTokenClaims(token);[m
+[31m-        return claims.get("token_type", String.class).equals("refresh");[m
+     }[m
+ [m
+[31m-    private String generateToken(UUID userId, String tokenType, long expirationMillis) {[m
+[31m-        return Jwts.builder()[m
+[31m-                .subject(userId.toString())[m
+[31m-                .claim("token_type", tokenType)[m
+[31m-                .issuedAt(new Date())[m
+[31m-                .expiration(new Date(System.currentTimeMillis() + expirationMillis))[m
+[31m-                .signWith(secretKey)[m
+[31m-                .compact();[m
+[31m-    }[m
+[31m-    [m
+[31m-    private void validateToken(String token) {[m
+[32m+[m[32m    public boolean isValidRefreshToken(String token) {[m
+         try{[m
+[31m-            Jwts.parser().verifyWith((SecretKey) secretKey)[m
+[31m-                    .build()[m
+[31m-                    .parseSignedClaims(token);[m
+[31m-        } catch(SignatureException e){[m
+[31m-            throw new JwtException("Invalid JWT signature");[m
+[31m-        } catch (JwtException e) {[m
+[31m-            throw new JwtException("Invalid JWT");[m
+[32m+[m[32m            validateToken(token);[m
+[32m+[m[32m            Claims claims = getTokenClaims(token);[m
+[32m+[m[32m            return claims.get("token_type", String.class).equals("refresh");[m
+[32m+[m[32m        }[m
+[32m+[m[32m        catch (InvalidTokenException e)[m
+[32m+[m[32m        {[m
+[32m+[m[32m            return false;[m
+         }[m
+[32m+[m
+     }[m
+ [m
+     public Instant getIssuedAt(String token) {[m
+[36m@@ -97,6 +90,13 @@[m [mpublic class JwtUtil {[m
+         return claims.getExpiration().toInstant();[m
+     }[m
+ [m
+[32m+[m[32m    public UUID getUserIdFromAccessToken(String accessToken) throws InvalidAccessTokenException {[m
+[32m+[m[32m        validateAccessToken(accessToken);[m
+[32m+[m[32m        Claims claims = getTokenClaims(accessToken);[m
+[32m+[m[32m        String userIdStr = claims.getSubject();[m
+[32m+[m[32m        return UUID.fromString(userIdStr);[m
+[32m+[m[32m    }[m
+[32m+[m
+     private Claims getTokenClaims(String token) {[m
+         return Jwts.parser()[m
+                 .verifyWith(secretKey)[m
+[36m@@ -105,10 +105,25 @@[m [mpublic class JwtUtil {[m
+                 .getPayload();[m
+     }[m
+ [m
+[31m-    public UUID getUserIdFromAccessToken(String accessToken) throws InvalidAccessTokenException {[m
+[31m-        validateAccessToken(accessToken);[m
+[31m-        Claims claims = getTokenClaims(accessToken);[m
+[31m-        String userIdStr = claims.getSubject();[m
+[31m-        return UUID.fromString(userIdStr);[m
+[32m+[m[32m    private String generateToken(UUID userId, String tokenType, long expirationMillis) {[m
+[32m+[m[32m        return Jwts.builder()[m
+[32m+[m[32m                .subject(userId.toString())[m
+[32m+[m[32m                .claim("token_type", tokenType)[m
+[32m+[m[32m                .issuedAt(new Date())[m
+[32m+[m[32m                .expiration(new Date(System.currentTimeMillis() + expirationMillis))[m
+[32m+[m[32m                .signWith(secretKey)[m
+[32m+[m[32m                .compact();[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    private void validateToken(String token) throws InvalidTokenException {[m
+[32m+[m[32m        try{[m
+[32m+[m[32m            Jwts.parser().verifyWith((SecretKey) secretKey)[m
+[32m+[m[32m                    .build()[m
+[32m+[m[32m                    .parseSignedClaims(token);[m
+[32m+[m[32m        } catch(SignatureException e){[m
+[32m+[m[32m            throw new InvalidTokenException("Invalid JWT signature");[m
+[32m+[m[32m        } catch (JwtException e) {[m
+[32m+[m[32m            throw new InvalidTokenException("Invalid JWT");[m
+[32m+[m[32m        }[m
+     }[m
+ }[m
+[1mdiff --git a/auth-service/src/test/java/com/connect/auth/component/AuthServiceComponentTest.java b/auth-service/src/test/java/com/connect/auth/component/AuthServiceComponentTest.java[m
+[1mindex c020d14..2bfce84 100644[m
+[1m--- a/auth-service/src/test/java/com/connect/auth/component/AuthServiceComponentTest.java[m
+[1m+++ b/auth-service/src/test/java/com/connect/auth/component/AuthServiceComponentTest.java[m
+[36m@@ -28,7 +28,7 @@[m [mimport java.util.Optional;[m
+ import java.util.UUID;[m
+ [m
+ import static org.mockito.ArgumentMatchers.any;[m
+[31m-import static org.mockito.Mockito.when;[m
+[32m+[m[32mimport static org.mockito.Mockito.*;[m
+ [m
+ @EnableAutoConfiguration(exclude = {[m
+         DataSourceAutoConfiguration.class,[m
+[36m@@ -88,6 +88,7 @@[m [mclass AuthServiceComponentTest {[m
+                 AuthProvider.LOCAL[m
+         );[m
+         when(userRepository.save(any(User.class))).thenReturn(user);[m
+[32m+[m[32m        when(userRepository.findByEmail("component-test@example.com")).thenReturn(Optional.empty());[m
+ [m
+         ResponseEntity<AuthResponseDTO> response = restTemplate.postForEntity(url, entity, AuthResponseDTO.class);[m
+         Assertions.assertEquals(HttpStatus.CREATED, response.getStatusCode());[m
+[36m@@ -180,6 +181,7 @@[m [mclass AuthServiceComponentTest {[m
+ [m
+         ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);[m
+         Assertions.assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());[m
+[32m+[m[32m        verify(userRepository, times(1)).findByEmail("component-test@example.com");[m
+     }[m
+ [m
+ [m
+[36m@@ -230,7 +232,11 @@[m [mclass AuthServiceComponentTest {[m
+         HttpHeaders headers = new HttpHeaders();[m
+         headers.set("Authorization", bearerPrefix + accessToken);[m
+         HttpEntity<String> entity = new HttpEntity<>(null, headers);[m
+[32m+[m[32m        User mockUser = mock(User.class);[m
+[32m+[m[32m        when(mockUser.getId()).thenReturn(UUID.randomUUID());[m
+ [m
+[32m+[m[32m        when(userRepository.getUserByUserId(any(UUID.class))).thenReturn(Optional.of(mockUser));[m
+[32m+[m[32m        doNothing().when(authRepository).deleteByUser_Id(any(UUID.class));[m
+         ResponseEntity<Void> response = restTemplate.postForEntity(url, entity, Void.class);[m
+         Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());[m
+     }[m
+[36m@@ -240,12 +246,68 @@[m [mclass AuthServiceComponentTest {[m
+         String url = getBaseUrl("/auth/logout");[m
+         String invalidAccessToken = jwtUtil.generateRefreshToken(UUID.randomUUID());[m
+         HttpHeaders headers = new HttpHeaders();[m
+[31m-        headers.set("Authorization", invalidAccessToken);[m
+[32m+[m[32m        headers.set("Authorization", bearerPrefix + invalidAccessToken);[m
+[32m+[m[32m        HttpEntity<String> entity = new HttpEntity<>(null, headers);[m
+[32m+[m
+[32m+[m[32m        ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);[m
+[32m+[m[32m        Assertions.assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    @Test[m
+[32m+[m[32m    void logout_userNotFound_ReturnsUnauthorized() {[m
+[32m+[m[32m        String url = getBaseUrl(internalPrefix + "/logout");[m
+[32m+[m[32m        String accessToken = jwtUtil.generateAccessToken(UUID.randomUUID());[m
+[32m+[m[32m        HttpHeaders headers = new HttpHeaders();[m
+[32m+[m[32m        headers.set("Authorization", bearerPrefix + accessToken);[m
+         HttpEntity<String> entity = new HttpEntity<>(null, headers);[m
+ [m
+[32m+[m[32m        when(userRepository.getUserByUserId(any(UUID.class))).thenReturn(Optional.empty());[m
+[32m+[m
+         ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);[m
+         Assertions.assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());[m
+     }[m
+ [m
+[31m-    // Add more tests for other endpoints and scenarios as needed[m
+[32m+[m[32m    // --- /auth/deleteUser ---[m
+[32m+[m
+[32m+[m[32m    @Test[m
+[32m+[m[32m    void deleteUser_ValidAccessToken_ReturnsNoContent() {[m
+[32m+[m[32m        String url = getBaseUrl(internalPrefix + "/deleteUser");[m
+[32m+[m[32m        String accessToken = jwtUtil.generateAccessToken(UUID.randomUUID());[m
+[32m+[m[32m        HttpHeaders headers = new HttpHeaders();[m
+[32m+[m[32m        headers.set("Authorization", bearerPrefix + accessToken);[m
+[32m+[m[32m        HttpEntity<String> entity = new HttpEntity<>(null, headers);[m
+[32m+[m[32m        User mockUser = mock(User.class);[m
+[32m+[m[32m        when(mockUser.getId()).thenReturn(UUID.randomUUID());[m
+[32m+[m
+[32m+[m[32m        when(userRepository.getUserByUserId(any(UUID.class))).thenReturn(Optional.of(mockUser));[m
+[32m+[m[32m        doNothing().when(authRepository).deleteByUser_Id(any(UUID.class));[m
+[32m+[m[32m        ResponseEntity<Void> response = restTemplate.exchange(url, HttpMethod.DELETE, entity, Void.class);[m
+[32m+[m[32m        Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    @Test[m
+[32m+[m[32m    void deleteUser_InvalidAccessToken_ReturnsUnauthorized() {[m
+[32m+[m[32m        String url = getBaseUrl(internalPrefix + "/deleteUser");[m
+[32m+[m[32m        String invalidAccessToken = jwtUtil.generateRefreshToken(UUID.randomUUID());[m
+[32m+[m[32m        HttpHeaders headers = new HttpHeaders();[m
+[32m+[m[32m        headers.set("Authorization", bearerPrefix + invalidAccessToken);[m
+[32m+[m[32m        HttpEntity<String> entity = new HttpEntity<>(null, headers);[m
+[32m+[m
+[32m+[m[32m        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.DELETE, entity, String.class);[m
+[32m+[m[32m        Assertions.assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    @Test[m
+[32m+[m[32m    void deleteUser_UserNotFound_ReturnsNoContent() {[m
+[32m+[m[32m        String url = getBaseUrl(internalPrefix + "/deleteUser");[m
+[32m+[m[32m        String accessToken = jwtUtil.generateAccessToken(UUID.randomUUID());[m
+[32m+[m[32m        HttpHeaders headers = new HttpHeaders();[m
+[32m+[m[32m        headers.set("Authorization", bearerPrefix + accessToken);[m
+[32m+[m[32m        HttpEntity<String> entity = new HttpEntity<>(null, headers);[m
+[32m+[m
+[32m+[m[32m        when(userRepository.getUserByUserId(any(UUID.class))).thenReturn(Optional.empty());[m
+[32m+[m
+[32m+[m[32m        ResponseEntity<Void> response = restTemplate.exchange(url, HttpMethod.DELETE, entity, Void.class);[m
+[32m+[m[32m        Assertions.assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());[m
+[32m+[m[32m    }[m
+ }[m
+\ No newline at end of file[m
+[1mdiff --git a/auth-service/src/test/java/com/connect/auth/controller/AuthControllerTest.java b/auth-service/src/test/java/com/connect/auth/controller/AuthControllerTest.java[m
+[1mindex f22f99f..bb8f92d 100644[m
+[1m--- a/auth-service/src/test/java/com/connect/auth/controller/AuthControllerTest.java[m
+[1m+++ b/auth-service/src/test/java/com/connect/auth/controller/AuthControllerTest.java[m
+[36m@@ -14,9 +14,10 @@[m [mimport org.springframework.security.core.context.SecurityContext;[m
+ import org.springframework.security.core.context.SecurityContextHolder;[m
+ import org.springframework.test.context.bean.override.mockito.MockitoBean;[m
+ import org.springframework.test.web.servlet.MockMvc;[m
+[32m+[m[32mimport static org.mockito.Mockito.doThrow;[m
+[32m+[m[32mimport static org.mockito.Mockito.when;[m
+ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;[m
+ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;[m
+[31m-import org.springframework.test.web.servlet.request.RequestPostProcessor;[m
+ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;[m
+ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;[m
+ [m
+[36m@@ -28,7 +29,6 @@[m [mimport com.connect.auth.exception.InvalidRefreshTokenException;[m
+ import com.connect.auth.exception.PasswordNotMatchException;[m
+ import com.connect.auth.exception.UnauthorizedException;[m
+ import com.connect.auth.exception.UserExistException;[m
+[31m-import com.connect.auth.exception.UserNotFoundException;[m
+ import com.connect.auth.service.AuthService;[m
+ import com.connect.auth.service.UserService;[m
+ import com.connect.auth.util.JwtUtil;[m
+[36m@@ -53,6 +53,8 @@[m [mpublic class AuthControllerTest {[m
+     private UserService userService;[m
+ [m
+     private static final String URIPREFIX = "/auth";[m
+[32m+[m[32m    private String PUBLICPREFIX = "/public";[m
+[32m+[m[32m    private String INTERNALPREFIX = "/internal";[m
+ [m
+     //---------------------------------register tests---------------------------------[m
+ [m
+[36m@@ -62,9 +64,9 @@[m [mpublic class AuthControllerTest {[m
+ [m
+         AuthResponseDTO response = new AuthResponseDTO("accessToken", "refreshToken");[m
+ [m
+[31m-        Mockito.when(authService.register(any(RegisterRequestDTO.class))).thenReturn(response);[m
+[32m+[m[32m        when(authService.register(any(RegisterRequestDTO.class))).thenReturn(response);[m
+ [m
+[31m-        mockMvc.perform(post(URIPREFIX + "/register")[m
+[32m+[m[32m        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/register")[m
+                         .contentType(MediaType.APPLICATION_JSON)[m
+                         .content(registerJson))[m
+                 .andExpect(status().isCreated())[m
+[36m@@ -76,10 +78,10 @@[m [mpublic class AuthControllerTest {[m
+     @Test[m
+     void register_userAlreadyExists_throwsUserExistException() throws Exception {[m
+         String registerJson = buildRegisterJson("naruto@gmail.com", "password", "password");[m
+[31m-        Mockito.when(authService.register(any(RegisterRequestDTO.class)))[m
+[32m+[m[32m        when(authService.register(any(RegisterRequestDTO.class)))[m
+                 .thenThrow(new UserExistException("User already exists"));[m
+ [m
+[31m-        mockMvc.perform(post(URIPREFIX + "/register")[m
+[32m+[m[32m        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/register")[m
+                         .contentType(MediaType.APPLICATION_JSON)[m
+                         .content(registerJson))[m
+                 .andExpect(status().isConflict());[m
+[36m@@ -89,7 +91,7 @@[m [mpublic class AuthControllerTest {[m
+     void register_missingEmail_returnsBadRequest() throws Exception {[m
+         String registerJson = buildRegisterJson("", "password123", "password123");[m
+ [m
+[31m-        mockMvc.perform(post(URIPREFIX + "/register")[m
+[32m+[m[32m        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/register")[m
+                         .contentType(MediaType.APPLICATION_JSON)[m
+                         .content(registerJson))[m
+                 .andExpect(status().isBadRequest());[m
+[36m@@ -99,7 +101,7 @@[m [mpublic class AuthControllerTest {[m
+     void register_missingPassword_returnsBadRequest() throws Exception {[m
+         String registerJson = buildRegisterJson("user@example.com", "", "password123");[m
+ [m
+[31m-        mockMvc.perform(post(URIPREFIX + "/register")[m
+[32m+[m[32m        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/register")[m
+                         .contentType(MediaType.APPLICATION_JSON)[m
+                         .content(registerJson))[m
+                 .andExpect(status().isBadRequest());[m
+[36m@@ -109,7 +111,7 @@[m [mpublic class AuthControllerTest {[m
+     void register_missingConfirmedPassword_returnsBadRequest() throws Exception {[m
+         String registerJson = buildRegisterJson("user@example.com", "password123", "");[m
+ [m
+[31m-        mockMvc.perform(post(URIPREFIX + "/register")[m
+[32m+[m[32m        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/register")[m
+                         .contentType(MediaType.APPLICATION_JSON)[m
+                         .content(registerJson))[m
+                 .andExpect(status().isBadRequest());[m
+[36m@@ -119,7 +121,7 @@[m [mpublic class AuthControllerTest {[m
+     void register_invalidEmailFormat_returnsBadRequest() throws Exception {[m
+         String registerJson = buildRegisterJson("invalid-email", "password123", "password123");[m
+ [m
+[31m-        mockMvc.perform(post(URIPREFIX + "/register")[m
+[32m+[m[32m        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/register")[m
+                         .contentType(MediaType.APPLICATION_JSON)[m
+                         .content(registerJson))[m
+                 .andExpect(status().isBadRequest());[m
+[36m@@ -129,10 +131,10 @@[m [mpublic class AuthControllerTest {[m
+     void register_passwordsDoNotMatch_throwsPasswordNotMatchException() throws Exception {[m
+         String registerJson = buildRegisterJson("user@example.com", "password123", "different123");[m
+ [m
+[31m-        Mockito.when(authService.register(any(RegisterRequestDTO.class)))[m
+[32m+[m[32m        when(authService.register(any(RegisterRequestDTO.class)))[m
+                 .thenThrow(new PasswordNotMatchException("Passwords do not match"));[m
+ [m
+[31m-        mockMvc.perform(post(URIPREFIX + "/register")[m
+[32m+[m[32m        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/register")[m
+                         .contentType(MediaType.APPLICATION_JSON)[m
+                         .content(registerJson))[m
+                 .andExpect(status().isBadRequest());[m
+[36m@@ -142,7 +144,7 @@[m [mpublic class AuthControllerTest {[m
+     void register_passwordTooShort_returnsBadRequest() throws Exception {[m
+         String registerJson = buildRegisterJson("user@example.com", "short", "validPassword");[m
+ [m
+[31m-        mockMvc.perform(post(URIPREFIX + "/register")[m
+[32m+[m[32m        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/register")[m
+                         .contentType(MediaType.APPLICATION_JSON)[m
+                         .content(registerJson))[m
+                 .andExpect(status().isBadRequest());[m
+[36m@@ -152,7 +154,7 @@[m [mpublic class AuthControllerTest {[m
+     void register_confirmedPasswordTooShort_returnsBadRequest() throws Exception {[m
+         String registerJson = buildRegisterJson("user@example.com", "validPassword", "short");[m
+ [m
+[31m-        mockMvc.perform(post(URIPREFIX + "/register")[m
+[32m+[m[32m        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/register")[m
+                         .contentType(MediaType.APPLICATION_JSON)[m
+                         .content(registerJson))[m
+                 .andExpect(status().isBadRequest());[m
+[36m@@ -165,9 +167,9 @@[m [mpublic class AuthControllerTest {[m
+     void login_ValidCredentials_Ok() throws Exception {[m
+         String loginJson = buildLoginJson("naruto@gmail.com", "password");[m
+         AuthResponseDTO response = new AuthResponseDTO("accessToken", "refreshToken");[m
+[31m-        Mockito.when(authService.login(any(LoginRequestDTO.class))).thenReturn(response);[m
+[32m+[m[32m        when(authService.login(any(LoginRequestDTO.class))).thenReturn(response);[m
+ [m
+[31m-        mockMvc.perform(post(URIPREFIX + "/login")[m
+[32m+[m[32m        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/login")[m
+                         .contentType(MediaType.APPLICATION_JSON)[m
+                         .content(loginJson))[m
+                 .andExpect(status().isOk())[m
+[36m@@ -178,10 +180,10 @@[m [mpublic class AuthControllerTest {[m
+     @Test[m
+     void login_InvalidCredentials_Unauthorized() throws Exception {[m
+         String loginJson = buildLoginJson("naruto@gmail.com", "wrongpassword");[m
+[31m-        Mockito.when(authService.login(any(LoginRequestDTO.class)))[m
+[32m+[m[32m        when(authService.login(any(LoginRequestDTO.class)))[m
+                 .thenThrow(new UnauthorizedException("Invalid credentials"));[m
+ [m
+[31m-        mockMvc.perform(post(URIPREFIX + "/login")[m
+[32m+[m[32m        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/login")[m
+                         .contentType(MediaType.APPLICATION_JSON)[m
+                         .content(loginJson))[m
+                 .andExpect(status().isUnauthorized());[m
+[36m@@ -191,7 +193,7 @@[m [mpublic class AuthControllerTest {[m
+     void login_missingEmail_returnsBadRequest() throws Exception {[m
+         String loginJson = buildLoginJson("", "validPassword");[m
+ [m
+[31m-        mockMvc.perform(post(URIPREFIX + "/login")[m
+[32m+[m[32m        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/login")[m
+                         .contentType(MediaType.APPLICATION_JSON)[m
+                         .content(loginJson))[m
+                 .andExpect(status().isBadRequest());[m
+[36m@@ -201,7 +203,7 @@[m [mpublic class AuthControllerTest {[m
+     void login_invalidEmailFormat_returnsBadRequest() throws Exception {[m
+         String loginJson = buildLoginJson("not-an-email", "validPassword");[m
+ [m
+[31m-        mockMvc.perform(post(URIPREFIX + "/login")[m
+[32m+[m[32m        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/login")[m
+                         .contentType(MediaType.APPLICATION_JSON)[m
+                         .content(loginJson))[m
+                 .andExpect(status().isBadRequest());[m
+[36m@@ -211,7 +213,7 @@[m [mpublic class AuthControllerTest {[m
+     void login_missingPassword_returnsBadRequest() throws Exception {[m
+         String loginJson = buildLoginJson("user@example.com", "");[m
+ [m
+[31m-        mockMvc.perform(post(URIPREFIX + "/login")[m
+[32m+[m[32m        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/login")[m
+                         .contentType(MediaType.APPLICATION_JSON)[m
+                         .content(loginJson))[m
+                 .andExpect(status().isBadRequest());[m
+[36m@@ -221,7 +223,7 @@[m [mpublic class AuthControllerTest {[m
+     void login_passwordTooShort_returnsBadRequest() throws Exception {[m
+         String loginJson = buildLoginJson("user@example.com", "short");[m
+ [m
+[31m-        mockMvc.perform(post(URIPREFIX + "/login")[m
+[32m+[m[32m        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/login")[m
+                         .contentType(MediaType.APPLICATION_JSON)[m
+                         .content(loginJson))[m
+                 .andExpect(status().isBadRequest());[m
+[36m@@ -232,9 +234,9 @@[m [mpublic class AuthControllerTest {[m
+     @Test[m
+     void refresh_ValidCookie_Ok() throws Exception {[m
+         AuthResponseDTO response = new AuthResponseDTO("accessToken", "newRefreshToken");[m
+[31m-        Mockito.when(authService.refresh(eq("refreshTokenValue"))).thenReturn(response);[m
+[32m+[m[32m        when(authService.refresh(eq("refreshTokenValue"))).thenReturn(response);[m
+ [m
+[31m-        mockMvc.perform(post(URIPREFIX + "/refresh")[m
+[32m+[m[32m        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/refresh")[m
+                         .cookie(new Cookie("refreshToken", "refreshTokenValue")))[m
+                 .andExpect(status().isOk())[m
+                 .andExpect(jsonPath("$.accessToken").value("accessToken"))[m
+[36m@@ -243,16 +245,16 @@[m [mpublic class AuthControllerTest {[m
+ [m
+     @Test[m
+     void refresh_MissingCookie_BadRequest() throws Exception {[m
+[31m-        mockMvc.perform(post(URIPREFIX + "/refresh"))[m
+[32m+[m[32m        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/refresh"))[m
+                 .andExpect(status().isBadRequest());[m
+     }[m
+ [m
+     @Test[m
+     void refresh_InvalidToken_NotFound() throws Exception {[m
+[31m-        Mockito.when(authService.refresh(any(String.class)))[m
+[32m+[m[32m        when(authService.refresh(any(String.class)))[m
+                 .thenThrow(new InvalidRefreshTokenException("Invalid refresh token"));[m
+ [m
+[31m-        mockMvc.perform(post(URIPREFIX + "/refresh")[m
+[32m+[m[32m        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/refresh")[m
+                         .cookie(new Cookie("refreshToken", "invalid")))[m
+                 .andExpect(status().isUnauthorized());[m
+     }[m
+[36m@

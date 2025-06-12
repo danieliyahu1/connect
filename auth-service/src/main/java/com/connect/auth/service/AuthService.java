@@ -65,20 +65,15 @@ public class AuthService {
         return createAuthResponse(user);
     }
 
-    public void logout(String accessToken) throws UserNotFoundException, InvalidAccessTokenException {
-        // Logic to handle user logout
-        // This would typically involve invalidating the user's session or token.
-        UUID userId = jwtUtil.getUserIdFromAccessToken(accessToken);
-        authRepository.deleteByUser_Id(userService.getUserByUserId(userId).orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId)).getId());
+    public void logout(String userId) throws UnauthorizedException {
+        authRepository.deleteByUser_Id(userService.getUserByUserId(UUID.fromString(userId)).orElseThrow(() -> new UnauthorizedException("No user with this userId")).getId());
     }
 
     @Transactional
-    public void deleteUserByUserId(String userId) {
-        // Logic to delete a user by ID
-        // This would typically involve removing the user from the database.
+    public void deleteUserByUserId(String userId) throws UnauthorizedException {
         Optional<User> userOpt = userService.getUserByUserId(UUID.fromString(userId));
         if (userOpt.isEmpty()) {
-            return;
+            throw new UnauthorizedException("No user with this userId");
         }
         User user = userOpt.get();
         authRepository.deleteByUser_Id(user.getId());

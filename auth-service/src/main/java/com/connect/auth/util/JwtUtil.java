@@ -2,6 +2,7 @@ package com.connect.auth.util;
 
 import com.connect.auth.exception.InvalidAccessTokenException;
 import com.connect.auth.exception.InvalidRefreshTokenException;
+import com.connect.auth.exception.InvalidTokenException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -31,23 +32,12 @@ public class JwtUtil {
     }
 
     public String generateAccessToken(UUID userId){
-        return Jwts.builder()
-                .subject(userId.toString())
-                .claim("token_type", "access")
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 1))
-                .signWith(secretKey)
-                .compact();
+        return generateToken(userId, "access", 1000 * 60 * 1);
+
     }
 
     public String generateRefreshToken(UUID userId) {
-        return Jwts.builder()
-                .subject(userId.toString())
-                .claim("token_type", "refresh")
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 1000L * 60 * 3)) // 7 days
-                .signWith(secretKey)
-                .compact();
+        return generateToken(userId, "refresh", 1000 * 60 * 3);
     }
 
     public void validateAccessToken(String token) throws InvalidAccessTokenException {
@@ -63,27 +53,29 @@ public class JwtUtil {
     }
 
     public boolean isValidAccessToken(String token) {
-        validateToken(token);
-        Claims claims = getTokenClaims(token);
-        return claims.get("token_type", String.class).equals("access");
+        try{
+            validateToken(token);
+            Claims claims = getTokenClaims(token);
+            return claims.get("token_type", String.class).equals("access");
+        }
+        catch (InvalidTokenException e)
+        {
+            return false;
+        }
+
     }
 
     public boolean isValidRefreshToken(String token) {
-        validateToken(token);
-        Claims claims = getTokenClaims(token);
-        return claims.get("token_type", String.class).equals("refresh");
-    }
-    
-    private void validateToken(String token) {
         try{
-            Jwts.parser().verifyWith((SecretKey) secretKey)
-                    .build()
-                    .parseSignedClaims(token);
-        } catch(SignatureException e){
-            throw new JwtException("Invalid JWT signature");
-        } catch (JwtException e) {
-            throw new JwtException("Invalid JWT");
+            validateToken(token);
+            Claims claims = getTokenClaims(token);
+            return claims.get("token_type", String.class).equals("refresh");
         }
+        catch (InvalidTokenException e)
+        {
+            return false;
+        }
+
     }
 
     public Instant getIssuedAt(String token) {
@@ -98,6 +90,13 @@ public class JwtUtil {
         return claims.getExpiration().toInstant();
     }
 
+    public UUID getUserIdFromAccessToken(String accessToken) throws InvalidAccessTokenException {
+        validateAccessToken(accessToken);
+        Claims claims = getTokenClaims(accessToken);
+        String userIdStr = claims.getSubject();
+        return UUID.fromString(userIdStr);
+    }
+
     private Claims getTokenClaims(String token) {
         return Jwts.parser()
                 .verifyWith(secretKey)
@@ -106,10 +105,25 @@ public class JwtUtil {
                 .getPayload();
     }
 
-    public UUID getUserIdFromAccessToken(String accessToken) throws InvalidAccessTokenException {
-        validateAccessToken(accessToken);
-        Claims claims = getTokenClaims(accessToken);
-        String userIdStr = claims.getSubject();
-        return UUID.fromString(userIdStr);
+    private String generateToken(UUID userId, String tokenType, long expirationMillis) {
+        return Jwts.builder()
+                .subject(userId.toString())
+                .claim("token_type", tokenType)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + expirationMillis))
+                .signWith(secretKey)
+                .compact();
+    }
+
+    private void validateToken(String token) throws InvalidTokenException {
+        try{
+            Jwts.parser().verifyWith((SecretKey) secretKey)
+                    .build()
+                    .parseSignedClaims(token);
+        } catch(SignatureException e){
+            throw new InvalidTokenException("Invalid JWT signature");
+        } catch (JwtException e) {
+            throw new InvalidTokenException("Invalid JWT");
+        }
     }
 }

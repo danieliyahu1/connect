@@ -105,13 +105,13 @@ class JwtUtilTest {
                 .signWith(otherKey)
                 .compact();
 
-        assertThrows(JwtException.class, () -> jwtUtil.validateAccessToken(invalidSignatureToken));
+        assertThrows(InvalidAccessTokenException.class, () -> jwtUtil.validateAccessToken(invalidSignatureToken));
     }
 
     @Test
     void validateToken_MalformedToken_ThrowsJwtException() {
         String malformedToken = "this.is.not.a.jwt";
-        assertThrows(JwtException.class, () -> jwtUtil.validateAccessToken(malformedToken));
+        assertThrows(InvalidAccessTokenException.class, () -> jwtUtil.validateAccessToken(malformedToken));
 
     }
 }

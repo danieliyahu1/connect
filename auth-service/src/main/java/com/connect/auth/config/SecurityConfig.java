@@ -33,7 +33,7 @@ public class SecurityConfig {
                 // Authorize routes
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/auth/**",          // for email/password register + login
+                                "/auth/public/**",          // for email/password register + login
                                 "/oauth2/**",        // for Google or other OAuth providers
                                 "/login/**",
                                 "/error"
@@ -45,7 +45,6 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .defaultSuccessUrl("/oauth2/success", true)
                 )
-
                 .addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
         ;
 

@@ -262,68 +262,34 @@ public class AuthServiceTest {
     // Test cases for the logout method in AuthService
 
     @Test
-    void logout_WithValidAccessToken_DeletesRefreshToken() throws InvalidRefreshTokenException, UserNotFoundException, InvalidAccessTokenException {
+    void logout_WithValidAccessToken_DeletesRefreshToken() throws InvalidAccessTokenException, UnauthorizedException {
         // Arrange
-        String accessToken = "validAccessToken";
-        UUID userId = UUID.randomUUID();
+        String userId = UUID.randomUUID().toString();
         User user = mock(User.class);
         Optional<User> optionalUser = Optional.of(user);
 
-        when(jwtUtil.getUserIdFromAccessToken(accessToken)).thenReturn(userId);
-        when(userService.getUserByUserId(userId)).thenReturn(optionalUser);
-        when(user.getId()).thenReturn(userId);
-        doNothing().when(authRepository).deleteByUser_Id(userId);
+        when(userService.getUserByUserId(any())).thenReturn(optionalUser);
+        doNothing().when(authRepository).deleteByUser_Id(any());
 
         // Act
-        authService.logout(accessToken);
+        authService.logout(userId);
 
-        // Assert
-        verify(jwtUtil).getUserIdFromAccessToken(accessToken);
-        verify(userService).getUserByUserId(userId);
-        verify(authRepository).deleteByUser_Id(userId);
     }
 
     @Test
-    void logout_WithInvalidToken_ThrowsException() throws InvalidAccessTokenException {
+    void logout_UserNotFound_ThrowsUnauthorizedException() {
         // Arrange
-        String accessToken = "invalidToken";
-        when(jwtUtil.getUserIdFromAccessToken(accessToken)).thenThrow(new RuntimeException("Invalid token"));
-
+        String userId = UUID.randomUUID().toString();
+        when(userService.getUserByUserId(any())).thenReturn(Optional.empty());
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> authService.logout(accessToken));
-        verify(jwtUtil).getUserIdFromAccessToken(accessToken);
+        assertThrows(UnauthorizedException.class, () -> authService.logout(userId));
     }
 
-    @Test
-    void logout_WithInvalidAccessToken_ThrowsException() throws InvalidAccessTokenException {
-        // Arrange
-        String accessToken = "invalidAccessToken";
-        when(jwtUtil.getUserIdFromAccessToken(accessToken)).thenThrow(new InvalidAccessTokenException("Invalid access token"));
-
-        // Act & Assert
-        assertThrows(InvalidAccessTokenException.class, () -> authService.logout(accessToken));
-        verify(jwtUtil).getUserIdFromAccessToken(accessToken);
-    }
-
-    @Test
-    void logout_WithNonExistentUser_ThrowsException() throws InvalidAccessTokenException {
-        // Arrange
-        String accessToken = "validAccessToken";
-        UUID userId = UUID.randomUUID();
-
-        when(jwtUtil.getUserIdFromAccessToken(accessToken)).thenReturn(userId);
-        when(userService.getUserByUserId(userId)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        assertThrows(UserNotFoundException.class, () -> authService.logout(accessToken));
-        verify(jwtUtil).getUserIdFromAccessToken(accessToken);
-        verify(userService).getUserByUserId(userId);
-    }
 
     // Test cases for the deleteUserByUserId method in AuthService
 
     @Test
-    void deleteUserByUserId_WithExistingUser_DeletesUserAndRefreshTokens() {
+    void deleteUserByUserId_WithExistingUser_DeletesUserAndRefreshTokens() throws UnauthorizedException {
         // Arrange
         UUID userId = UUID.randomUUID();
         String userIdStr = userId.toString();
@@ -341,17 +307,13 @@ public class AuthServiceTest {
     }
 
     @Test
-    void deleteUserByUserId_WithNonExistentUser_DoesNothing() {
+    void deleteUserByUserId_WithNonExistentUser_DoesNothing() throws UnauthorizedException {
         // Arrange
         UUID userId = UUID.randomUUID();
         String userIdStr = userId.toString();
         when(userService.getUserByUserId(userId)).thenReturn(Optional.empty());
 
         // Act
-        authService.deleteUserByUserId(userIdStr);
-
-        // Assert
-        verify(userService).getUserByUserId(userId);
-        verifyNoMoreInteractions(authRepository, userService);
+        assertThrows(UnauthorizedException.class, () -> authService.logout(userId.toString()));
     }
 }

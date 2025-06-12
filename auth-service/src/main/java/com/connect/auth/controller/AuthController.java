@@ -20,44 +20,34 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @PostMapping("/register")
+    @PostMapping("/public/register")
     public ResponseEntity<AuthResponseDTO> register(@RequestBody @Valid RegisterRequestDTO registerRequest) throws UserExistException, PasswordNotMatchException {
         return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(registerRequest));
     }
 
-    @PostMapping("/login")
+    @PostMapping("/public/login")
     public ResponseEntity<AuthResponseDTO> login(@RequestBody @Valid LoginRequestDTO loginRequest) throws UnauthorizedException {
         return ResponseEntity.ok(authService.login(loginRequest));
     }
 
-    @PostMapping("/refresh")
+    @PostMapping("/public/refresh")
     public ResponseEntity<AuthResponseDTO> refresh(@CookieValue String refreshToken) throws InvalidRefreshTokenException {
         return ResponseEntity.ok(authService.refresh(refreshToken));
     }
 
-    @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authorizationHeader) throws UserNotFoundException, InvalidAccessTokenException {
-        String accessToken = authorizationHeader.replace("Bearer ", "").trim();
-        authService.logout(accessToken);
+    @PostMapping("/internal/logout")
+    public ResponseEntity<Void> logout(Authentication authentication) throws UnauthorizedException {
+        authService.logout(getUserId(authentication));
         return ResponseEntity.noContent().build(); // 204 No Content
     }
 
-    @DeleteMapping("/deleteUser")
-    public ResponseEntity<Void> deleteUser(Authentication authentication) {
-        String userId = authentication.getName();
-        authService.deleteUserByUserId(userId);
+    @DeleteMapping("/internal/deleteUser")
+    public ResponseEntity<Void> deleteUser(Authentication authentication) throws UnauthorizedException {
+        authService.deleteUserByUserId(getUserId(authentication));
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/getUserIdFromAccessToken")
-    public ResponseEntity<UUID> getUserIdFromAccessToken(Authentication authentication) {
-        UUID userId = UUID.fromString(authentication.getName());
-        return ResponseEntity.ok(userId);
-    }
-
-    @GetMapping("/isValidAccessToken")
-    public ResponseEntity<Boolean> isValidAccessToken(Authentication authentication) {
-        // If this method is called, the token is already validated by the filter
-        return ResponseEntity.ok(true);
+    private String getUserId(Authentication authentication) {
+        return authentication.getName();
     }
 }
