@@ -6,12 +6,15 @@ import com.connect.auth.exception.WrongProviderException;
 import com.connect.auth.model.RefreshToken;
 import com.connect.auth.model.User;
 import com.connect.auth.repository.AuthRepository;
+import com.connect.auth.service.oauth.extractor.OAuth2UserInfoExtractor;
+import com.connect.auth.service.oauth.extractor.OAuth2UserInfoExtractorRegistry;
 import com.connect.auth.util.JwtUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
@@ -31,6 +34,10 @@ class OAuthServiceTest {
     private JwtUtil jwtUtil;
     @Mock
     private AuthRepository authRepository;
+    @Mock
+    private OAuth2UserInfoExtractorRegistry oAuth2UserInfoExtractorRegistry;
+    @Mock
+    OAuth2UserInfoExtractor oAuth2UserInfoExtractor;
     @InjectMocks
     private OAuthService oAuthService;
 
@@ -46,10 +53,10 @@ class OAuthServiceTest {
 
         OAuth2AuthenticationToken oauthToken = mock(OAuth2AuthenticationToken.class);
         OAuth2User oauthUser = mock(OAuth2User.class);
-
+        when(oAuth2UserInfoExtractorRegistry.getExtractor(provider)).thenReturn(oAuth2UserInfoExtractor);
+        when(oAuth2UserInfoExtractor.getEmail(oauthUser)).thenReturn(email);
+        when(oAuth2UserInfoExtractor.getProviderUserId(oauthUser)).thenReturn(providerUserId);
         when(oauthToken.getPrincipal()).thenReturn(oauthUser);
-        when(oauthUser.getAttribute("email")).thenReturn(email);
-        when(oauthUser.getAttribute("sub")).thenReturn(providerUserId);
         when(oauthToken.getAuthorizedClientRegistrationId()).thenReturn(provider.name().toLowerCase());
         when(userService.findByEmail(email)).thenReturn(Optional.empty());
 
@@ -61,12 +68,12 @@ class OAuthServiceTest {
         when(jwtUtil.generateRefreshToken(userId)).thenReturn(refreshToken);
 
         // Act
-        AuthResponseDTO response = oAuthService.processOAuthPostLogin(oauthToken);
+        ResponseEntity<AuthResponseDTO> response = oAuthService.processOAuthPostLogin(oauthToken);
 
         // Assert
         assertNotNull(response);
-        assertEquals(accessToken, response.getAccessToken());
-        assertEquals(refreshToken, response.getRefreshToken());
+        assertEquals(accessToken, response.getBody().getAccessToken());
+        assertEquals(refreshToken, response.getBody().getRefreshToken());
         verify(userService).save(any(User.class));
         verify(authRepository).save(any(RefreshToken.class));
     }
@@ -85,8 +92,9 @@ class OAuthServiceTest {
         OAuth2User oauthUser = mock(OAuth2User.class);
 
         when(oauthToken.getPrincipal()).thenReturn(oauthUser);
-        when(oauthUser.getAttribute("email")).thenReturn(email);
-        when(oauthUser.getAttribute("sub")).thenReturn(providerUserId);
+        when(oAuth2UserInfoExtractorRegistry.getExtractor(provider)).thenReturn(oAuth2UserInfoExtractor);
+        when(oAuth2UserInfoExtractor.getEmail(oauthUser)).thenReturn(email);
+        when(oAuth2UserInfoExtractor.getProviderUserId(oauthUser)).thenReturn(providerUserId);
         when(oauthToken.getAuthorizedClientRegistrationId()).thenReturn(provider.name().toLowerCase());
 
         User existingUser = mock(User.class);
@@ -98,12 +106,12 @@ class OAuthServiceTest {
         when(jwtUtil.generateRefreshToken(userId)).thenReturn(refreshToken);
 
         // Act
-        AuthResponseDTO response = oAuthService.processOAuthPostLogin(oauthToken);
+        ResponseEntity<AuthResponseDTO> response = oAuthService.processOAuthPostLogin(oauthToken);
 
         // Assert
         assertNotNull(response);
-        assertEquals(accessToken, response.getAccessToken());
-        assertEquals(refreshToken, response.getRefreshToken());
+        assertEquals(accessToken, response.getBody().getAccessToken());
+        assertEquals(refreshToken, response.getBody().getRefreshToken());
         verify(userService, never()).save(any(User.class));
         verify(authRepository).save(any(RefreshToken.class));
     }
@@ -120,8 +128,9 @@ class OAuthServiceTest {
         OAuth2User oauthUser = mock(OAuth2User.class);
 
         when(oauthToken.getPrincipal()).thenReturn(oauthUser);
-        when(oauthUser.getAttribute("email")).thenReturn(email);
-        when(oauthUser.getAttribute("sub")).thenReturn(providerUserId);
+        when(oAuth2UserInfoExtractorRegistry.getExtractor(provider)).thenReturn(oAuth2UserInfoExtractor);
+        when(oAuth2UserInfoExtractor.getEmail(oauthUser)).thenReturn(email);
+        when(oAuth2UserInfoExtractor.getProviderUserId(oauthUser)).thenReturn(providerUserId);
         when(oauthToken.getAuthorizedClientRegistrationId()).thenReturn(provider.name().toLowerCase());
 
         User existingUser = mock(User.class);

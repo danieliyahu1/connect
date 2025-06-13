@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -30,7 +31,8 @@ public class OAuthControllerTest {
 
     @Test
     void oauth2Success_ValidAuthentication_ReturnsAuthResponse() throws Exception {
-        AuthResponseDTO response = new AuthResponseDTO("accessToken", "refreshToken");
+        AuthResponseDTO authResponseDTO = new AuthResponseDTO("accessToken", "refreshToken");
+        ResponseEntity<AuthResponseDTO> response = ResponseEntity.ok(authResponseDTO);
         Mockito.when(oAuthService.processOAuthPostLogin(any(OAuth2AuthenticationToken.class)))
                 .thenReturn(response);
 

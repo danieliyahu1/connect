@@ -34,7 +34,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/auth/public/**",          // for email/password register + login
-                                "/oauth2/**",        // for Google or other OAuth providers
                                 "/login/**",
                                 "/error"
                         ).permitAll()

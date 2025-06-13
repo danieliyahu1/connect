@@ -19,6 +19,14 @@ public class AuthExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
 
+    @ExceptionHandler(UnsupportedProviderException.class)
+    public ResponseEntity<Map<String, String>> handleUnsupportedProviderException(UnsupportedProviderException ex) {
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", "Unsupported Provider");
+        errorResponse.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
     @ExceptionHandler(InvalidAccessTokenException.class)
     public ResponseEntity<Map<String, String>> handleInvalidAccessTokenException(InvalidAccessTokenException ex) {
         Map<String, String> errorResponse = new HashMap<>();

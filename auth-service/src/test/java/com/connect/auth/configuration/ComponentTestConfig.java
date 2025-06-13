@@ -21,8 +21,13 @@ public class ComponentTestConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/auth/public/**").permitAll()
+                                "/auth/public/**",
+                                "/login/**"
+                                ).permitAll()
                         .anyRequest().authenticated()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .defaultSuccessUrl("/oauth2/success", true)
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(this.jwtUtil()), UsernamePasswordAuthenticationFilter.class);
         ;

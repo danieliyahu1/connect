@@ -6,9 +6,13 @@ import com.connect.auth.exception.WrongProviderException;
 import com.connect.auth.model.RefreshToken;
 import com.connect.auth.model.User;
 import com.connect.auth.repository.AuthRepository;
+import com.connect.auth.service.oauth.extractor.OAuth2UserInfoExtractor;
+import com.connect.auth.service.oauth.extractor.OAuth2UserInfoExtractorRegistry;
 import com.connect.auth.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
@@ -23,14 +27,17 @@ public class OAuthService {
     private final UserService userService;
     private final JwtUtil jwtUtil;
     private final AuthRepository authRepository;
+    private final OAuth2UserInfoExtractorRegistry oAuth2UserInfoExtractorRegistry;
 
-    public AuthResponseDTO processOAuthPostLogin(OAuth2AuthenticationToken oauthToken) throws WrongProviderException {
+    public ResponseEntity<AuthResponseDTO> processOAuthPostLogin(OAuth2AuthenticationToken oauthToken) throws WrongProviderException {
         OAuth2User oauthUser = oauthToken.getPrincipal();
 
-        // Extract required details from the OAuth2User
-        String email = oauthUser.getAttribute("email");
-        String providerUserId = oauthUser.getAttribute("sub"); // "sub" is common for Google
         AuthProvider provider = AuthProvider.valueOf(oauthToken.getAuthorizedClientRegistrationId().toUpperCase());
+        OAuth2UserInfoExtractor extractor = oAuth2UserInfoExtractorRegistry.getExtractor(provider);
+
+        // Extract required details from the OAuth2User
+        String email = extractor.getEmail(oauthUser);
+        String providerUserId = extractor.getProviderUserId(oauthUser);
 
         Optional<User> userOpt = userService.findByEmail(email);
         User user;
@@ -39,15 +46,23 @@ public class OAuthService {
             // User does not exist -> create a new user
             user = new User(email, provider, providerUserId);
             user = userService.save(user);
+            return userRegisteredResponse(user);
         } else {
             user = userOpt.get();
             if(!sameProvider(provider.name(), user.getProvider().name()))
             {
                 throw new WrongProviderException("User already registered with a different provider");
             }
+            return userLoggedInResponse(user);
         }
+    }
 
-        return createAuthResponse(user); // null or name if you add it later
+    private ResponseEntity<AuthResponseDTO> userLoggedInResponse(User user) throws WrongProviderException {
+        return ResponseEntity.ok(createAuthResponse(user));
+    }
+
+    private ResponseEntity<AuthResponseDTO> userRegisteredResponse(User user) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(createAuthResponse(user));
     }
 
     private boolean sameProvider(String oauthProvider, String userProvider) {
@@ -63,6 +78,6 @@ public class OAuthService {
 
         authRepository.save(new RefreshToken(refreshToken, user, jwtUtil.getIssuedAt(refreshToken), jwtUtil.getExpiration(refreshToken)));
 
-        return new AuthResponseDTO(accessToken, refreshToken); // null or name if you add it later
+        return new AuthResponseDTO(accessToken, refreshToken);
     }
 }

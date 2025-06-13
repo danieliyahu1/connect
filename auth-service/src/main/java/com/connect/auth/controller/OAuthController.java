@@ -20,6 +20,6 @@ public class OAuthController {
     @GetMapping("/success")
     public ResponseEntity<AuthResponseDTO> oauth2Success(OAuth2AuthenticationToken authentication) throws WrongProviderException {
         // Extract OAuth2 user info and pass it to service for registration/login
-        return ResponseEntity.ok(oAuthService.processOAuthPostLogin(authentication));
+        return oAuthService.processOAuthPostLogin(authentication);
     }
 }
