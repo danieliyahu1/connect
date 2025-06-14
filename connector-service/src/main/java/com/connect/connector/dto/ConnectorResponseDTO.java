@@ -3,6 +3,7 @@ package com.connect.connector.dto;
 import com.connect.connector.enums.SocialMedia;
 import lombok.Data;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -13,7 +14,7 @@ public class ConnectorResponseDTO {
     private String country;
     private String city;
     private String bio;
-    private String profilePictureUrl;
+    private List<ConnectorImageDTO> galleryPhotos;
     private Map<SocialMedia, String> socialMediaLinks;
 
     public void setUserId(UUID userId) {

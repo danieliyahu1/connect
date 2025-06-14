@@ -1,14 +1,14 @@
 package com.connect.connector.dto;
 
-import com.connect.connector.dto.validation.ValidCountryCity;
-import jakarta.validation.constraints.Pattern;
+import com.connect.connector.model.ConnectorSocialMedia;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @NoArgsConstructor
 @Data
-@ValidCountryCity
 public class ConnectorRequestDTO {
     @Size(min = 2, max = 20, message = "First name must be between 2 and 20 characters")
     private String firstName;
@@ -19,9 +19,11 @@ public class ConnectorRequestDTO {
     @Size(min = 2, max = 20, message = "City must be between 2 and 20 characters")
     private String city;
 
-    @Size(min = 15, message = "Bio must be at least 15 characters long")
+    @Size(min = 300, message = "Bio must be at least 15 characters long")
     private String bio;
 
-    @Pattern(regexp = "^(http|https)://.*$", message = "Profile picture must be a valid URL")
-    private String profilePictureUrl;
+    private List<ConnectorSocialMedia> socialLinks;
+
+    private List<ConnectorImageDTO> gallery;
+
 }

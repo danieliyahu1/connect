@@ -25,13 +25,11 @@ public class ConnectorImage {
     @Column(name = "media_id", nullable = false, unique = true)
     private String mediaId; // ID received from Media Service
 
-    private String caption; // optional, can be null
     private int orderIndex; // for ordering images in gallery
 
-    public ConnectorImage(UUID connectorId, String mediaId, String caption, int orderIndex) {
+    public ConnectorImage(UUID connectorId, String mediaId, int orderIndex) {
         this.connectorId = connectorId;
         this.mediaId = mediaId;
-        this.caption = caption;
         this.orderIndex = orderIndex;
     }
 
