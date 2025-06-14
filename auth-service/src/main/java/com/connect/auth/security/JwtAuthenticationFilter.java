@@ -30,7 +30,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
-        if (request.getRequestURI().startsWith("/auth/public")) {
+
+        if (isPublicEndpoint(request)) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -48,16 +49,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
+                filterChain.doFilter(request, response);
             }
             catch (InvalidAccessTokenException e) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                return;
             }
         }
         else{
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
         }
-        filterChain.doFilter(request, response);
+    }
+
+    private boolean isPublicEndpoint(HttpServletRequest request) {
+        return isAuthPublicEndpoint(request) ||
+               isOAuthPublicEndpoint(request);
+    }
+
+    private boolean isAuthPublicEndpoint(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return path.startsWith("/auth/public");
+    }
+
+    private boolean isOAuthPublicEndpoint(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return path.startsWith("/login/oauth2");
     }
 }

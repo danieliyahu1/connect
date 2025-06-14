@@ -1,6 +1,7 @@
 package com.connect.auth.service;
 
 import com.connect.auth.dto.AuthResponseDTO;
+import com.connect.auth.dto.OAuthResponseDTO;
 import com.connect.auth.enums.AuthProvider;
 import com.connect.auth.exception.WrongProviderException;
 import com.connect.auth.model.RefreshToken;
@@ -29,7 +30,7 @@ public class OAuthService {
     private final AuthRepository authRepository;
     private final OAuth2UserInfoExtractorRegistry oAuth2UserInfoExtractorRegistry;
 
-    public ResponseEntity<AuthResponseDTO> processOAuthPostLogin(OAuth2AuthenticationToken oauthToken) throws WrongProviderException {
+    public OAuthResponseDTO processOAuthPostLogin(OAuth2AuthenticationToken oauthToken) throws WrongProviderException {
         OAuth2User oauthUser = oauthToken.getPrincipal();
 
         AuthProvider provider = AuthProvider.valueOf(oauthToken.getAuthorizedClientRegistrationId().toUpperCase());
@@ -46,30 +47,21 @@ public class OAuthService {
             // User does not exist -> create a new user
             user = new User(email, provider, providerUserId);
             user = userService.save(user);
-            return userRegisteredResponse(user);
         } else {
             user = userOpt.get();
             if(!sameProvider(provider.name(), user.getProvider().name()))
             {
                 throw new WrongProviderException("User already registered with a different provider");
             }
-            return userLoggedInResponse(user);
         }
-    }
-
-    private ResponseEntity<AuthResponseDTO> userLoggedInResponse(User user) throws WrongProviderException {
-        return ResponseEntity.ok(createAuthResponse(user));
-    }
-
-    private ResponseEntity<AuthResponseDTO> userRegisteredResponse(User user) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(createAuthResponse(user));
+        return createOAuthResponse(user, userOpt.isPresent());
     }
 
     private boolean sameProvider(String oauthProvider, String userProvider) {
         return oauthProvider.equalsIgnoreCase(userProvider);
     }
 
-    private AuthResponseDTO createAuthResponse(User user) {
+    private OAuthResponseDTO createOAuthResponse(User user, boolean isNewUser){
         String accessToken = jwtUtil.generateAccessToken(user.getUserId());
         String refreshToken = jwtUtil.generateRefreshToken(user.getUserId());
         log.info("generated access and refresh tokens for user: {}", user.getUserId());
@@ -78,6 +70,6 @@ public class OAuthService {
 
         authRepository.save(new RefreshToken(refreshToken, user, jwtUtil.getIssuedAt(refreshToken), jwtUtil.getExpiration(refreshToken)));
 
-        return new AuthResponseDTO(accessToken, refreshToken);
+        return new OAuthResponseDTO(accessToken, refreshToken, isNewUser);
     }
 }

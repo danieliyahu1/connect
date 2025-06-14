@@ -1,6 +1,7 @@
 package com.connect.auth.service;
 
 import com.connect.auth.dto.AuthResponseDTO;
+import com.connect.auth.dto.OAuthResponseDTO;
 import com.connect.auth.enums.AuthProvider;
 import com.connect.auth.exception.WrongProviderException;
 import com.connect.auth.model.RefreshToken;
@@ -68,12 +69,12 @@ class OAuthServiceTest {
         when(jwtUtil.generateRefreshToken(userId)).thenReturn(refreshToken);
 
         // Act
-        ResponseEntity<AuthResponseDTO> response = oAuthService.processOAuthPostLogin(oauthToken);
+        OAuthResponseDTO response = oAuthService.processOAuthPostLogin(oauthToken);
 
         // Assert
         assertNotNull(response);
-        assertEquals(accessToken, response.getBody().getAccessToken());
-        assertEquals(refreshToken, response.getBody().getRefreshToken());
+        assertEquals(accessToken, response.getAccessToken());
+        assertEquals(refreshToken, response.getRefreshToken());
         verify(userService).save(any(User.class));
         verify(authRepository).save(any(RefreshToken.class));
     }
@@ -106,12 +107,12 @@ class OAuthServiceTest {
         when(jwtUtil.generateRefreshToken(userId)).thenReturn(refreshToken);
 
         // Act
-        ResponseEntity<AuthResponseDTO> response = oAuthService.processOAuthPostLogin(oauthToken);
+        OAuthResponseDTO response = oAuthService.processOAuthPostLogin(oauthToken);
 
         // Assert
         assertNotNull(response);
-        assertEquals(accessToken, response.getBody().getAccessToken());
-        assertEquals(refreshToken, response.getBody().getRefreshToken());
+        assertEquals(accessToken, response.getAccessToken());
+        assertEquals(refreshToken, response.getRefreshToken());
         verify(userService, never()).save(any(User.class));
         verify(authRepository).save(any(RefreshToken.class));
     }

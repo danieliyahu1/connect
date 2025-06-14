@@ -22,8 +22,10 @@ public class ComponentTestConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/auth/public/**",
-                                "/login/**"
-                                ).permitAll()
+                                "/login/**",
+                                "/oauth2/authorization/**" // triggers login with Google
+
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
