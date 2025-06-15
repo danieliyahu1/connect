@@ -18,20 +18,20 @@ import java.util.UUID;
 public class ConnectorImageService {
     private final ConnectorImageRepository connectorImageRepository;
 
-    public void addGalleryPhoto(ConnectorImageDTO connectorImageDTO, Connector connector) throws ImageIndexOutOfBoundException, ImageNotFoundException {
+    public void addGalleryPhoto(ConnectorImageDTO connectorImageDTO, Connector connector) throws ImageIndexOutOfBoundException {
         validateConnectorImageIndex(connectorImageDTO.getOrderIndex());
         ConnectorImage connectorImage = ConnectorImage.builder()
                 .connectorId(connector.getId())
                 .mediaUrl(connectorImageDTO.getMediaUrl())
                 .build();
 
-        saveConnectorImage(connectorImage);
+        saveConnectorImage(connectorImage, connectorImageDTO.getOrderIndex());
     }
 
     public void deleteGalleryPhoto(int orderIndex, Connector connector) throws ImageIndexOutOfBoundException {
         validateConnectorImageIndex(orderIndex);
         List<ConnectorImage> images = getConnectorImages(connector.getId());
-        checkUserHasProfileImage(images);
+        validateUserHasProfileImage(images);
         removeGalleryImage(orderIndex, images);
         images = getConnectorImages(connector.getId());
         reOrderGalleryImages(images, orderIndex);
@@ -43,9 +43,9 @@ public class ConnectorImageService {
         }
     }
 
-    private void saveConnectorImage(ConnectorImage connectorImage) {
+    private void saveConnectorImage(ConnectorImage connectorImage, int orderIndex) {
         List<ConnectorImage> existingImages = getConnectorImages(connectorImage.getConnectorId());
-        int imageIndex = getNewImageIndex(existingImages, connectorImage.getOrderIndex());
+        int imageIndex = getNewImageIndex(existingImages, orderIndex);
         connectorImage.setOrderIndex(imageIndex);
         removeGalleryImage(imageIndex, existingImages);
         connectorImageRepository.save(connectorImage);
@@ -69,7 +69,7 @@ public class ConnectorImageService {
                 .ifPresent(connectorImageRepository::delete);
     }
 
-    private void checkUserHasProfileImage(List<ConnectorImage> images) {
+    private void validateUserHasProfileImage(List<ConnectorImage> images) {
         if(images.size() < 2){
             throw new ProfilePictureRequiredException("User must have at least one picture for profile .");
         }
@@ -80,11 +80,12 @@ public class ConnectorImageService {
         for(ConnectorImage image : images) {
             tempArray[image.getOrderIndex()] = image;
         }
-        for(int i = removedIndex; i < tempArray.length - 1; i++) {
+        for(int i = removedIndex+1; i < tempArray.length - 1; i++) {
+            // If the next image is null, we reached the end of pictures
             if(tempArray[i] == null) {
                 return;
             }
-            tempArray[i].setOrderIndex(tempArray[i + 1].getOrderIndex() - 1);
+            tempArray[i].setOrderIndex(tempArray[i].getOrderIndex() - 1);
         }
     }
 
