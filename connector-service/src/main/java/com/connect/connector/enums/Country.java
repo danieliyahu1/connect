@@ -7,5 +7,6 @@ public enum Country {
     CZECHIA,
     SWITZERLAND,
     ITALY,
-    SPAIN
+    SPAIN,
+    POLAND,
 }

@@ -4,6 +4,7 @@ import com.connect.connector.enums.City;
 import com.connect.connector.enums.Country;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Data;
 import lombok.Setter;
 import java.util.UUID;
@@ -30,8 +31,12 @@ public class Connector {
     private City city;
     private String bio;
 
-    public Connector(UUID userId)
-    {
+    @Builder
+    public Connector(UUID userId, String firstName, Country country, City city, String bio) {
         this.userId = userId;
+        this.firstName = firstName;
+        this.country = country;
+        this.city = city;
+        this.bio = bio;
     }
 }

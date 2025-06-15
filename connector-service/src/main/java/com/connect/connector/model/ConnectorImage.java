@@ -2,6 +2,7 @@ package com.connect.connector.model;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Data;
 import lombok.Setter;
 
@@ -23,13 +24,14 @@ public class ConnectorImage {
 
     @Setter(AccessLevel.NONE)
     @Column(name = "media_id", nullable = false, unique = true)
-    private String mediaId; // ID received from Media Service
+    private String mediaUrl; // ID received from Media Service
 
     private int orderIndex; // for ordering images in gallery
 
-    public ConnectorImage(UUID connectorId, String mediaId, int orderIndex) {
+    @Builder
+    public ConnectorImage(UUID connectorId, String mediaUrl, int orderIndex) {
         this.connectorId = connectorId;
-        this.mediaId = mediaId;
+        this.mediaUrl = mediaUrl;
         this.orderIndex = orderIndex;
     }
 

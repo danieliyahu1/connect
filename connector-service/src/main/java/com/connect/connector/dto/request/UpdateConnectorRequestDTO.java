@@ -1,15 +1,16 @@
-package com.connect.connector.dto;
+package com.connect.connector.dto.request;
 
-import com.connect.connector.model.ConnectorSocialMedia;
+import com.connect.connector.dto.ConnectorImageDTO;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 
 @NoArgsConstructor
 @Data
-public class ConnectorRequestDTO {
+public class UpdateConnectorRequestDTO {
     @Size(min = 2, max = 20, message = "First name must be between 2 and 20 characters")
     private String firstName;
 
@@ -22,8 +23,7 @@ public class ConnectorRequestDTO {
     @Size(min = 300, message = "Bio must be at least 15 characters long")
     private String bio;
 
-    private List<ConnectorSocialMedia> socialLinks;
+    private Map<String, String> socialMediaLinks; // <platform, profileUrl>
 
     private List<ConnectorImageDTO> gallery;
-
 }

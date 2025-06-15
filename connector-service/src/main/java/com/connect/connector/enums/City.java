@@ -28,7 +28,11 @@ public enum City {
 
     // Spain
     MADRID(Country.SPAIN),
-    BARCELONA(Country.SPAIN);
+    BARCELONA(Country.SPAIN),
+
+    // Poland
+    WARSAW(Country.POLAND),
+    KRAKOW(Country.POLAND);
 
     private final Country country;
 
