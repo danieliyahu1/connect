@@ -3,38 +3,43 @@ package com.connect.connector.service;
 import com.connect.connector.dto.ConnectorImageDTO;
 import com.connect.connector.exception.ImageIndexOutOfBoundException;
 import com.connect.connector.exception.ImageNotFoundException;
+import com.connect.connector.exception.InvalidImageOrderException;
 import com.connect.connector.exception.ProfilePictureRequiredException;
+import com.connect.connector.mapper.ConnectorImageMapper;
 import com.connect.connector.model.Connector;
 import com.connect.connector.model.ConnectorImage;
 import com.connect.connector.repository.ConnectorImageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class ConnectorImageService {
     private final ConnectorImageRepository connectorImageRepository;
+    private final ConnectorImageMapper connectorImageMapper;
 
-    public void addGalleryPhoto(ConnectorImageDTO connectorImageDTO, Connector connector) throws ImageIndexOutOfBoundException {
+    public ConnectorImageDTO addGalleryPhoto(ConnectorImageDTO connectorImageDTO, Connector connector) throws ImageIndexOutOfBoundException, InvalidImageOrderException, ImageNotFoundException {
         validateConnectorImageIndex(connectorImageDTO.getOrderIndex());
-        ConnectorImage connectorImage = ConnectorImage.builder()
-                .connectorId(connector.getId())
-                .mediaUrl(connectorImageDTO.getMediaUrl())
-                .build();
-
-        saveConnectorImage(connectorImage, connectorImageDTO.getOrderIndex());
+        return connectorImageMapper.toDto(saveConnectorImage(connectorImageDTO, connector));
     }
 
-    public void deleteGalleryPhoto(int orderIndex, Connector connector) throws ImageIndexOutOfBoundException {
+    public ConnectorImageDTO deleteGalleryPhoto(int orderIndex, Connector connector) throws ImageIndexOutOfBoundException, ImageNotFoundException, ProfilePictureRequiredException {
         validateConnectorImageIndex(orderIndex);
-        List<ConnectorImage> images = getConnectorImages(connector.getId());
+        List<ConnectorImage> images = getConnectorImages(connector.getConnectorId());
         validateUserHasProfileImage(images);
-        removeGalleryImage(orderIndex, images);
-        images = getConnectorImages(connector.getId());
-        reOrderGalleryImages(images, orderIndex);
+        ConnectorImage deletedConnectorImage = removeGalleryImage(orderIndex, images);
+        images = getConnectorImages(connector.getConnectorId());
+        reorderGalleryImages(images, orderIndex);
+        return connectorImageMapper.toDto(deletedConnectorImage);
+    }
+
+    public List<ConnectorImageDTO> findByConnectorId(UUID id) {
+        return connectorImageRepository.findByConnector_Id(id).stream()
+                .map(connectorImageMapper::toDto)
+                .toList();
     }
 
     private void validateConnectorImageIndex(int imageOrderIndex) throws ImageIndexOutOfBoundException {
@@ -43,39 +48,53 @@ public class ConnectorImageService {
         }
     }
 
-    private void saveConnectorImage(ConnectorImage connectorImage, int orderIndex) {
-        List<ConnectorImage> existingImages = getConnectorImages(connectorImage.getConnectorId());
-        int imageIndex = getNewImageIndex(existingImages, orderIndex);
-        connectorImage.setOrderIndex(imageIndex);
-        removeGalleryImage(imageIndex, existingImages);
-        connectorImageRepository.save(connectorImage);
+    private ConnectorImage saveConnectorImage(ConnectorImageDTO connectorImage, Connector connector) throws InvalidImageOrderException, ImageNotFoundException {
+        List<ConnectorImage> existingImages = getConnectorImages(connector.getConnectorId());
+        int orderIndex = connectorImage.getOrderIndex();
+
+        if(isReplacingExistingImage(existingImages, orderIndex)) {
+            removeGalleryImage(connectorImage.getOrderIndex(), existingImages);
+        }
+        else{
+            validateIsNextAvailableIndex(existingImages, orderIndex);
+        }
+
+        return connectorImageRepository.save(createImageOrderIndex(connectorImage, connector));
+    }
+
+    private boolean isReplacingExistingImage(List<ConnectorImage> existingImages, int orderIndex) {
+        return existingImages.stream()
+                .anyMatch(image -> image.getOrderIndex() == orderIndex);
     }
 
     private List<ConnectorImage> getConnectorImages(UUID connectorId) {
-        return connectorImageRepository.findByConnectorId(connectorId);
+        return connectorImageRepository.findByConnector_Id(connectorId);
     }
 
-    private int getNewImageIndex(List<ConnectorImage> images, int orderIndex) {
-        if(orderIndex > images.size()) {
-            return images.size() + 1;
+    private void validateIsNextAvailableIndex(List<ConnectorImage> images, int orderIndex) throws InvalidImageOrderException {
+        if(orderIndex != images.size()) {
+            throw new InvalidImageOrderException(
+                    String.format("Order index is %d but should be equal to the next spot available in the images list: %d", orderIndex, images.size())
+            );
         }
-        return orderIndex;
     }
 
-    private void removeGalleryImage(int orderIndex, List<ConnectorImage> images) {
-        images.stream()
+    private ConnectorImage removeGalleryImage(int orderIndex, List<ConnectorImage> images) throws ImageNotFoundException {
+        Optional<ConnectorImage> imageOpt = images.stream()
                 .filter(img -> img.getOrderIndex() == orderIndex)
-                .findFirst()
-                .ifPresent(connectorImageRepository::delete);
+                .findFirst();
+
+        imageOpt.ifPresent(connectorImageRepository::delete);
+        return imageOpt.orElseThrow(() -> new ImageNotFoundException("Image not found at the specified order index: " + orderIndex));
     }
 
-    private void validateUserHasProfileImage(List<ConnectorImage> images) {
+    private void validateUserHasProfileImage(List<ConnectorImage> images) throws ProfilePictureRequiredException {
         if(images.size() < 2){
             throw new ProfilePictureRequiredException("User must have at least one picture for profile .");
         }
     }
 
-    private void reOrderGalleryImages(List<ConnectorImage> images, int removedIndex) {
+    private void reorderGalleryImages(List<ConnectorImage> images, int removedIndex) {
         ConnectorImage[] tempArray = new ConnectorImage[5];
         for(ConnectorImage image : images) {
             tempArray[image.getOrderIndex()] = image;
@@ -85,11 +104,19 @@ public class ConnectorImageService {
             if(tempArray[i] == null) {
                 return;
             }
-            tempArray[i].setOrderIndex(tempArray[i].getOrderIndex() - 1);
+            updateImageOrderIndex(tempArray[i],tempArray[i].getOrderIndex() - 1);
         }
     }
 
-    public List<ConnectorImage> findByConnectorId(UUID id) {
-        return connectorImageRepository.findByConnectorId(id);
+    private void updateImageOrderIndex(ConnectorImage image, int newOrderIndex) {
+        image.setOrderIndex(newOrderIndex);
+    }
+
+    private ConnectorImage createImageOrderIndex(ConnectorImageDTO image, Connector connector) {
+        return ConnectorImage.builder()
+                .connector(connector)
+                .mediaUrl(image.getMediaUrl())
+                .orderIndex(image.getOrderIndex())
+                .build();
     }
 }

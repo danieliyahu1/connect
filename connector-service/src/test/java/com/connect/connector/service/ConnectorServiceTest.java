@@ -6,16 +6,12 @@ import com.connect.connector.dto.request.CreateConnectorRequestDTO;
 import com.connect.connector.dto.request.UpdateConnectorRequestDTO;
 import com.connect.connector.enums.City;
 import com.connect.connector.enums.Country;
-import com.connect.connector.exception.ConnectorNotFoundException;
-import com.connect.connector.exception.ExistingConnectorException;
-import com.connect.connector.exception.ImageIndexOutOfBoundException;
-import com.connect.connector.exception.ImageNotFoundException;
+import com.connect.connector.exception.*;
 import com.connect.connector.mapper.ConnectorImageMapper;
 import com.connect.connector.model.Connector;
 import com.connect.connector.model.ConnectorImage;
 import com.connect.connector.service.ConnectorImageService;
 import com.connect.connector.repository.ConnectorRepository;
-import com.connect.connector.repository.ConnectorSocialMediaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,9 +30,8 @@ import static org.mockito.Mockito.*;
 class ConnectorServiceTest {
 
     @Mock private ConnectorRepository connectorRepository;
-    @Mock private ConnectorSocialMediaRepository connectorSocialMediaRepository;
+    @Mock private ConnectorSocialMediaService connectorSocialMediaService;
     @Mock private ConnectorImageService connectorImageService;
-    @Mock private ConnectorImageMapper connectorImageMapper;
 
     @InjectMocks private ConnectorService connectorService;
 
@@ -60,18 +55,13 @@ class ConnectorServiceTest {
             "Jane,POLAND,KRAKOW,New bio",
             "Mike,ISRAEL,TEL_AVIV,Another bio"
     })
-    void updateMyProfile_shouldUpdate_whenFieldsAreNotNull(String firstName, String country, String city, String bio) {
-        UpdateConnectorRequestDTO dto = new UpdateConnectorRequestDTO();
-        dto.setFirstName(firstName);
-        dto.setCountry(country);
-        dto.setCity(city);
-        dto.setBio(bio);
+    void updateMyProfile_shouldUpdate_whenFieldsAreNotNull(String firstName, String country, String city, String bio) throws InvalidProfileUrlException {
+        UpdateConnectorRequestDTO dto = new UpdateConnectorRequestDTO(firstName, country, city, bio);
 
         when(connectorRepository.findByUserId(userId)).thenReturn(Optional.of(connector));
         when(connectorRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        when(connectorImageService.findByConnectorId(connector.getId())).thenReturn(Collections.emptyList());
-        when(connectorImageMapper.toDtoList(any())).thenReturn(Collections.emptyList());
-        when(connectorSocialMediaRepository.findByConnectorId(connector.getId())).thenReturn(Collections.emptyMap());
+        when(connectorImageService.findByConnectorId(connector.getConnectorId())).thenReturn(Collections.emptyList());
+        when(connectorSocialMediaService.findByConnectorId(connector.getConnectorId())).thenReturn(Collections.emptyList());
 
         ConnectorResponseDTO response = connectorService.updateMyProfile(userId, dto);
 
@@ -87,7 +77,7 @@ class ConnectorServiceTest {
     void updateMyProfile_shouldThrow_whenConnectorNotFound() {
         when(connectorRepository.findByUserId(userId)).thenReturn(Optional.empty());
 
-        UpdateConnectorRequestDTO dto = new UpdateConnectorRequestDTO();
+        UpdateConnectorRequestDTO dto = new UpdateConnectorRequestDTO(null, null, null, null);
 
         ConnectorNotFoundException exception = assertThrows(ConnectorNotFoundException.class,
                 () -> connectorService.updateMyProfile(userId, dto));
@@ -100,19 +90,14 @@ class ConnectorServiceTest {
             "Dina,ISRAEL,JERUSALEM,Hi there"
     })
     void createMyProfile_shouldCreate_whenNoExistingConnector(String firstName, String country, String city, String bio)
-            throws ExistingConnectorException {
+            throws ExistingConnectorException, InvalidProfileUrlException {
 
-        CreateConnectorRequestDTO dto = new CreateConnectorRequestDTO();
-        dto.setFirstName(firstName);
-        dto.setCountry(country);
-        dto.setCity(city);
-        dto.setBio(bio);
+        CreateConnectorRequestDTO dto = new CreateConnectorRequestDTO(firstName, country, city, bio);
 
         when(connectorRepository.existsByUserId(userId)).thenReturn(false);
         when(connectorRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(connectorImageService.findByConnectorId(any())).thenReturn(Collections.emptyList());
-        when(connectorImageMapper.toDtoList(any())).thenReturn(Collections.emptyList());
-        when(connectorSocialMediaRepository.findByConnectorId(any())).thenReturn(Collections.emptyMap());
+        when(connectorSocialMediaService.findByConnectorId(any())).thenReturn(Collections.emptyList());
 
         ConnectorResponseDTO response = connectorService.createMyProfile(userId, dto);
 
@@ -126,7 +111,7 @@ class ConnectorServiceTest {
 
     @Test
     void createMyProfile_shouldThrow_whenConnectorExists() {
-        CreateConnectorRequestDTO dto = new CreateConnectorRequestDTO();
+        CreateConnectorRequestDTO dto = new CreateConnectorRequestDTO(null, null, null, null);
         when(connectorRepository.existsByUserId(userId)).thenReturn(true);
 
         ExistingConnectorException exception = assertThrows(ExistingConnectorException.class,
@@ -137,9 +122,8 @@ class ConnectorServiceTest {
     @Test
     void getPublicProfile_shouldReturnProfile_whenFound() {
         when(connectorRepository.findByUserId(userId)).thenReturn(Optional.of(connector));
-        when(connectorImageService.findByConnectorId(connector.getId())).thenReturn(Collections.emptyList());
-        when(connectorImageMapper.toDtoList(any())).thenReturn(Collections.emptyList());
-        when(connectorSocialMediaRepository.findByConnectorId(connector.getId())).thenReturn(Collections.emptyMap());
+        when(connectorImageService.findByConnectorId(connector.getConnectorId())).thenReturn(Collections.emptyList());
+        when(connectorSocialMediaService.findByConnectorId(connector.getConnectorId())).thenReturn(Collections.emptyList());
 
         ConnectorResponseDTO response = connectorService.getPublicProfile(userId);
 
@@ -164,9 +148,8 @@ class ConnectorServiceTest {
         List<UUID> userIds = List.of(userId);
 
         when(connectorRepository.findAllByUserIdIn(userIds)).thenReturn(connectors);
-        when(connectorImageService.findByConnectorId(connector.getId())).thenReturn(Collections.emptyList());
-        when(connectorImageMapper.toDtoList(any())).thenReturn(Collections.emptyList());
-        when(connectorSocialMediaRepository.findByConnectorId(connector.getId())).thenReturn(Collections.emptyMap());
+        when(connectorImageService.findByConnectorId(connector.getConnectorId())).thenReturn(Collections.emptyList());
+        when(connectorSocialMediaService.findByConnectorId(connector.getConnectorId())).thenReturn(Collections.emptyList());
 
         List<ConnectorResponseDTO> result = connectorService.getPublicProfiles(userIds);
 
@@ -180,7 +163,7 @@ class ConnectorServiceTest {
         ConnectorImageDTO imageDTO = new ConnectorImageDTO("http://image.jpg", 1);
 
         Connector mockedConnector = mock(Connector.class);
-        when(mockedConnector.getId()).thenReturn(connectorId);
+        when(mockedConnector.getConnectorId()).thenReturn(connectorId);
         when(mockedConnector.getUserId()).thenReturn(userId);
         when(mockedConnector.getFirstName()).thenReturn("John");
         when(mockedConnector.getCountry()).thenReturn(Country.POLAND);
@@ -189,10 +172,8 @@ class ConnectorServiceTest {
 
         when(connectorRepository.findByUserId(userId)).thenReturn(Optional.of(mockedConnector));
 
-        List<ConnectorImageDTO> imageDTOs = List.of(imageDTO);
-        when(connectorImageService.findByConnectorId(connectorId)).thenReturn(List.of());
-        when(connectorImageMapper.toDtoList(any())).thenReturn(imageDTOs);
-        when(connectorSocialMediaRepository.findByConnectorId(connectorId)).thenReturn(Map.of());
+        when(connectorImageService.findByConnectorId(connectorId)).thenReturn(List.of(imageDTO));
+        when(connectorSocialMediaService.findByConnectorId(connectorId)).thenReturn(List.of());
 
         ConnectorResponseDTO response = connectorService.addGalleryPhoto(userId, imageDTO);
 
@@ -206,7 +187,7 @@ class ConnectorServiceTest {
 
     @ParameterizedTest
     @ValueSource(ints = {-1, 6, 100})
-    void addGalleryPhoto_invalidOrderIndex_throwsImageIndexOutOfBoundException(int orderIndex) throws ImageNotFoundException, ImageIndexOutOfBoundException {
+    void addGalleryPhoto_invalidOrderIndex_throwsImageIndexOutOfBoundException(int orderIndex) throws ImageNotFoundException, ImageIndexOutOfBoundException, InvalidImageOrderException {
         ConnectorImageDTO imageDTO = new ConnectorImageDTO("http://image.jpg", orderIndex);
         Connector mockedConnector = mock(Connector.class);
 
@@ -223,42 +204,43 @@ class ConnectorServiceTest {
         assertTrue(exception.getMessage().contains("Order index must be between 0 and 5"));
     }
 
-    @Test
-    void deleteGalleryPhoto_validRequest_deletesImageAndReturnsUpdatedResponse() throws Exception {
-        int orderIndexToDelete = 1;
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 2, 3, 4, 5})
+    void deleteGalleryPhoto_validRequest_deletesImageAndReturnsUpdatedResponse(int orderIndexToDelete) throws Exception {
         UUID connectorId = UUID.randomUUID();
 
         Connector mockedConnector = mock(Connector.class);
-        when(mockedConnector.getId()).thenReturn(connectorId);
+        when(mockedConnector.getConnectorId()).thenReturn(connectorId);
         when(mockedConnector.getUserId()).thenReturn(userId);
         when(mockedConnector.getFirstName()).thenReturn("John");
         when(mockedConnector.getCountry()).thenReturn(Country.POLAND);
         when(mockedConnector.getCity()).thenReturn(City.KRAKOW);
         when(mockedConnector.getBio()).thenReturn("Bio");
 
-        when(connectorRepository.findByUserId(userId)).thenReturn(Optional.of(mockedConnector));
-        doNothing().when(connectorImageService).deleteGalleryPhoto(orderIndexToDelete, mockedConnector);
+        List<ConnectorImageDTO> existingImages = new ArrayList<>();
+        for(int i = 0; i < 6; i++) {
+            existingImages.add(new ConnectorImageDTO("http://image" + i + ".jpg", i));
+        }
+        List<ConnectorImageDTO> imagesAfterDelete = existingImages.stream().filter(img -> img.getOrderIndex() != orderIndexToDelete).toList();
 
-        List<ConnectorImageDTO> remainingImages = List.of(
-                new ConnectorImageDTO("http://image1.jpg", 0),
-                new ConnectorImageDTO("http://image3.jpg", 2)
-        );
-        when(connectorImageService.findByConnectorId(connectorId)).thenReturn(List.of());
-        when(connectorImageMapper.toDtoList(any())).thenReturn(remainingImages);
-        when(connectorSocialMediaRepository.findByConnectorId(connectorId)).thenReturn(Map.of());
+        when(connectorRepository.findByUserId(userId)).thenReturn(Optional.of(mockedConnector));
+        when(connectorImageService.deleteGalleryPhoto(orderIndexToDelete, mockedConnector)).thenReturn(mock(ConnectorImageDTO.class));
+
+        when(connectorImageService.findByConnectorId(connectorId)).thenReturn(imagesAfterDelete);
+        when(connectorSocialMediaService.findByConnectorId(connectorId)).thenReturn(List.of());
 
         ConnectorResponseDTO response = connectorService.deleteGalleryPhoto(userId, orderIndexToDelete);
 
         assertNotNull(response);
         assertEquals(userId, response.getUserId());
         assertEquals("John", response.getFirstName());
-        assertEquals(2, response.getGalleryImages().size());
+        assertEquals(5, response.getGalleryImages().size());
         verify(connectorImageService).deleteGalleryPhoto(orderIndexToDelete, mockedConnector);
     }
 
     @ParameterizedTest
     @ValueSource(ints = {-1, 6, 10})
-    void deleteGalleryPhoto_invalidIndex_throwsImageIndexOutOfBoundException(int orderIndexToDelete) throws ImageIndexOutOfBoundException {
+    void deleteGalleryPhoto_invalidIndex_throwsImageIndexOutOfBoundException(int orderIndexToDelete) throws ImageIndexOutOfBoundException, ImageNotFoundException, ProfilePictureRequiredException {
         Connector mockedConnector = mock(Connector.class);
         when(connectorRepository.findByUserId(userId)).thenReturn(Optional.of(mockedConnector));
 

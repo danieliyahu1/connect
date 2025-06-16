@@ -1,13 +1,18 @@
 package com.connect.connector.controller;
 
+import com.connect.connector.dto.ConnectorSocialMediaDTO;
 import com.connect.connector.dto.response.ConnectorResponseDTO;
 import com.connect.connector.dto.request.CreateConnectorRequestDTO;
 import com.connect.connector.dto.request.UpdateConnectorRequestDTO;
 import com.connect.connector.dto.ConnectorImageDTO;
-import com.connect.connector.exception.ImageIndexOutOfBoundException;
+import com.connect.connector.enums.SocialMediaPlatform;
+import com.connect.connector.exception.*;
 import com.connect.connector.service.ConnectorService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -18,7 +23,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -26,6 +30,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(value = ConnectorController.class)
@@ -46,16 +51,13 @@ class ConnectorControllerTest {
     void updateMyProfile_returnsUpdatedProfile() throws Exception {
         UUID userId = UUID.randomUUID();
 
-        UpdateConnectorRequestDTO updateRequest = new UpdateConnectorRequestDTO();
-        updateRequest.setFirstName("Updated Name");
-        updateRequest.setBio("Updated bio");
-        updateRequest.setSocialMediaLinks(Map.of("INSTAGRAM", "instagram_url"));
+        UpdateConnectorRequestDTO updateRequest = new UpdateConnectorRequestDTO("Updated Name", "Updated Country", "Updated City", "Updated bio");
 
         ConnectorResponseDTO responseDTO = ConnectorResponseDTO.builder()
                 .userId(userId)
                 .firstName("Updated Name")
                 .bio("Updated bio")
-                .socialMediaLinks(Map.of("INSTAGRAM", "instagram_handle"))
+                .socialMediaLinks(List.of(new ConnectorSocialMediaDTO(SocialMediaPlatform.INSTAGRAM, "instagram_handle")))
                 .build();
 
         when(connectorService.updateMyProfile(userId, updateRequest)).thenReturn(responseDTO);
@@ -70,7 +72,26 @@ class ConnectorControllerTest {
                 .andExpect(jsonPath("$.userId").value(userId.toString()))
                 .andExpect(jsonPath("$.firstName").value("Updated Name"))
                 .andExpect(jsonPath("$.bio").value("Updated bio"))
-                .andExpect(jsonPath("$.socialMediaLinks.INSTAGRAM").value("instagram_handle"));
+                .andExpect(jsonPath("$.socialMediaLinks[0].platform").value("INSTAGRAM"))
+                .andExpect(jsonPath("$.socialMediaLinks[0].profileUrl").value("instagram_handle"));
+        verify(connectorService).updateMyProfile(userId, updateRequest);
+    }
+
+    @Test
+    void updateMyProfile_withInvalidProfileUrl_returnsBadRequest() throws Exception {
+        UUID userId = UUID.randomUUID();
+
+        UpdateConnectorRequestDTO updateRequest = new UpdateConnectorRequestDTO("Invalid User", "Country", "City", "Bio with invalid URL");
+
+        when(connectorService.updateMyProfile(userId, updateRequest)).thenThrow(InvalidProfileUrlException.class);
+
+        Authentication auth = new TestingAuthenticationToken(userId.toString(), null);
+
+        mockMvc.perform(put(URIPREFIX + "/me")
+                        .principal(auth)
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isBadRequest());
 
         verify(connectorService).updateMyProfile(userId, updateRequest);
     }
@@ -79,15 +100,13 @@ class ConnectorControllerTest {
     void createMyProfile_returnsCreatedProfile() throws Exception {
         UUID userId = UUID.randomUUID();
 
-        CreateConnectorRequestDTO createRequest = new CreateConnectorRequestDTO();
-        createRequest.setFirstName("New User");
-        createRequest.setBio("Bio for new user");
+        CreateConnectorRequestDTO createRequest = new CreateConnectorRequestDTO("New User", "Country", "City", "Bio for new user");
 
         ConnectorResponseDTO createdResponse = ConnectorResponseDTO.builder()
                 .userId(userId)
                 .firstName("New User")
                 .bio("Bio for new user")
-                .socialMediaLinks(Collections.emptyMap())
+                .socialMediaLinks(Collections.emptyList())
                 .build();
 
         when(connectorService.createMyProfile(userId, createRequest)).thenReturn(createdResponse);
@@ -107,6 +126,25 @@ class ConnectorControllerTest {
     }
 
     @Test
+    void createMyProfile_withExistingProfile_returnsConflict() throws Exception {
+        UUID userId = UUID.randomUUID();
+
+        CreateConnectorRequestDTO createRequest = new CreateConnectorRequestDTO("Existing User", "Country", "City", "Bio for existing user");
+
+        when(connectorService.createMyProfile(userId, createRequest)).thenThrow(ExistingConnectorException.class);
+
+        Authentication auth = new TestingAuthenticationToken(userId.toString(), null);
+
+        mockMvc.perform(post(URIPREFIX + "/me")
+                        .principal(auth)
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(createRequest)))
+                .andExpect(status().isConflict());
+
+        verify(connectorService).createMyProfile(eq(userId), any(CreateConnectorRequestDTO.class));
+    }
+
+    @Test
     void addGalleryPhoto_returnsUpdatedProfile() throws Exception {
         UUID userId = UUID.randomUUID();
 
@@ -116,7 +154,7 @@ class ConnectorControllerTest {
                 .userId(userId)
                 .firstName("User")
                 .bio("Bio")
-                .socialMediaLinks(Collections.emptyMap())
+                .socialMediaLinks(Collections.emptyList())
                 .build();
 
         when(connectorService.addGalleryPhoto(eq(userId), any(ConnectorImageDTO.class))).thenReturn(responseDTO);
@@ -154,6 +192,50 @@ class ConnectorControllerTest {
     }
 
     @Test
+    void addGalleryPhoto_notNextAvailableOrderIndex_returnsBadRequest() throws Exception {
+        UUID userId = UUID.randomUUID();
+
+        ConnectorImageDTO connectorImageDTO = new ConnectorImageDTO("Sample Photo", 10); // Invalid order index
+
+        when(connectorService.addGalleryPhoto(eq(userId), any(ConnectorImageDTO.class)))
+                .thenThrow(new InvalidImageOrderException("Order index must be between 0 and 5"));
+
+        Authentication auth = new TestingAuthenticationToken(userId.toString(), null);
+
+        mockMvc.perform(post(URIPREFIX + "/me/gallery")
+                        .principal(auth)
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(connectorImageDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Invalid Image Order"))
+                .andExpect(jsonPath("$.message").value("Order index must be between 0 and 5"));
+
+        verify(connectorService).addGalleryPhoto(eq(userId), any(ConnectorImageDTO.class));
+    }
+
+    @Test
+    void addGalleryPhoto_withImageNotFound_returnsNotFound() throws Exception {
+        UUID userId = UUID.randomUUID();
+
+        ConnectorImageDTO connectorImageDTO = new ConnectorImageDTO("Non-existent Photo", 0);
+
+        when(connectorService.addGalleryPhoto(eq(userId), any(ConnectorImageDTO.class)))
+                .thenThrow(new ImageNotFoundException("Image not found"));
+
+        Authentication auth = new TestingAuthenticationToken(userId.toString(), null);
+
+        mockMvc.perform(post(URIPREFIX + "/me/gallery")
+                        .principal(auth)
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(connectorImageDTO)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("Image Not Found"))
+                .andExpect(jsonPath("$.message").value("Image not found"));
+
+        verify(connectorService).addGalleryPhoto(eq(userId), any(ConnectorImageDTO.class));
+    }
+
+    @Test
     void getPublicProfile_returnsProfile() throws Exception {
         UUID userId = UUID.randomUUID();
 
@@ -161,7 +243,7 @@ class ConnectorControllerTest {
                 .userId(userId)
                 .firstName("Public User")
                 .bio("Public bio")
-                .socialMediaLinks(Collections.emptyMap())
+                .socialMediaLinks(Collections.emptyList())
                 .build();
 
         when(connectorService.getPublicProfile(userId)).thenReturn(responseDTO);
@@ -186,19 +268,19 @@ class ConnectorControllerTest {
                 .userId(userId1)
                 .firstName("User1")
                 .bio("Bio1")
-                .socialMediaLinks(Collections.emptyMap())
+                .socialMediaLinks(Collections.emptyList())
                 .build();
 
         ConnectorResponseDTO profile2 = ConnectorResponseDTO.builder()
                 .userId(userId2)
                 .firstName("User2")
                 .bio("Bio2")
-                .socialMediaLinks(Collections.emptyMap())
+                .socialMediaLinks(Collections.emptyList())
                 .build();
 
         when(connectorService.getPublicProfiles(userIds)).thenReturn(List.of(profile1, profile2));
 
-        mockMvc.perform(post(URIPREFIX + "/internal/public-batch")
+        mockMvc.perform(post(URIPREFIX + "/internal/batch")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(userIds)))
                 .andExpect(status().isOk())
@@ -220,7 +302,7 @@ class ConnectorControllerTest {
                 .firstName("John")
                 .bio("Updated bio")
                 .galleryImages(Collections.emptyList())
-                .socialMediaLinks(Map.of())
+                .socialMediaLinks(List.of())
                 .build();
 
         when(connectorService.deleteGalleryPhoto(userId, orderIndex)).thenReturn(responseDTO);
@@ -255,5 +337,212 @@ class ConnectorControllerTest {
                 .andExpect(jsonPath("$.error").value("Image Index Out of Bound"))
                 .andExpect(jsonPath("$.message").value("Order index must be between 0 and 5"));
         verify(connectorService).deleteGalleryPhoto(userId, invalidIndex);
+    }
+
+    @Test
+    void deleteGalleryPhoto_shouldReturnNotFound_whenImageNotFound() throws Exception {
+        UUID userId = UUID.randomUUID();
+        int orderIndex = 1;
+
+        Authentication auth = new TestingAuthenticationToken(userId.toString(), null);
+
+        when(connectorService.deleteGalleryPhoto(userId, orderIndex))
+                .thenThrow(new ImageNotFoundException("Image not found"));
+
+        mockMvc.perform(delete(URIPREFIX + "/me/gallery/{orderIndex}", orderIndex)
+                        .principal(auth))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("Image Not Found"))
+                .andExpect(jsonPath("$.message").value("Image not found"));
+        verify(connectorService).deleteGalleryPhoto(userId, orderIndex);
+    }
+
+    @Test
+    void deleteGalleryPhoto_shouldReturnBadRequest_whenProfilePictureRequired() throws Exception {
+        UUID userId = UUID.randomUUID();
+        int orderIndex = 0; // Assuming 0 is the profile picture index
+
+        Authentication auth = new TestingAuthenticationToken(userId.toString(), null);
+
+        when(connectorService.deleteGalleryPhoto(userId, orderIndex))
+                .thenThrow(new ProfilePictureRequiredException("Profile picture cannot be deleted"));
+
+        mockMvc.perform(delete(URIPREFIX + "/me/gallery/{orderIndex}", orderIndex)
+                        .principal(auth))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Profile Picture Required"))
+                .andExpect(jsonPath("$.message").value("Profile picture cannot be deleted"));
+        verify(connectorService).deleteGalleryPhoto(userId, orderIndex);
+    }
+
+    @Test
+    void addSocialMediaPlatformLink_shouldReturnCreatedLink() throws Exception {
+        UUID userId = UUID.randomUUID();
+        SocialMediaPlatform platform = SocialMediaPlatform.INSTAGRAM;
+        String profileUrl = "https://instagram.com/user";
+
+        ConnectorSocialMediaDTO connectorSocialMediaDTO = new ConnectorSocialMediaDTO(platform, profileUrl);
+        ConnectorResponseDTO responseDTO = ConnectorResponseDTO.builder()
+                .userId(userId)
+                .firstName("John")
+                .bio("Updated bio")
+                .galleryImages(Collections.emptyList())
+                .socialMediaLinks(List.of(connectorSocialMediaDTO))
+                .build();
+        when(connectorService.addSocialMediaPlatformLink(userId, connectorSocialMediaDTO)).thenReturn(responseDTO);
+
+        Authentication auth = new TestingAuthenticationToken(userId.toString(), null);
+
+        mockMvc.perform(post(URIPREFIX + "/me/social-media")
+                        .principal(auth)
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(connectorSocialMediaDTO)))
+                .andDo(print())
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.socialMediaLinks[0].platform").value(platform.name()))
+                .andExpect(jsonPath("$.socialMediaLinks[0].profileUrl").value(profileUrl));
+
+        verify(connectorService).addSocialMediaPlatformLink(userId, connectorSocialMediaDTO);
+    }
+
+    @Test
+    void addSocialMediaPlatformLink_shouldReturnBadRequest_whenInvalidUrl() throws Exception {
+        UUID userId = UUID.randomUUID();
+        SocialMediaPlatform platform = SocialMediaPlatform.INSTAGRAM;
+        String invalidProfileUrl = "invalid_url";
+
+        ConnectorSocialMediaDTO connectorSocialMediaDTO = new ConnectorSocialMediaDTO(platform, invalidProfileUrl);
+        when(connectorService.addSocialMediaPlatformLink(userId, connectorSocialMediaDTO))
+                .thenThrow(new InvalidProfileUrlException("Invalid profile URL"));
+
+        Authentication auth = new TestingAuthenticationToken(userId.toString(), null);
+
+        mockMvc.perform(post(URIPREFIX + "/me/social-media")
+                        .principal(auth)
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(connectorSocialMediaDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Invalid Profile URL"))
+                .andExpect(jsonPath("$.message").value("Invalid profile URL"));
+
+        verify(connectorService).addSocialMediaPlatformLink(userId, connectorSocialMediaDTO);
+    }
+
+    @Test
+    void updateSocialMediaPlatformLink_shouldReturnUpdatedLink() throws Exception {
+        UUID userId = UUID.randomUUID();
+        String platform = "INSTAGRAM";
+        String profileUrl = "https://instagram.com/updated_user";
+        ConnectorResponseDTO responseDTO = ConnectorResponseDTO.builder()
+                .userId(userId)
+                .firstName("John")
+                .bio("Updated bio")
+                .galleryImages(Collections.emptyList())
+                .socialMediaLinks(List.of(new ConnectorSocialMediaDTO(SocialMediaPlatform.INSTAGRAM, profileUrl)))
+                .build();
+
+        when(connectorService.updateSocialMediaPlatformLink(userId, platform, profileUrl))
+                .thenReturn(responseDTO);
+
+        Authentication auth = new TestingAuthenticationToken(userId.toString(), null);
+
+        mockMvc.perform(put(URIPREFIX + "/me/social-media/{platform}", platform)
+                        .principal(auth)
+                        .contentType("text/plain")
+                        .content(profileUrl))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.socialMediaLinks[0].platform").value(platform))
+                .andExpect(jsonPath("$.socialMediaLinks[0].profileUrl").value(profileUrl));
+
+        verify(connectorService).updateSocialMediaPlatformLink(userId, platform, profileUrl);
+    }
+
+    @Test
+    void updateSocialMediaPlatformLink_shouldReturnBadRequest_whenInvalidUrl() throws Exception {
+        UUID userId = UUID.randomUUID();
+        String platform = "INSTAGRAM";
+        String invalidProfileUrl = "invalid_url";
+
+        when(connectorService.updateSocialMediaPlatformLink(userId, platform, invalidProfileUrl))
+                .thenThrow(new InvalidProfileUrlException("Invalid profile URL"));
+
+        Authentication auth = new TestingAuthenticationToken(userId.toString(), null);
+
+        mockMvc.perform(put(URIPREFIX + "/me/social-media/{platform}", platform)
+                        .principal(auth)
+                        .contentType("text/plain")
+                        .content(invalidProfileUrl))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Invalid Profile URL"))
+                .andExpect(jsonPath("$.message").value("Invalid profile URL"));
+
+        verify(connectorService).updateSocialMediaPlatformLink(userId, platform, invalidProfileUrl);
+    }
+
+    @Test
+    void updateSocialMediaPlatformLink_shouldReturnNotFound_whenPlatformNotFound() throws Exception {
+        UUID userId = UUID.randomUUID();
+        String platform = "INSTAGRAM";
+        String profileUrl = "https://instagram.com/updated_user";
+
+        when(connectorService.updateSocialMediaPlatformLink(userId, platform, profileUrl))
+                .thenThrow(new ConnectorSocialMediaNotFoundException("Social media platform not found"));
+
+        Authentication auth = new TestingAuthenticationToken(userId.toString(), null);
+
+        mockMvc.perform(put(URIPREFIX + "/me/social-media/{platform}", platform)
+                        .principal(auth)
+                        .contentType("text/plain")
+                        .content(profileUrl))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("Connector Social Media Not Found"))
+                .andExpect(jsonPath("$.message").value("Social media platform not found"));
+
+        verify(connectorService).updateSocialMediaPlatformLink(userId, platform, profileUrl);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "INSTAGRAM", "FACEBOOK", "LINKEDIN", "TIKTOK" })
+    void deleteSocialMediaPlatformLink_shouldReturnDeletedLink(String platform) throws Exception {
+        UUID userId = UUID.randomUUID();
+        ConnectorResponseDTO responseDTO = ConnectorResponseDTO.builder()
+                .userId(userId)
+                .firstName("John")
+                .bio("Updated bio")
+                .galleryImages(Collections.emptyList())
+                .socialMediaLinks(List.of(new ConnectorSocialMediaDTO(SocialMediaPlatform.valueOf(platform), null)))
+                .build();
+        when(connectorService.deleteSocialMediaPlatformLink(userId, platform))
+                .thenReturn(responseDTO);
+
+        Authentication auth = new TestingAuthenticationToken(userId.toString(), null);
+
+        mockMvc.perform(delete(URIPREFIX + "/me/social-media/{platform}", platform)
+                        .principal(auth))
+                .andExpect(status().isOk())
+
+                .andExpect(jsonPath("$.socialMediaLinks[0].platform").value(platform))
+                .andExpect(jsonPath("$.profileUrl").doesNotExist());
+
+        verify(connectorService).deleteSocialMediaPlatformLink(userId, platform);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "GITHUB", "TWITTER" })
+    void deleteSocialMediaPlatformLink_shouldReturnNotFound(String platform) throws Exception {
+        UUID userId = UUID.randomUUID();
+
+        when(connectorService.deleteSocialMediaPlatformLink(userId, platform))
+                .thenThrow(new ConnectorSocialMediaNotFoundException("Social media platform not found"));
+
+        Authentication auth = new TestingAuthenticationToken(userId.toString(), null);
+
+        mockMvc.perform(delete(URIPREFIX + "/me/social-media/{platform}", platform)
+                        .principal(auth))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("Connector Social Media Not Found"))
+                .andExpect(jsonPath("$.message").value("Social media platform not found"));
+
+        verify(connectorService).deleteSocialMediaPlatformLink(userId, platform);
     }
 }

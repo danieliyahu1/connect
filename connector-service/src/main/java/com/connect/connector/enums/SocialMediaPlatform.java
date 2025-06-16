@@ -1,6 +1,6 @@
 package com.connect.connector.enums;
 
-public enum SocialMedia {
+public enum SocialMediaPlatform {
     TIKTOK,
     FACEBOOK,
     INSTAGRAM,

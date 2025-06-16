@@ -1,6 +1,7 @@
 package com.connect.connector.service;
 
 import com.connect.connector.dto.ConnectorImageDTO;
+import com.connect.connector.dto.ConnectorSocialMediaDTO;
 import com.connect.connector.dto.request.CreateConnectorRequestDTO;
 import com.connect.connector.dto.request.UpdateConnectorRequestDTO;
 import com.connect.connector.dto.response.ConnectorResponseDTO;
@@ -9,15 +10,11 @@ import com.connect.connector.enums.Country;
 import com.connect.connector.exception.*;
 import com.connect.connector.mapper.ConnectorImageMapper;
 import com.connect.connector.model.Connector;
-import com.connect.connector.model.ConnectorImage;
-import com.connect.connector.repository.ConnectorImageRepository;
 import com.connect.connector.repository.ConnectorRepository;
-import com.connect.connector.repository.ConnectorSocialMediaRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -26,11 +23,10 @@ import java.util.stream.Collectors;
 public class ConnectorService {
 
     private final ConnectorRepository connectorRepository;
-    private final ConnectorSocialMediaRepository connectorSocialMediaRepository;
+    private final ConnectorSocialMediaService connectorSocialMediaService;
     private final ConnectorImageService connectorImageService;
-    private final ConnectorImageMapper connectorImageMapper;
 
-    public ConnectorResponseDTO updateMyProfile(UUID userId, @Valid UpdateConnectorRequestDTO updateConnectorRequestDTO) {
+    public ConnectorResponseDTO updateMyProfile(UUID userId, @Valid UpdateConnectorRequestDTO updateConnectorRequestDTO) throws InvalidProfileUrlException {
         Connector connector = findConnectorByUserId(userId);
 
         if (updateConnectorRequestDTO.getFirstName() != null) {
@@ -60,13 +56,12 @@ public class ConnectorService {
                 .city(City.valueOf(createConnectorRequestDTO.getCity()))
                 .bio(createConnectorRequestDTO.getBio())
                 .build();
-
         Connector savedConnector = connectorRepository.save(connector);
 
         return buildConnectorResponse(savedConnector);
     }
 
-    public ConnectorResponseDTO addGalleryPhoto(UUID userId, ConnectorImageDTO connectorImageDTO) throws ImageIndexOutOfBoundException, ImageNotFoundException {
+    public ConnectorResponseDTO addGalleryPhoto(UUID userId, ConnectorImageDTO connectorImageDTO) throws ImageIndexOutOfBoundException, ImageNotFoundException, InvalidImageOrderException {
         Connector connector = findConnectorByUserId(userId);
         connectorImageService.addGalleryPhoto(connectorImageDTO, connector);
         return buildConnectorResponse(connector);
@@ -85,9 +80,27 @@ public class ConnectorService {
                 .toList();
     }
 
-    public ConnectorResponseDTO deleteGalleryPhoto(UUID userId, int orderIndex) throws ImageIndexOutOfBoundException {
+    public ConnectorResponseDTO deleteGalleryPhoto(UUID userId, int orderIndex) throws ImageIndexOutOfBoundException, ImageNotFoundException, ProfilePictureRequiredException {
         Connector connector = findConnectorByUserId(userId);
         connectorImageService.deleteGalleryPhoto(orderIndex, connector);
+        return buildConnectorResponse(connector);
+    }
+
+    public ConnectorResponseDTO addSocialMediaPlatformLink(UUID userIdFromAuth, @Valid ConnectorSocialMediaDTO dto) throws InvalidProfileUrlException {
+        Connector connector = findConnectorByUserId(userIdFromAuth);
+        connectorSocialMediaService.addSocialMediaPlatformLink(connector, dto);
+        return buildConnectorResponse(connector);
+    }
+
+    public ConnectorResponseDTO updateSocialMediaPlatformLink(UUID userIdFromAuth, String platform, String profileUrl) throws InvalidProfileUrlException, ConnectorSocialMediaNotFoundException {
+        Connector connector = findConnectorByUserId(userIdFromAuth);
+        connectorSocialMediaService.updateSocialMediaPlatformLink(findConnectorByUserId(userIdFromAuth), platform, profileUrl);
+        return buildConnectorResponse(connector);
+    }
+
+    public ConnectorResponseDTO deleteSocialMediaPlatformLink(UUID userIdFromAuth, String platform) throws ConnectorSocialMediaNotFoundException {
+        Connector connector = findConnectorByUserId(userIdFromAuth);
+        connectorSocialMediaService.deleteSocialMediaPlatformLink(findConnectorByUserId(userIdFromAuth), platform);
         return buildConnectorResponse(connector);
     }
 
@@ -109,11 +122,14 @@ public class ConnectorService {
                 .country(connector.getCountry().name())
                 .city(connector.getCity().name())
                 .bio(connector.getBio())
-                .galleryImages(connectorImageMapper.toDtoList(connectorImageService.findByConnectorId(connector.getId())))
-                .socialMediaLinks(connectorSocialMediaRepository.findByConnectorId(connector.getId()).entrySet()
+                .galleryImages(connectorImageService.findByConnectorId(connector.getConnectorId()))
+                .socialMediaLinks(connectorSocialMediaService.findByConnectorId(connector.getConnectorId())
                         .stream()
-                        .collect(Collectors.toMap(entry -> entry.getKey().name(),
-                                Map.Entry::getValue)))
+                        .map(socialMedia -> ConnectorSocialMediaDTO.builder()
+                                .platform(socialMedia.getPlatform())
+                                .profileUrl(socialMedia.getProfileUrl())
+                                .build())
+                        .collect(Collectors.toList()))
                 .build();
     }
 }

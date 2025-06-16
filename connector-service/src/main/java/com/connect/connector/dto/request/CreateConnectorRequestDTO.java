@@ -4,14 +4,14 @@ import com.connect.connector.dto.ConnectorImageDTO;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 import java.util.Map;
 
-@Data
-@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode
+@Getter
 public class CreateConnectorRequestDTO {
     @NotBlank
     @Size(min = 2, max = 20)
@@ -28,9 +28,4 @@ public class CreateConnectorRequestDTO {
     @NotBlank
     @Size(min = 15)
     private String bio;
-
-    @NotNull
-    private Map<String, String> socialMediaLinks; // <platform, profileUrl>
-
-    private List<ConnectorImageDTO> gallery; // optional
 }

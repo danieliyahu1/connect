@@ -51,4 +51,28 @@ public class ConnectorExceptionHandler {
             errorResponse.put("message", ex.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
+
+        @ExceptionHandler(InvalidProfileUrlException.class)
+        public ResponseEntity<Map<String, String>> handleInvalidProfileUrlException(InvalidProfileUrlException ex) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Invalid Profile URL");
+            errorResponse.put("message", ex.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+
+        @ExceptionHandler(ConnectorSocialMediaNotFoundException.class)
+        public ResponseEntity<Map<String, String>> handleConnectorSocialMediaNotFoundException(ConnectorSocialMediaNotFoundException ex) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Connector Social Media Not Found");
+            errorResponse.put("message", ex.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        }
+
+        @ExceptionHandler(InvalidImageOrderException.class)
+        public ResponseEntity<Map<String, String>> handleInvalidImageOrderException(InvalidImageOrderException ex) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Invalid Image Order");
+            errorResponse.put("message", ex.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
 }
