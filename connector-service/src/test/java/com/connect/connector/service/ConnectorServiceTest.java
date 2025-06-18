@@ -60,8 +60,8 @@ class ConnectorServiceTest {
 
         when(connectorRepository.findByUserId(userId)).thenReturn(Optional.of(connector));
         when(connectorRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        when(connectorImageService.findByConnectorId(connector.getConnectorId())).thenReturn(Collections.emptyList());
-        when(connectorSocialMediaService.findByConnectorId(connector.getConnectorId())).thenReturn(Collections.emptyList());
+        when(connectorImageService.findByConnector_ConnectorId(connector.getConnectorId())).thenReturn(Collections.emptyList());
+        when(connectorSocialMediaService.findByConnector_ConnectorId(connector.getConnectorId())).thenReturn(Collections.emptyList());
 
         ConnectorResponseDTO response = connectorService.updateMyProfile(userId, dto);
 
@@ -96,8 +96,8 @@ class ConnectorServiceTest {
 
         when(connectorRepository.existsByUserId(userId)).thenReturn(false);
         when(connectorRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        when(connectorImageService.findByConnectorId(any())).thenReturn(Collections.emptyList());
-        when(connectorSocialMediaService.findByConnectorId(any())).thenReturn(Collections.emptyList());
+        when(connectorImageService.findByConnector_ConnectorId(any())).thenReturn(Collections.emptyList());
+        when(connectorSocialMediaService.findByConnector_ConnectorId(any())).thenReturn(Collections.emptyList());
 
         ConnectorResponseDTO response = connectorService.createMyProfile(userId, dto);
 
@@ -122,8 +122,8 @@ class ConnectorServiceTest {
     @Test
     void getPublicProfile_shouldReturnProfile_whenFound() {
         when(connectorRepository.findByUserId(userId)).thenReturn(Optional.of(connector));
-        when(connectorImageService.findByConnectorId(connector.getConnectorId())).thenReturn(Collections.emptyList());
-        when(connectorSocialMediaService.findByConnectorId(connector.getConnectorId())).thenReturn(Collections.emptyList());
+        when(connectorImageService.findByConnector_ConnectorId(connector.getConnectorId())).thenReturn(Collections.emptyList());
+        when(connectorSocialMediaService.findByConnector_ConnectorId(connector.getConnectorId())).thenReturn(Collections.emptyList());
 
         ConnectorResponseDTO response = connectorService.getPublicProfile(userId);
 
@@ -148,8 +148,8 @@ class ConnectorServiceTest {
         List<UUID> userIds = List.of(userId);
 
         when(connectorRepository.findAllByUserIdIn(userIds)).thenReturn(connectors);
-        when(connectorImageService.findByConnectorId(connector.getConnectorId())).thenReturn(Collections.emptyList());
-        when(connectorSocialMediaService.findByConnectorId(connector.getConnectorId())).thenReturn(Collections.emptyList());
+        when(connectorImageService.findByConnector_ConnectorId(connector.getConnectorId())).thenReturn(Collections.emptyList());
+        when(connectorSocialMediaService.findByConnector_ConnectorId(connector.getConnectorId())).thenReturn(Collections.emptyList());
 
         List<ConnectorResponseDTO> result = connectorService.getPublicProfiles(userIds);
 
@@ -172,8 +172,8 @@ class ConnectorServiceTest {
 
         when(connectorRepository.findByUserId(userId)).thenReturn(Optional.of(mockedConnector));
 
-        when(connectorImageService.findByConnectorId(connectorId)).thenReturn(List.of(imageDTO));
-        when(connectorSocialMediaService.findByConnectorId(connectorId)).thenReturn(List.of());
+        when(connectorImageService.findByConnector_ConnectorId(connectorId)).thenReturn(List.of(imageDTO));
+        when(connectorSocialMediaService.findByConnector_ConnectorId(connectorId)).thenReturn(List.of());
 
         ConnectorResponseDTO response = connectorService.addGalleryPhoto(userId, imageDTO);
 
@@ -226,8 +226,8 @@ class ConnectorServiceTest {
         when(connectorRepository.findByUserId(userId)).thenReturn(Optional.of(mockedConnector));
         when(connectorImageService.deleteGalleryPhoto(orderIndexToDelete, mockedConnector)).thenReturn(mock(ConnectorImageDTO.class));
 
-        when(connectorImageService.findByConnectorId(connectorId)).thenReturn(imagesAfterDelete);
-        when(connectorSocialMediaService.findByConnectorId(connectorId)).thenReturn(List.of());
+        when(connectorImageService.findByConnector_ConnectorId(connectorId)).thenReturn(imagesAfterDelete);
+        when(connectorSocialMediaService.findByConnector_ConnectorId(connectorId)).thenReturn(List.of());
 
         ConnectorResponseDTO response = connectorService.deleteGalleryPhoto(userId, orderIndexToDelete);
 

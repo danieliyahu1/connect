@@ -1,0 +1,22 @@
+server:
+  port: 4003
+
+spring:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: connector-service-route
+              uri: http://connector-service:4001
+              predicates:
+                - Path=/api/connectors/**
+              filters:
+                - StripPrefix=1
+
+            - id: auth-service-route
+              uri: http://auth-service:4000
+              predicates:
+                - Path=/auth/**
+              filters:
+                - RewritePath=/auth/(?<path>.*), /auth/public/${path}

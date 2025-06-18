@@ -14,5 +14,5 @@ public interface ConnectorImageRepository  extends JpaRepository<ConnectorImage,
     List<ConnectorImage> findByConnector(Connector connector);
 
     // OR if you want to search by the connector's ID directly:
-    List<ConnectorImage> findByConnector_Id(UUID connectorId);
+    List<ConnectorImage> findByConnector_ConnectorId(UUID connectorId);
 }

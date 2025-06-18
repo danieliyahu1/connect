@@ -49,7 +49,7 @@ class ConnectorImageServiceTest {
 
         Connector mockedConnector = mock(Connector.class);
 
-        when(connectorImageRepository.findByConnector_Id(mockedConnector.getConnectorId())).thenReturn(imageDTOs);
+        when(connectorImageRepository.findByConnector_ConnectorId(mockedConnector.getConnectorId())).thenReturn(imageDTOs);
         when(connectorImageMapper.toDto(any(ConnectorImage.class))).thenReturn(imageDTO1);
         when(connectorImageRepository.save(any(ConnectorImage.class))).thenReturn(image1);
         assertDoesNotThrow(() -> connectorImageService.addGalleryPhoto(imageDTO1, mockedConnector));
@@ -78,7 +78,7 @@ class ConnectorImageServiceTest {
         existingImages.add(new ConnectorImage(mockedConnector, "http://image2.jpg", 1));
         existingImages.add(new ConnectorImage(mockedConnector, "http://image3.jpg", 2));
 
-        when(connectorImageRepository.findByConnector_Id(mockedConnector.getConnectorId())).thenReturn(existingImages);
+        when(connectorImageRepository.findByConnector_ConnectorId(mockedConnector.getConnectorId())).thenReturn(existingImages);
 
         InvalidImageOrderException exception = assertThrows(InvalidImageOrderException.class,
                 () -> connectorImageService.addGalleryPhoto(imageDTO, mockedConnector));
@@ -104,7 +104,7 @@ class ConnectorImageServiceTest {
 
 
         List<ConnectorImage> imagesAfterDeletion = new ArrayList<>(imagesBeforeDeletion.stream().filter(image -> image.getOrderIndex() != orderIndexToDelete).toList());
-        when(connectorImageRepository.findByConnector_Id(userId))
+        when(connectorImageRepository.findByConnector_ConnectorId(userId))
                 .thenReturn(imagesBeforeDeletion)
                 .thenReturn(imagesAfterDeletion)
                 .thenReturn(imagesAfterDeletion);
@@ -134,7 +134,7 @@ class ConnectorImageServiceTest {
 
         ConnectorImage image0 = ConnectorImage.builder().orderIndex(0).connector(mockedConnector).build();
         List<ConnectorImage> imagesBeforeDeletion = new ArrayList<>(List.of(image0));
-        when(connectorImageRepository.findByConnector_Id(userId))
+        when(connectorImageRepository.findByConnector_ConnectorId(userId))
                 .thenReturn(imagesBeforeDeletion);
 
         assertThrows(ProfilePictureRequiredException.class, () -> connectorImageService.deleteGalleryPhoto(orderIndexToDelete, mockedConnector));
@@ -152,7 +152,7 @@ class ConnectorImageServiceTest {
             imagesBeforeDeletion.add(new ConnectorImage(mockedConnector, "http://image" + i + ".jpg", i));
         }
         imagesBeforeDeletion.remove(orderIndexToDelete);
-        when(connectorImageRepository.findByConnector_Id(userId)).thenReturn(imagesBeforeDeletion);
+        when(connectorImageRepository.findByConnector_ConnectorId(userId)).thenReturn(imagesBeforeDeletion);
 
         ImageNotFoundException exception = assertThrows(ImageNotFoundException.class,
                 () -> connectorImageService.deleteGalleryPhoto(orderIndexToDelete, mockedConnector));
@@ -162,9 +162,9 @@ class ConnectorImageServiceTest {
     @Test
     void findByConnectorId_shouldReturnEmptyList_whenNoImagesFound() {
         UUID connectorId = UUID.randomUUID();
-        when(connectorImageRepository.findByConnector_Id(connectorId)).thenReturn(Collections.emptyList());
+        when(connectorImageRepository.findByConnector_ConnectorId(connectorId)).thenReturn(Collections.emptyList());
 
-        List<ConnectorImageDTO> result = connectorImageService.findByConnectorId(connectorId);
+        List<ConnectorImageDTO> result = connectorImageService.findByConnector_ConnectorId(connectorId);
 
         assertTrue(result.isEmpty());
     }

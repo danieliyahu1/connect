@@ -36,8 +36,8 @@ public class ConnectorImageService {
         return connectorImageMapper.toDto(deletedConnectorImage);
     }
 
-    public List<ConnectorImageDTO> findByConnectorId(UUID id) {
-        return connectorImageRepository.findByConnector_Id(id).stream()
+    public List<ConnectorImageDTO> findByConnector_ConnectorId(UUID id) {
+        return connectorImageRepository.findByConnector_ConnectorId(id).stream()
                 .map(connectorImageMapper::toDto)
                 .toList();
     }
@@ -68,7 +68,7 @@ public class ConnectorImageService {
     }
 
     private List<ConnectorImage> getConnectorImages(UUID connectorId) {
-        return connectorImageRepository.findByConnector_Id(connectorId);
+        return connectorImageRepository.findByConnector_ConnectorId(connectorId);
     }
 
     private void validateIsNextAvailableIndex(List<ConnectorImage> images, int orderIndex) throws InvalidImageOrderException {

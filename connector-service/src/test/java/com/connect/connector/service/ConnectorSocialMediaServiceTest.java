@@ -86,9 +86,9 @@ class ConnectorSocialMediaServiceTest {
         ConnectorSocialMedia socialMedia2 = new ConnectorSocialMedia(mockConnector, SocialMediaPlatform.FACEBOOK, "https://facebook.com/user");
         when(mockConnector.getConnectorId()).thenReturn(UUID.randomUUID());
         List<ConnectorSocialMedia> expectedList = List.of(socialMedia1, socialMedia2);
-        when(connectorSocialMediaPlatformRepository.findByConnectorId(mockConnector.getConnectorId())).thenReturn(expectedList);
+        when(connectorSocialMediaPlatformRepository.findByConnector_ConnectorId(mockConnector.getConnectorId())).thenReturn(expectedList);
 
-        List<ConnectorSocialMedia> result = connectorSocialMediaPlatformService.findByConnectorId(mockConnector.getConnectorId());
+        List<ConnectorSocialMedia> result = connectorSocialMediaPlatformService.findByConnector_ConnectorId(mockConnector.getConnectorId());
 
         assertThat(result).isEqualTo(expectedList);
     }
@@ -101,7 +101,7 @@ class ConnectorSocialMediaServiceTest {
                 .build();
 
         ConnectorSocialMedia existingSocialMedia = new ConnectorSocialMedia(connector, SocialMediaPlatform.INSTAGRAM, "https://instagram.com/olduser");
-        when(connectorSocialMediaPlatformRepository.findByConnectorIdAndPlatformName(connector.getConnectorId(), SocialMediaPlatform.INSTAGRAM))
+        when(connectorSocialMediaPlatformRepository.findByConnector_ConnectorIdAndPlatform(connector.getConnectorId(), SocialMediaPlatform.INSTAGRAM))
                 .thenReturn(existingSocialMedia);
         String newProfileUrl = "https://instagram.com/newuser";
         ConnectorSocialMedia newConnectorSocialMedia = new ConnectorSocialMedia(connector, SocialMediaPlatform.INSTAGRAM, newProfileUrl);
@@ -121,7 +121,7 @@ class ConnectorSocialMediaServiceTest {
                 .firstName("John")
                 .build();
 
-        when(connectorSocialMediaPlatformRepository.findByConnectorIdAndPlatformName(connector.getConnectorId(), SocialMediaPlatform.INSTAGRAM))
+        when(connectorSocialMediaPlatformRepository.findByConnector_ConnectorIdAndPlatform(connector.getConnectorId(), SocialMediaPlatform.INSTAGRAM))
                 .thenReturn(null);
 
         String newProfileUrl = "https://instagram.com/newuser";
@@ -154,7 +154,7 @@ class ConnectorSocialMediaServiceTest {
                 .build();
 
         ConnectorSocialMedia existingSocialMedia = new ConnectorSocialMedia(connector, SocialMediaPlatform.INSTAGRAM, "https://instagram.com/user");
-        when(connectorSocialMediaPlatformRepository.findByConnectorIdAndPlatformName(connector.getConnectorId(), SocialMediaPlatform.INSTAGRAM))
+        when(connectorSocialMediaPlatformRepository.findByConnector_ConnectorIdAndPlatform(connector.getConnectorId(), SocialMediaPlatform.INSTAGRAM))
                 .thenReturn(existingSocialMedia);
 
         connectorSocialMediaPlatformService.deleteSocialMediaPlatformLink(connector, "INSTAGRAM");

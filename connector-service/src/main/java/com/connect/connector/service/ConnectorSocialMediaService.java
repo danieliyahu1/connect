@@ -17,8 +17,8 @@ import java.util.UUID;
 public class ConnectorSocialMediaService {
     private final ConnectorSocialMediaRepository connectorSocialMediaRepository;
 
-    public List<ConnectorSocialMedia> findByConnectorId(UUID id) {
-        return connectorSocialMediaRepository.findByConnectorId(id);
+    public List<ConnectorSocialMedia> findByConnector_ConnectorId(UUID id) {
+        return connectorSocialMediaRepository.findByConnector_ConnectorId(id);
     }
 
     public ConnectorSocialMediaDTO addSocialMediaPlatformLink(Connector connector, ConnectorSocialMediaDTO connectorSocialMediaDTO) throws InvalidProfileUrlException {
@@ -58,7 +58,7 @@ public class ConnectorSocialMediaService {
     }
 
     private ConnectorSocialMedia findSocialMediaPlatformLink(Connector connector, String platform) {
-        return connectorSocialMediaRepository.findByConnectorIdAndPlatformName(
+        return connectorSocialMediaRepository.findByConnector_ConnectorIdAndPlatform(
                 connector.getConnectorId(), SocialMediaPlatform.valueOf(platform));
     }
 
