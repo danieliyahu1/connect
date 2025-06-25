@@ -1,5 +1,7 @@
 package com.connect.auth.controller;
 
+import com.connect.auth.common.exception.AuthCommonInvalidRefreshTokenException;
+import com.connect.auth.common.exception.AuthCommonUnauthorizedException;
 import com.connect.auth.dto.AuthResponseDTO;
 import com.connect.auth.dto.LoginRequestDTO;
 import com.connect.auth.dto.RegisterRequestDTO;
@@ -11,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -26,23 +27,23 @@ public class AuthController {
     }
 
     @PostMapping("/public/login")
-    public ResponseEntity<AuthResponseDTO> login(@RequestBody @Valid LoginRequestDTO loginRequest) throws UnauthorizedException {
+    public ResponseEntity<AuthResponseDTO> login(@RequestBody @Valid LoginRequestDTO loginRequest) throws AuthCommonUnauthorizedException {
         return ResponseEntity.ok(authService.login(loginRequest));
     }
 
     @PostMapping("/public/refresh")
-    public ResponseEntity<AuthResponseDTO> refresh(@CookieValue String refreshToken) throws InvalidRefreshTokenException {
+    public ResponseEntity<AuthResponseDTO> refresh(@CookieValue String refreshToken) throws AuthCommonInvalidRefreshTokenException {
         return ResponseEntity.ok(authService.refresh(refreshToken));
     }
 
     @PostMapping("/internal/logout")
-    public ResponseEntity<Void> logout(Authentication authentication) throws UnauthorizedException {
+    public ResponseEntity<Void> logout(Authentication authentication) throws AuthCommonUnauthorizedException {
         authService.logout(getUserId(authentication));
         return ResponseEntity.noContent().build(); // 204 No Content
     }
 
     @DeleteMapping("/internal/deleteUser")
-    public ResponseEntity<Void> deleteUser(Authentication authentication) throws UnauthorizedException {
+    public ResponseEntity<Void> deleteUser(Authentication authentication) throws AuthCommonUnauthorizedException {
         authService.deleteUserByUserId(getUserId(authentication));
         return ResponseEntity.noContent().build();
     }

@@ -6,7 +6,6 @@ import com.connect.auth.dto.OAuthResponseDTO;
 import com.connect.auth.exception.WrongProviderException;
 import com.connect.auth.repository.UserRepository;
 import com.connect.auth.service.OAuthService;
-import com.connect.auth.util.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

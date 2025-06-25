@@ -1,5 +1,7 @@
 package com.connect.auth.service;
 
+import com.connect.auth.common.exception.AuthCommonInvalidRefreshTokenException;
+import com.connect.auth.common.exception.AuthCommonUnauthorizedException;
 import com.connect.auth.dto.AuthResponseDTO;
 import com.connect.auth.dto.LoginRequestDTO;
 import com.connect.auth.dto.RegisterRequestDTO;
@@ -7,7 +9,7 @@ import com.connect.auth.exception.*;
 import com.connect.auth.model.RefreshToken;
 import com.connect.auth.model.User;
 import com.connect.auth.repository.AuthRepository;
-import com.connect.auth.util.JwtUtil;
+import com.connect.auth.common.util.JwtUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -174,7 +176,7 @@ public class AuthServiceTest {
         when(userService.findByEmail(email)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(UnauthorizedException.class, () -> authService.login(request));
+        assertThrows(AuthCommonUnauthorizedException.class, () -> authService.login(request));
         verify(userService).findByEmail(email);
     }
 
@@ -194,7 +196,7 @@ public class AuthServiceTest {
         when(passwordEncoder.matches(password, encodedPassword)).thenReturn(false);
 
         // Act & Assert
-        assertThrows(UnauthorizedException.class, () -> authService.login(request));
+        assertThrows(AuthCommonUnauthorizedException.class, () -> authService.login(request));
         verify(userService).findByEmail(email);
         verify(passwordEncoder).matches(password, encodedPassword);
     }
@@ -238,23 +240,23 @@ public class AuthServiceTest {
     }
 
     @Test
-    void refresh_WithInvalidRefreshToken_ThrowsInvalidRefreshTokenException() throws InvalidRefreshTokenException {
+    void refresh_WithInvalidRefreshToken_ThrowsInvalidRefreshTokenException() throws AuthCommonInvalidRefreshTokenException {
         // Arrange
         String refreshToken = "invalidRefreshToken";
-        doThrow(InvalidRefreshTokenException.class).when(jwtUtil).validateRefreshToken(refreshToken);        // Act & Assert
-        assertThrows(InvalidRefreshTokenException.class, () -> authService.refresh(refreshToken));
+        doThrow(AuthCommonInvalidRefreshTokenException.class).when(jwtUtil).validateRefreshToken(refreshToken);        // Act & Assert
+        assertThrows(AuthCommonInvalidRefreshTokenException.class, () -> authService.refresh(refreshToken));
         verify(jwtUtil).validateRefreshToken(refreshToken);
     }
 
     @Test
-    void refresh_WithNonExistentRefreshToken_ThrowsInvalidRefreshTokenException() throws InvalidRefreshTokenException {
+    void refresh_WithNonExistentRefreshToken_ThrowsInvalidRefreshTokenException() throws AuthCommonInvalidRefreshTokenException {
         // Arrange
         String refreshToken = "notFoundRefreshToken";
         doNothing().when(jwtUtil).validateRefreshToken(refreshToken);
         when(authRepository.findByToken(refreshToken)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(InvalidRefreshTokenException.class, () -> authService.refresh(refreshToken));
+        assertThrows(AuthCommonInvalidRefreshTokenException.class, () -> authService.refresh(refreshToken));
         verify(jwtUtil).validateRefreshToken(refreshToken);
         verify(authRepository).findByToken(refreshToken);
     }
@@ -262,7 +264,7 @@ public class AuthServiceTest {
     // Test cases for the logout method in AuthService
 
     @Test
-    void logout_WithValidAccessToken_DeletesRefreshToken() throws InvalidAccessTokenException, UnauthorizedException {
+    void logout_WithValidAccessToken_DeletesRefreshToken() throws AuthCommonUnauthorizedException {
         // Arrange
         String userId = UUID.randomUUID().toString();
         User user = mock(User.class);
@@ -282,14 +284,14 @@ public class AuthServiceTest {
         String userId = UUID.randomUUID().toString();
         when(userService.getUserByUserId(any())).thenReturn(Optional.empty());
         // Act & Assert
-        assertThrows(UnauthorizedException.class, () -> authService.logout(userId));
+        assertThrows(AuthCommonUnauthorizedException.class, () -> authService.logout(userId));
     }
 
 
     // Test cases for the deleteUserByUserId method in AuthService
 
     @Test
-    void deleteUserByUserId_WithExistingUser_DeletesUserAndRefreshTokens() throws UnauthorizedException {
+    void deleteUserByUserId_WithExistingUser_DeletesUserAndRefreshTokens() throws AuthCommonUnauthorizedException {
         // Arrange
         UUID userId = UUID.randomUUID();
         String userIdStr = userId.toString();
@@ -307,13 +309,13 @@ public class AuthServiceTest {
     }
 
     @Test
-    void deleteUserByUserId_WithNonExistentUser_DoesNothing() throws UnauthorizedException {
+    void deleteUserByUserId_WithNonExistentUser_DoesNothing() throws AuthCommonUnauthorizedException {
         // Arrange
         UUID userId = UUID.randomUUID();
         String userIdStr = userId.toString();
         when(userService.getUserByUserId(userId)).thenReturn(Optional.empty());
 
         // Act
-        assertThrows(UnauthorizedException.class, () -> authService.logout(userId.toString()));
+        assertThrows(AuthCommonUnauthorizedException.class, () -> authService.logout(userId.toString()));
     }
 }

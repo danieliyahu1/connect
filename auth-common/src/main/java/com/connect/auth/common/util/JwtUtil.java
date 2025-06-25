@@ -1,28 +1,27 @@
-package com.connect.auth.util;
+package com.connect.auth.common.util;
 
-import com.connect.auth.exception.InvalidAccessTokenException;
-import com.connect.auth.exception.InvalidRefreshTokenException;
-import com.connect.auth.exception.InvalidTokenException;
+import com.connect.auth.common.exception.AuthCommonInvalidAccessTokenException;
+import com.connect.auth.common.exception.AuthCommonInvalidRefreshTokenException;
+import com.connect.auth.common.exception.AuthCommonInvalidTokenException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Date;
 import java.util.UUID;
+import static com.connect.auth.common.constants.JwtConstants.ACCESS_TOKEN_LIFE_SPAN;
+import static com.connect.auth.common.constants.JwtConstants.REFRESH_TOKEN_LIFE_SPAN;
 
 @Component
 public class JwtUtil {
-
-    private static final Logger log = LoggerFactory.getLogger(JwtUtil.class);
     private final SecretKey secretKey;
 
     public JwtUtil(@Value("${jwt.secret}") String secret){
@@ -32,23 +31,23 @@ public class JwtUtil {
     }
 
     public String generateAccessToken(UUID userId){
-        return generateToken(userId, "access", 1000 * 60 * 1);
+        return generateToken(userId, "access", ACCESS_TOKEN_LIFE_SPAN);
 
     }
 
     public String generateRefreshToken(UUID userId) {
-        return generateToken(userId, "refresh", 1000 * 60 * 3);
+        return generateToken(userId, "refresh", REFRESH_TOKEN_LIFE_SPAN);
     }
 
-    public void validateAccessToken(String token) throws InvalidAccessTokenException {
+    public void validateAccessToken(String token) throws AuthCommonInvalidAccessTokenException {
         if(!isValidAccessToken(token)) {
-            throw new InvalidAccessTokenException("Invalid access token");
+            throw new AuthCommonInvalidAccessTokenException("Invalid access token");
         }
     }
 
-    public void validateRefreshToken(String token) throws InvalidRefreshTokenException {
+    public void validateRefreshToken(String token) throws AuthCommonInvalidRefreshTokenException {
         if(!isValidRefreshToken(token)) {
-            throw new InvalidRefreshTokenException("Invalid refresh token");
+            throw new AuthCommonInvalidRefreshTokenException("Invalid refresh token");
         }
     }
 
@@ -58,7 +57,7 @@ public class JwtUtil {
             Claims claims = getTokenClaims(token);
             return claims.get("token_type", String.class).equals("access");
         }
-        catch (InvalidTokenException e)
+        catch (AuthCommonInvalidTokenException e)
         {
             return false;
         }
@@ -71,7 +70,7 @@ public class JwtUtil {
             Claims claims = getTokenClaims(token);
             return claims.get("token_type", String.class).equals("refresh");
         }
-        catch (InvalidTokenException e)
+        catch (AuthCommonInvalidTokenException e)
         {
             return false;
         }
@@ -90,7 +89,7 @@ public class JwtUtil {
         return claims.getExpiration().toInstant();
     }
 
-    public UUID getUserIdFromAccessToken(String accessToken) throws InvalidAccessTokenException {
+    public UUID getUserIdFromAccessToken(String accessToken) throws AuthCommonInvalidAccessTokenException {
         validateAccessToken(accessToken);
         Claims claims = getTokenClaims(accessToken);
         String userIdStr = claims.getSubject();
@@ -115,15 +114,15 @@ public class JwtUtil {
                 .compact();
     }
 
-    private void validateToken(String token) throws InvalidTokenException {
+    private void validateToken(String token) throws AuthCommonInvalidTokenException {
         try{
             Jwts.parser().verifyWith((SecretKey) secretKey)
                     .build()
                     .parseSignedClaims(token);
         } catch(SignatureException e){
-            throw new InvalidTokenException("Invalid JWT signature");
+            throw new AuthCommonInvalidTokenException("Invalid JWT signature");
         } catch (JwtException e) {
-            throw new InvalidTokenException("Invalid JWT");
+            throw new AuthCommonInvalidTokenException("Invalid JWT");
         }
     }
 }

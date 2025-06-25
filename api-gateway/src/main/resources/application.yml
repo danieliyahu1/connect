@@ -8,15 +8,18 @@ spring:
         webflux:
           routes:
             - id: connector-service-route
-              uri: http://connector-service:4001
+              uri: http://connect-connector-service:4001
               predicates:
                 - Path=/api/connectors/**
               filters:
                 - StripPrefix=1
 
             - id: auth-service-route
-              uri: http://auth-service:4000
+              uri: http://connect-auth-service:4000
               predicates:
                 - Path=/auth/**
               filters:
-                - RewritePath=/auth/(?<path>.*), /auth/public/${path}
+                - name: RewritePath
+                  args:
+                    regexp: "/auth/(?<segment>.*)"
+                    replacement: "/auth/public/${segment}"

@@ -1,16 +1,13 @@
-package com.connect.auth.util;
+package com.connect.auth.common.util;
 
-import com.connect.auth.exception.InvalidAccessTokenException;
-import com.connect.auth.exception.InvalidRefreshTokenException;
-import io.jsonwebtoken.JwtException;
+import com.connect.auth.common.exception.AuthCommonInvalidAccessTokenException;
+import com.connect.auth.common.exception.AuthCommonInvalidRefreshTokenException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -34,7 +31,7 @@ class JwtUtilTest {
     }
 
     @Test
-    void generateAndValidateAccessToken() throws InvalidAccessTokenException {
+    void generateAndValidateAccessToken() throws AuthCommonInvalidAccessTokenException {
         String token = jwtUtil.generateAccessToken(userId);
         assertNotNull(token);
         assertTrue(jwtUtil.isValidAccessToken(token));
@@ -42,7 +39,7 @@ class JwtUtilTest {
     }
 
     @Test
-    void generateAndValidateRefreshToken() throws InvalidRefreshTokenException {
+    void generateAndValidateRefreshToken() throws AuthCommonInvalidRefreshTokenException {
         String token = jwtUtil.generateRefreshToken(userId);
         assertNotNull(token);
         assertTrue(jwtUtil.isValidRefreshToken(token));
@@ -72,7 +69,7 @@ class JwtUtilTest {
     }
 
     @Test
-    void getUserIdFromAccessToken_ReturnsCorrectUserId() throws InvalidAccessTokenException {
+    void getUserIdFromAccessToken_ReturnsCorrectUserId() throws AuthCommonInvalidAccessTokenException {
         String accessToken = jwtUtil.generateAccessToken(userId);
         UUID extracted = jwtUtil.getUserIdFromAccessToken(accessToken);
         assertEquals(userId, extracted);
@@ -81,13 +78,13 @@ class JwtUtilTest {
     @Test
     void validateAccessToken_InvalidToken_ThrowsException() {
         String invalidToken = jwtUtil.generateRefreshToken(userId);
-        assertThrows(InvalidAccessTokenException.class, () -> jwtUtil.validateAccessToken(invalidToken));
+        assertThrows(AuthCommonInvalidAccessTokenException.class, () -> jwtUtil.validateAccessToken(invalidToken));
     }
 
     @Test
     void validateRefreshToken_InvalidToken_ThrowsException() {
         String invalidToken = jwtUtil.generateAccessToken(userId);
-        assertThrows(InvalidRefreshTokenException.class, () -> jwtUtil.validateRefreshToken(invalidToken));
+        assertThrows(AuthCommonInvalidRefreshTokenException.class, () -> jwtUtil.validateRefreshToken(invalidToken));
     }
 
     @Test
@@ -105,13 +102,13 @@ class JwtUtilTest {
                 .signWith(otherKey)
                 .compact();
 
-        assertThrows(InvalidAccessTokenException.class, () -> jwtUtil.validateAccessToken(invalidSignatureToken));
+        assertThrows(AuthCommonInvalidAccessTokenException.class, () -> jwtUtil.validateAccessToken(invalidSignatureToken));
     }
 
     @Test
     void validateToken_MalformedToken_ThrowsJwtException() {
         String malformedToken = "this.is.not.a.jwt";
-        assertThrows(InvalidAccessTokenException.class, () -> jwtUtil.validateAccessToken(malformedToken));
+        assertThrows(AuthCommonInvalidAccessTokenException.class, () -> jwtUtil.validateAccessToken(malformedToken));
 
     }
 }

@@ -1,7 +1,7 @@
-package com.connect.auth.security;
+package com.connect.auth.common.security;
 
-import com.connect.auth.exception.InvalidAccessTokenException;
-import com.connect.auth.util.JwtUtil;
+import com.connect.auth.common.exception.AuthCommonInvalidAccessTokenException;
+import com.connect.auth.common.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,20 +9,32 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-
     private final JwtUtil jwtUtil;
+    private final List<String> permitAllRoutes;
+    private final AntPathMatcher pathMatcher;
 
-    public JwtAuthenticationFilter(JwtUtil jwtUtil) {
+    public JwtAuthenticationFilter(JwtUtil jwtUtil, List<String> permitAllRoutes) {
         this.jwtUtil = jwtUtil;
+        this.permitAllRoutes = permitAllRoutes;
+        pathMatcher = new AntPathMatcher();
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return permitAllRoutes.stream()
+                .anyMatch(pattern -> pathMatcher.match(pattern, path));
     }
 
     @Override
@@ -31,7 +43,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        if (isPublicEndpoint(request)) {
+        if(shouldNotFilter(request))
+        {
             filterChain.doFilter(request, response);
             return;
         }
@@ -51,27 +64,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
                 filterChain.doFilter(request, response);
             }
-            catch (InvalidAccessTokenException e) {
+            catch (AuthCommonInvalidAccessTokenException e) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             }
         }
         else{
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
-    }
-
-    private boolean isPublicEndpoint(HttpServletRequest request) {
-        return isAuthPublicEndpoint(request) ||
-               isOAuthPublicEndpoint(request);
-    }
-
-    private boolean isAuthPublicEndpoint(HttpServletRequest request) {
-        String path = request.getRequestURI();
-        return path.startsWith("/auth/public");
-    }
-
-    private boolean isOAuthPublicEndpoint(HttpServletRequest request) {
-        String path = request.getRequestURI();
-        return path.startsWith("/login/oauth2");
     }
 }

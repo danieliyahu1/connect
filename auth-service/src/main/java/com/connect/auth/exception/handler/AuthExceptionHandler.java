@@ -1,5 +1,7 @@
 package com.connect.auth.exception.handler;
 
+import com.connect.auth.common.exception.AuthCommonInvalidRefreshTokenException;
+import com.connect.auth.common.exception.AuthCommonUnauthorizedException;
 import com.connect.auth.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,8 +13,8 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class AuthExceptionHandler {
-    @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<Map<String, String>> handleUnauthorizedException(UnauthorizedException ex) {
+    @ExceptionHandler(AuthCommonUnauthorizedException.class)
+    public ResponseEntity<Map<String, String>> handleUnauthorizedException(AuthCommonUnauthorizedException ex) {
         Map<String, String> errorResponse = new HashMap<>();
         errorResponse.put("error", "Unauthorized");
         errorResponse.put("message", ex.getMessage());
@@ -27,16 +29,8 @@ public class AuthExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
-    @ExceptionHandler(InvalidAccessTokenException.class)
-    public ResponseEntity<Map<String, String>> handleInvalidAccessTokenException(InvalidAccessTokenException ex) {
-        Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("error", "Invalid Access Token");
-        errorResponse.put("message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
-    }
-
-    @ExceptionHandler(InvalidRefreshTokenException.class)
-    public ResponseEntity<Map<String, String>> handleRefreshTokenNotFoundException(InvalidRefreshTokenException ex) {
+    @ExceptionHandler(AuthCommonInvalidRefreshTokenException.class)
+    public ResponseEntity<Map<String, String>> handleRefreshTokenNotFoundException(AuthCommonInvalidRefreshTokenException ex) {
         Map<String, String> errorResponse = new HashMap<>();
         errorResponse.put("error", "Refresh Token Not Found");
         errorResponse.put("message", ex.getMessage());
@@ -59,13 +53,13 @@ public class AuthExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
-    @ExceptionHandler(InvalidTokenException.class)
-    public ResponseEntity<Map<String, String>> handleInvalidTokenException(InvalidTokenException ex) {
-        Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("error", "Invalid Token");
-        errorResponse.put("message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
-    }
+//    @ExceptionHandler(InvalidTokenException.class)
+//    public ResponseEntity<Map<String, String>> handleInvalidTokenException(InvalidTokenException ex) {
+//        Map<String, String> errorResponse = new HashMap<>();
+//        errorResponse.put("error", "Invalid Token");
+//        errorResponse.put("message", ex.getMessage());
+//        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+//    }
 
     @ExceptionHandler(WrongProviderException.class)
     public ResponseEntity<Map<String, String>> handleWrongProviderException(WrongProviderException ex) {

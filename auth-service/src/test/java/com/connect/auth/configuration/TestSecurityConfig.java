@@ -1,17 +1,20 @@
 package com.connect.auth.configuration;
 
-
-import com.connect.auth.security.JwtAuthenticationFilter;
-import com.connect.auth.util.JwtUtil;
+import com.connect.auth.common.security.JwtAuthenticationFilter;
+import com.connect.auth.common.util.JwtUtil;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.util.List;
+
 @TestConfiguration
+@Profile("!component-test")
 public class TestSecurityConfig {
 
     @Bean
@@ -20,7 +23,7 @@ public class TestSecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-                .addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, List.of("auth/**")), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 }

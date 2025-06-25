@@ -9,7 +9,7 @@ import com.connect.auth.model.User;
 import com.connect.auth.repository.AuthRepository;
 import com.connect.auth.service.oauth.extractor.OAuth2UserInfoExtractor;
 import com.connect.auth.service.oauth.extractor.OAuth2UserInfoExtractorRegistry;
-import com.connect.auth.util.JwtUtil;
+import com.connect.auth.common.util.JwtUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

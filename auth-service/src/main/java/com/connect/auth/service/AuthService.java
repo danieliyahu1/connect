@@ -1,5 +1,7 @@
 package com.connect.auth.service;
 
+import com.connect.auth.common.exception.AuthCommonInvalidRefreshTokenException;
+import com.connect.auth.common.exception.AuthCommonUnauthorizedException;
 import com.connect.auth.dto.AuthResponseDTO;
 import com.connect.auth.dto.LoginRequestDTO;
 import com.connect.auth.dto.RegisterRequestDTO;
@@ -8,7 +10,7 @@ import com.connect.auth.exception.*;
 import com.connect.auth.model.RefreshToken;
 import com.connect.auth.model.User;
 import com.connect.auth.repository.AuthRepository;
-import com.connect.auth.util.JwtUtil;
+import com.connect.auth.common.util.JwtUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -42,12 +44,12 @@ public class AuthService {
     }
 
     @Transactional
-    public AuthResponseDTO login(LoginRequestDTO loginRequestDTO) throws UnauthorizedException {
+    public AuthResponseDTO login(LoginRequestDTO loginRequestDTO) throws AuthCommonUnauthorizedException {
         Optional<User> userOpt = userService.findByEmail(loginRequestDTO.getEmail())
                 .filter(user -> passwordEncoder.matches(loginRequestDTO.getPassword(), user.getEncodedPassword()));
 
         if (userOpt.isEmpty()) {
-            throw new UnauthorizedException("Invalid email or password");
+            throw new AuthCommonUnauthorizedException("Invalid email or password");
         }
 
         User user = userOpt.get();
@@ -55,7 +57,7 @@ public class AuthService {
         return createAuthResponse(user);
     }
 
-    public AuthResponseDTO refresh(String refreshToken) throws InvalidRefreshTokenException {
+    public AuthResponseDTO refresh(String refreshToken) throws AuthCommonInvalidRefreshTokenException {
         // Logic to handle token refresh
         // This would typically involve validating the refresh token
         // and generating a new authentication token.
@@ -65,15 +67,15 @@ public class AuthService {
         return createAuthResponse(user);
     }
 
-    public void logout(String userId) throws UnauthorizedException {
-        authRepository.deleteByUser_Id(userService.getUserByUserId(UUID.fromString(userId)).orElseThrow(() -> new UnauthorizedException("No user with this userId")).getId());
+    public void logout(String userId) throws AuthCommonUnauthorizedException {
+        authRepository.deleteByUser_Id(userService.getUserByUserId(UUID.fromString(userId)).orElseThrow(() -> new AuthCommonUnauthorizedException("No user with this userId")).getId());
     }
 
     @Transactional
-    public void deleteUserByUserId(String userId) throws UnauthorizedException {
+    public void deleteUserByUserId(String userId) throws AuthCommonUnauthorizedException {
         Optional<User> userOpt = userService.getUserByUserId(UUID.fromString(userId));
         if (userOpt.isEmpty()) {
-            throw new UnauthorizedException("No user with this userId");
+            throw new AuthCommonUnauthorizedException("No user with this userId");
         }
         User user = userOpt.get();
         authRepository.deleteByUser_Id(user.getId());
@@ -96,9 +98,9 @@ public class AuthService {
                 jwtUtil.getIssuedAt(refreshToken), jwtUtil.getExpiration(refreshToken)));;
     }
 
-    private User getUserByRefreshToken(String refreshToken) throws InvalidRefreshTokenException {
+    private User getUserByRefreshToken(String refreshToken) throws AuthCommonInvalidRefreshTokenException {
         return authRepository.findByToken(refreshToken)
-                .map(RefreshToken::getUser).orElseThrow( () -> new InvalidRefreshTokenException("Invalid Refresh token"));
+                .map(RefreshToken::getUser).orElseThrow( () -> new AuthCommonInvalidRefreshTokenException("Invalid Refresh token"));
     }
 
     private boolean UserExists(String email) {

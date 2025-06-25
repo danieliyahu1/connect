@@ -1,5 +1,7 @@
 package com.connect.auth.controller;
 
+import com.connect.auth.common.exception.AuthCommonInvalidRefreshTokenException;
+import com.connect.auth.common.exception.AuthCommonUnauthorizedException;
 import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -24,13 +26,11 @@ import com.connect.auth.configuration.TestSecurityConfig;
 import com.connect.auth.dto.AuthResponseDTO;
 import com.connect.auth.dto.LoginRequestDTO;
 import com.connect.auth.dto.RegisterRequestDTO;
-import com.connect.auth.exception.InvalidRefreshTokenException;
 import com.connect.auth.exception.PasswordNotMatchException;
-import com.connect.auth.exception.UnauthorizedException;
 import com.connect.auth.exception.UserExistException;
 import com.connect.auth.service.AuthService;
 import com.connect.auth.service.UserService;
-import com.connect.auth.util.JwtUtil;
+import com.connect.auth.common.util.JwtUtil;
 
 import jakarta.servlet.http.Cookie;
 
@@ -180,7 +180,7 @@ public class AuthControllerTest {
     void login_InvalidCredentials_Unauthorized() throws Exception {
         String loginJson = buildLoginJson("naruto@gmail.com", "wrongpassword");
         when(authService.login(any(LoginRequestDTO.class)))
-                .thenThrow(new UnauthorizedException("Invalid credentials"));
+                .thenThrow(new AuthCommonUnauthorizedException("Invalid credentials"));
 
         mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -251,7 +251,7 @@ public class AuthControllerTest {
     @Test
     void refresh_InvalidToken_NotFound() throws Exception {
         when(authService.refresh(any(String.class)))
-                .thenThrow(new InvalidRefreshTokenException("Invalid refresh token"));
+                .thenThrow(new AuthCommonInvalidRefreshTokenException("Invalid refresh token"));
 
         mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/refresh")
                         .cookie(new Cookie("refreshToken", "invalid")))
@@ -300,7 +300,7 @@ public class AuthControllerTest {
         securityContext.setAuthentication(authentication);
         SecurityContextHolder.setContext(securityContext);
 
-        doThrow(new UnauthorizedException("User not authenticated"))
+        doThrow(new AuthCommonUnauthorizedException("User not authenticated"))
                 .when(authService).logout(Mockito.anyString());
 
         try {
@@ -358,7 +358,7 @@ public class AuthControllerTest {
         securityContext.setAuthentication(authentication);
         SecurityContextHolder.setContext(securityContext);
 
-        doThrow(new UnauthorizedException("User not authenticated"))
+        doThrow(new AuthCommonUnauthorizedException("User not authenticated"))
                 .when(authService).deleteUserByUserId(userId);
         try {
             mockMvc.perform(delete(URIPREFIX + INTERNALPREFIX + "/deleteUser")

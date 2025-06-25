@@ -1,12 +1,12 @@
 package com.connect.auth.component;
 
-import com.connect.auth.configuration.ComponentTestConfig;
+import com.connect.auth.configuration.ComponentTestSecurityConfig;
 import com.connect.auth.dto.AuthResponseDTO;
 import com.connect.auth.model.RefreshToken;
 import com.connect.auth.model.User;
 import com.connect.auth.repository.AuthRepository;
 import com.connect.auth.repository.UserRepository;
-import com.connect.auth.util.JwtUtil;
+import com.connect.auth.common.util.JwtUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,8 +36,7 @@ import static org.mockito.Mockito.*;
         HibernateJpaAutoConfiguration.class
 })
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-
-@Import(ComponentTestConfig.class)
+@Import(ComponentTestSecurityConfig.class)
 @ActiveProfiles("component-test")
 class AuthServiceComponentTest {
 
