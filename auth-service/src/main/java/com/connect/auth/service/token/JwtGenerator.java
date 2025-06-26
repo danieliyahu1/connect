@@ -23,8 +23,6 @@ public class JwtGenerator {
     private final PrivateKey privateKey;
 
     public JwtGenerator(@Value("${jwt.private.key}") String privateKeyBase64) throws Exception {
-        log.info("private key is: " + privateKeyBase64);
-
         byte[] keyBytes = Base64.getDecoder().decode(privateKeyBase64);
         PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
         KeyFactory kf = KeyFactory.getInstance("RSA");

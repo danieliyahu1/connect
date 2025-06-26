@@ -30,7 +30,7 @@ WHERE NOT EXISTS (
 -- Ensure the 'refresh_tokens' table exists
 CREATE TABLE IF NOT EXISTS "refresh_tokens" (
     id UUID PRIMARY KEY,
-    token VARCHAR(255) UNIQUE NOT NULL,
+    token TEXT UNIQUE NOT NULL,
     user_id UUID NOT NULL REFERENCES "users"(id),
     issued_at TIMESTAMP NOT NULL,
     expires_at TIMESTAMP NOT NULL
