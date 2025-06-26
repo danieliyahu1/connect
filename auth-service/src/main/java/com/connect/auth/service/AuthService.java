@@ -1,7 +1,10 @@
 package com.connect.auth.service;
 
 import com.connect.auth.common.exception.AuthCommonInvalidRefreshTokenException;
+import com.connect.auth.common.exception.AuthCommonInvalidTokenException;
+import com.connect.auth.common.exception.AuthCommonSignatureMismatchException;
 import com.connect.auth.common.exception.AuthCommonUnauthorizedException;
+import com.connect.auth.common.util.AsymmetricJwtUtil;
 import com.connect.auth.dto.AuthResponseDTO;
 import com.connect.auth.dto.LoginRequestDTO;
 import com.connect.auth.dto.RegisterRequestDTO;
@@ -10,7 +13,7 @@ import com.connect.auth.exception.*;
 import com.connect.auth.model.RefreshToken;
 import com.connect.auth.model.User;
 import com.connect.auth.repository.AuthRepository;
-import com.connect.auth.common.util.JwtUtil;
+import com.connect.auth.service.token.JwtGenerator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,11 +31,12 @@ public class AuthService {
 
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
-    private final JwtUtil jwtUtil;
+    private final AsymmetricJwtUtil asymmetricJwtUtil;
+    private final JwtGenerator jwtGenerator;
     private final AuthRepository authRepository;
 
     @Transactional
-    public AuthResponseDTO register(RegisterRequestDTO registerRequest) throws UserExistException, PasswordNotMatchException {
+    public AuthResponseDTO register(RegisterRequestDTO registerRequest) throws UserExistException, PasswordNotMatchException, AuthCommonSignatureMismatchException, AuthCommonInvalidTokenException {
         if (UserExists(registerRequest.getEmail())) {
             throw new UserExistException("User with this email already exists");
         }
@@ -44,7 +48,7 @@ public class AuthService {
     }
 
     @Transactional
-    public AuthResponseDTO login(LoginRequestDTO loginRequestDTO) throws AuthCommonUnauthorizedException {
+    public AuthResponseDTO login(LoginRequestDTO loginRequestDTO) throws AuthCommonUnauthorizedException, AuthCommonSignatureMismatchException, AuthCommonInvalidTokenException {
         Optional<User> userOpt = userService.findByEmail(loginRequestDTO.getEmail())
                 .filter(user -> passwordEncoder.matches(loginRequestDTO.getPassword(), user.getEncodedPassword()));
 
@@ -57,11 +61,11 @@ public class AuthService {
         return createAuthResponse(user);
     }
 
-    public AuthResponseDTO refresh(String refreshToken) throws AuthCommonInvalidRefreshTokenException {
+    public AuthResponseDTO refresh(String refreshToken) throws AuthCommonInvalidRefreshTokenException, AuthCommonSignatureMismatchException, AuthCommonInvalidTokenException {
         // Logic to handle token refresh
         // This would typically involve validating the refresh token
         // and generating a new authentication token.
-        jwtUtil.validateRefreshToken(refreshToken);
+        asymmetricJwtUtil.validateRefreshToken(refreshToken);
         User user = getUserByRefreshToken(refreshToken);
 
         return createAuthResponse(user);
@@ -83,9 +87,9 @@ public class AuthService {
     }
 
     @Transactional
-    private AuthResponseDTO createAuthResponse(User user) {
-        String accessToken = jwtUtil.generateAccessToken(user.getUserId());
-        String refreshToken = jwtUtil.generateRefreshToken(user.getUserId());
+    private AuthResponseDTO createAuthResponse(User user) throws AuthCommonSignatureMismatchException, AuthCommonInvalidTokenException {
+        String accessToken = jwtGenerator.generateAccessToken(user.getUserId());
+        String refreshToken = jwtGenerator.generateRefreshToken(user.getUserId());
 
         authRepository.deleteByUser_Id(user.getId());
         storeRefreshToken(refreshToken, user);
@@ -93,9 +97,9 @@ public class AuthService {
         return new AuthResponseDTO(accessToken, refreshToken);
     }
 
-    private void storeRefreshToken(String refreshToken, User user) {
+    private void storeRefreshToken(String refreshToken, User user) throws AuthCommonSignatureMismatchException, AuthCommonInvalidTokenException {
         authRepository.save(new RefreshToken(refreshToken, user,
-                jwtUtil.getIssuedAt(refreshToken), jwtUtil.getExpiration(refreshToken)));;
+                asymmetricJwtUtil.getIssuedAt(refreshToken), asymmetricJwtUtil.getExpiration(refreshToken)));;
     }
 
     private User getUserByRefreshToken(String refreshToken) throws AuthCommonInvalidRefreshTokenException {

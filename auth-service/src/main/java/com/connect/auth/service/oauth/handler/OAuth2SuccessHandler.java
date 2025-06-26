@@ -1,6 +1,8 @@
 package com.connect.auth.service.oauth.handler;
 
 
+import com.connect.auth.common.exception.AuthCommonInvalidTokenException;
+import com.connect.auth.common.exception.AuthCommonSignatureMismatchException;
 import com.connect.auth.dto.AuthResponseDTO;
 import com.connect.auth.dto.OAuthResponseDTO;
 import com.connect.auth.exception.WrongProviderException;
@@ -24,6 +26,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     private final OAuthService oAuthService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException {
@@ -34,10 +37,8 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
             response.setContentType("application/json");
             setResponseStatus(response, oAuthResponse.isNewUser());
             objectMapper.writeValue(response.getWriter(), oAuthResponse);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
-        catch (WrongProviderException e) {
+        catch (WrongProviderException | AuthCommonSignatureMismatchException | AuthCommonInvalidTokenException e) {
 
             // Set HTTP status to 400 Bad Request (or 409 Conflict, your choice)
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);

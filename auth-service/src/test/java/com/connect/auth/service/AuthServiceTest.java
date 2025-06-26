@@ -9,7 +9,8 @@ import com.connect.auth.exception.*;
 import com.connect.auth.model.RefreshToken;
 import com.connect.auth.model.User;
 import com.connect.auth.repository.AuthRepository;
-import com.connect.auth.common.util.JwtUtil;
+import com.connect.auth.common.util.AsymmetricJwtUtil;
+import com.connect.auth.service.token.JwtGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,7 +34,9 @@ public class AuthServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
     @Mock
-    private JwtUtil jwtUtil;
+    private AsymmetricJwtUtil jwtUtil;
+    @Mock
+    private JwtGenerator jwtGenerator;
     @Mock
     private AuthRepository authRepository;
     @InjectMocks
@@ -65,8 +68,8 @@ public class AuthServiceTest {
 
         when(savedUser.getUserId()).thenReturn(userId);
         when(savedUser.getId()).thenReturn(userId);
-        when(jwtUtil.generateAccessToken(userId)).thenReturn(accessToken);
-        when(jwtUtil.generateRefreshToken(userId)).thenReturn(refreshToken);
+        when(jwtGenerator.generateAccessToken(userId)).thenReturn(accessToken);
+        when(jwtGenerator.generateRefreshToken(userId)).thenReturn(refreshToken);
 
         doNothing().when(authRepository).deleteByUser_Id(userId);
         // Act
@@ -80,8 +83,8 @@ public class AuthServiceTest {
         verify(userService).findByEmail(email);
         verify(passwordEncoder).encode(password);
         verify(userService).save(any(User.class));
-        verify(jwtUtil).generateAccessToken(userId);
-        verify(jwtUtil).generateRefreshToken(userId);
+        verify(jwtGenerator).generateAccessToken(userId);
+        verify(jwtGenerator).generateRefreshToken(userId);
         verify(authRepository).deleteByUser_Id(savedUser.getId());
         verify(authRepository).save(any());
     }
@@ -145,8 +148,8 @@ public class AuthServiceTest {
         when(passwordEncoder.matches(password, encodedPassword)).thenReturn(true);
         when(user.getUserId()).thenReturn(userId);
         when(user.getId()).thenReturn(userId);
-        when(jwtUtil.generateAccessToken(userId)).thenReturn(accessToken);
-        when(jwtUtil.generateRefreshToken(userId)).thenReturn(refreshToken);
+        when(jwtGenerator.generateAccessToken(userId)).thenReturn(accessToken);
+        when(jwtGenerator.generateRefreshToken(userId)).thenReturn(refreshToken);
 
         doNothing().when(authRepository).deleteByUser_Id(userId);
 
@@ -159,8 +162,8 @@ public class AuthServiceTest {
         assertEquals(refreshToken, response.getRefreshToken());
         verify(userService).findByEmail(email);
         verify(passwordEncoder).matches(password, encodedPassword);
-        verify(jwtUtil).generateAccessToken(userId);
-        verify(jwtUtil).generateRefreshToken(userId);
+        verify(jwtGenerator).generateAccessToken(userId);
+        verify(jwtGenerator).generateRefreshToken(userId);
         verify(authRepository).deleteByUser_Id(userId);
         verify(authRepository).save(any());
     }
@@ -219,8 +222,8 @@ public class AuthServiceTest {
         when(authRepository.findByToken(refreshToken)).thenReturn(Optional.of(new RefreshToken(refreshToken, user, null, null)));
         when(user.getUserId()).thenReturn(userId);
         when(user.getId()).thenReturn(userId);
-        when(jwtUtil.generateAccessToken(userId)).thenReturn(accessToken);
-        when(jwtUtil.generateRefreshToken(userId)).thenReturn(newRefreshToken);
+        when(jwtGenerator.generateAccessToken(userId)).thenReturn(accessToken);
+        when(jwtGenerator.generateRefreshToken(userId)).thenReturn(newRefreshToken);
 
         doNothing().when(authRepository).deleteByUser_Id(userId);
 
@@ -233,8 +236,8 @@ public class AuthServiceTest {
         assertEquals(newRefreshToken, response.getRefreshToken());
         verify(jwtUtil).validateRefreshToken(refreshToken);
         verify(authRepository).findByToken(refreshToken);
-        verify(jwtUtil).generateAccessToken(userId);
-        verify(jwtUtil).generateRefreshToken(userId);
+        verify(jwtGenerator).generateAccessToken(userId);
+        verify(jwtGenerator).generateRefreshToken(userId);
         verify(authRepository).deleteByUser_Id(userId);
         verify(authRepository).save(any());
     }

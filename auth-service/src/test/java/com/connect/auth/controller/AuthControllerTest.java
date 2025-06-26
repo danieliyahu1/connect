@@ -30,7 +30,7 @@ import com.connect.auth.exception.PasswordNotMatchException;
 import com.connect.auth.exception.UserExistException;
 import com.connect.auth.service.AuthService;
 import com.connect.auth.service.UserService;
-import com.connect.auth.common.util.JwtUtil;
+import com.connect.auth.common.util.AsymmetricJwtUtil;
 
 import jakarta.servlet.http.Cookie;
 
@@ -46,7 +46,7 @@ public class AuthControllerTest {
     private AuthService authService;
 
     @MockitoBean
-    private JwtUtil jwtUtil;
+    private AsymmetricJwtUtil jwtUtil;
 
     @MockitoBean
     private UserService userService;

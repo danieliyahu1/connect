@@ -1,11 +1,14 @@
 package com.connect.auth.service.token;
 
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.stereotype.Service;
-import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
 import java.util.Date;
 import java.util.UUID;
@@ -16,12 +19,16 @@ import static com.connect.auth.common.constants.JwtConstants.REFRESH_TOKEN_LIFE_
 @Service
 public class JwtGenerator {
 
-    private final SecretKey secretKey;
+    private static final Logger log = LoggerFactory.getLogger(JwtGenerator.class);
+    private final PrivateKey privateKey;
 
-    public JwtGenerator(@Value("${jwt.secret}") String secret){
-        byte[] keyBytes = Base64.getDecoder()
-                .decode(secret.getBytes(StandardCharsets.UTF_8));
-        this.secretKey = Keys.hmacShaKeyFor(keyBytes);
+    public JwtGenerator(@Value("${jwt.private.key}") String privateKeyBase64) throws Exception {
+        log.info("private key is: " + privateKeyBase64);
+
+        byte[] keyBytes = Base64.getDecoder().decode(privateKeyBase64);
+        PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+        this.privateKey = kf.generatePrivate(spec);
     }
 
     public String generateAccessToken(UUID userId){
@@ -39,7 +46,7 @@ public class JwtGenerator {
                 .claim("token_type", tokenType)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationMillis))
-                .signWith(secretKey)
+                .signWith(privateKey)
                 .compact();
     }
 }

@@ -1,6 +1,8 @@
 package com.connect.auth.controller;
 
 import com.connect.auth.common.exception.AuthCommonInvalidRefreshTokenException;
+import com.connect.auth.common.exception.AuthCommonInvalidTokenException;
+import com.connect.auth.common.exception.AuthCommonSignatureMismatchException;
 import com.connect.auth.common.exception.AuthCommonUnauthorizedException;
 import com.connect.auth.dto.AuthResponseDTO;
 import com.connect.auth.dto.LoginRequestDTO;
@@ -22,17 +24,17 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/public/register")
-    public ResponseEntity<AuthResponseDTO> register(@RequestBody @Valid RegisterRequestDTO registerRequest) throws UserExistException, PasswordNotMatchException {
+    public ResponseEntity<AuthResponseDTO> register(@RequestBody @Valid RegisterRequestDTO registerRequest) throws UserExistException, PasswordNotMatchException, AuthCommonSignatureMismatchException, AuthCommonInvalidTokenException {
         return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(registerRequest));
     }
 
     @PostMapping("/public/login")
-    public ResponseEntity<AuthResponseDTO> login(@RequestBody @Valid LoginRequestDTO loginRequest) throws AuthCommonUnauthorizedException {
+    public ResponseEntity<AuthResponseDTO> login(@RequestBody @Valid LoginRequestDTO loginRequest) throws AuthCommonUnauthorizedException, AuthCommonSignatureMismatchException, AuthCommonInvalidTokenException {
         return ResponseEntity.ok(authService.login(loginRequest));
     }
 
     @PostMapping("/public/refresh")
-    public ResponseEntity<AuthResponseDTO> refresh(@CookieValue String refreshToken) throws AuthCommonInvalidRefreshTokenException {
+    public ResponseEntity<AuthResponseDTO> refresh(@CookieValue String refreshToken) throws AuthCommonInvalidRefreshTokenException, AuthCommonSignatureMismatchException, AuthCommonInvalidTokenException {
         return ResponseEntity.ok(authService.refresh(refreshToken));
     }
 

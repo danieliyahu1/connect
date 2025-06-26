@@ -6,7 +6,8 @@ import com.connect.auth.model.RefreshToken;
 import com.connect.auth.model.User;
 import com.connect.auth.repository.AuthRepository;
 import com.connect.auth.repository.UserRepository;
-import com.connect.auth.common.util.JwtUtil;
+import com.connect.auth.common.util.AsymmetricJwtUtil;
+import com.connect.auth.service.token.JwtGenerator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +52,10 @@ class AuthServiceComponentTest {
     private UserRepository userRepository;
 
     @Autowired
-    private JwtUtil jwtUtil;
+    private AsymmetricJwtUtil jwtUtil;
+
+    @Autowired
+    private JwtGenerator jwtGenerator;
 
     @LocalServerPort
     private int port;
@@ -189,7 +193,7 @@ class AuthServiceComponentTest {
     @Test
     void refresh_ValidRefreshToken_ReturnsNewTokens() {
         String url = getBaseUrl(publicPrefix + "/refresh");
-        String token = jwtUtil.generateRefreshToken(UUID.randomUUID());
+        String token = jwtGenerator.generateRefreshToken(UUID.randomUUID());
         User mockUser = new User("component@test.com", AuthProvider.LOCAL, "providerUserId123");
         RefreshToken mockRefreshToken = new RefreshToken();
         mockRefreshToken.setToken(token);
@@ -212,7 +216,7 @@ class AuthServiceComponentTest {
     void refresh_InvalidRefreshToken_ReturnsUnauthorized() {
         String url = getBaseUrl(publicPrefix + "/refresh");
         HttpHeaders headers = new HttpHeaders();
-        String invalidRefreshToken = jwtUtil.generateAccessToken(UUID.randomUUID());
+        String invalidRefreshToken = jwtGenerator.generateAccessToken(UUID.randomUUID());
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.add(HttpHeaders.COOKIE, "refreshToken="+invalidRefreshToken);
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
@@ -227,7 +231,7 @@ class AuthServiceComponentTest {
     @Test
     void logout_ValidAccessToken_ReturnsNoContent() {
         String url = getBaseUrl(internalPrefix + "/logout");
-        String accessToken = jwtUtil.generateAccessToken(UUID.randomUUID());
+        String accessToken = jwtGenerator.generateAccessToken(UUID.randomUUID());
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", bearerPrefix + accessToken);
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
@@ -243,7 +247,7 @@ class AuthServiceComponentTest {
     @Test
     void logout_InvalidAccessToken_ReturnsUnauthorized() {
         String url = getBaseUrl("/auth/logout");
-        String invalidAccessToken = jwtUtil.generateRefreshToken(UUID.randomUUID());
+        String invalidAccessToken = jwtGenerator.generateRefreshToken(UUID.randomUUID());
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", bearerPrefix + invalidAccessToken);
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
@@ -255,7 +259,7 @@ class AuthServiceComponentTest {
     @Test
     void logout_userNotFound_ReturnsUnauthorized() {
         String url = getBaseUrl(internalPrefix + "/logout");
-        String accessToken = jwtUtil.generateAccessToken(UUID.randomUUID());
+        String accessToken = jwtGenerator.generateAccessToken(UUID.randomUUID());
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", bearerPrefix + accessToken);
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
@@ -271,7 +275,7 @@ class AuthServiceComponentTest {
     @Test
     void deleteUser_ValidAccessToken_ReturnsNoContent() {
         String url = getBaseUrl(internalPrefix + "/deleteUser");
-        String accessToken = jwtUtil.generateAccessToken(UUID.randomUUID());
+        String accessToken = jwtGenerator.generateAccessToken(UUID.randomUUID());
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", bearerPrefix + accessToken);
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
@@ -287,7 +291,7 @@ class AuthServiceComponentTest {
     @Test
     void deleteUser_InvalidAccessToken_ReturnsUnauthorized() {
         String url = getBaseUrl(internalPrefix + "/deleteUser");
-        String invalidAccessToken = jwtUtil.generateRefreshToken(UUID.randomUUID());
+        String invalidAccessToken = jwtGenerator.generateRefreshToken(UUID.randomUUID());
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", bearerPrefix + invalidAccessToken);
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
@@ -299,7 +303,7 @@ class AuthServiceComponentTest {
     @Test
     void deleteUser_UserNotFound_ReturnsNoContent() {
         String url = getBaseUrl(internalPrefix + "/deleteUser");
-        String accessToken = jwtUtil.generateAccessToken(UUID.randomUUID());
+        String accessToken = jwtGenerator.generateAccessToken(UUID.randomUUID());
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", bearerPrefix + accessToken);
         HttpEntity<String> entity = new HttpEntity<>(null, headers);

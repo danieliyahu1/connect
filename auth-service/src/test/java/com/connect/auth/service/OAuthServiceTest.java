@@ -1,5 +1,7 @@
 package com.connect.auth.service;
 
+import com.connect.auth.common.exception.AuthCommonInvalidTokenException;
+import com.connect.auth.common.exception.AuthCommonSignatureMismatchException;
 import com.connect.auth.dto.AuthResponseDTO;
 import com.connect.auth.dto.OAuthResponseDTO;
 import com.connect.auth.enums.AuthProvider;
@@ -9,7 +11,8 @@ import com.connect.auth.model.User;
 import com.connect.auth.repository.AuthRepository;
 import com.connect.auth.service.oauth.extractor.OAuth2UserInfoExtractor;
 import com.connect.auth.service.oauth.extractor.OAuth2UserInfoExtractorRegistry;
-import com.connect.auth.common.util.JwtUtil;
+import com.connect.auth.common.util.AsymmetricJwtUtil;
+import com.connect.auth.service.token.JwtGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -32,7 +35,9 @@ class OAuthServiceTest {
     @Mock
     private UserService userService;
     @Mock
-    private JwtUtil jwtUtil;
+    private AsymmetricJwtUtil jwtUtil;
+    @Mock
+    private JwtGenerator jwtGenerator;
     @Mock
     private AuthRepository authRepository;
     @Mock
@@ -43,7 +48,7 @@ class OAuthServiceTest {
     private OAuthService oAuthService;
 
     @Test
-    void processOAuthPostLogin_NewUser_CreatesUserAndReturnsAuthResponse() throws WrongProviderException {
+    void processOAuthPostLogin_NewUser_CreatesUserAndReturnsAuthResponse() throws WrongProviderException, AuthCommonSignatureMismatchException, AuthCommonInvalidTokenException {
         // Arrange
         String email = "test@example.com";
         String providerUserId = "google-123";
@@ -65,8 +70,8 @@ class OAuthServiceTest {
         when(userService.save(any(User.class))).thenReturn(savedUser);
         when(savedUser.getUserId()).thenReturn(userId);
 
-        when(jwtUtil.generateAccessToken(userId)).thenReturn(accessToken);
-        when(jwtUtil.generateRefreshToken(userId)).thenReturn(refreshToken);
+        when(jwtGenerator.generateAccessToken(userId)).thenReturn(accessToken);
+        when(jwtGenerator.generateRefreshToken(userId)).thenReturn(refreshToken);
 
         // Act
         OAuthResponseDTO response = oAuthService.processOAuthPostLogin(oauthToken);
@@ -80,7 +85,7 @@ class OAuthServiceTest {
     }
 
     @Test
-    void processOAuthPostLogin_ExistingUserWithSameProvider_ReturnsAuthResponse() throws WrongProviderException {
+    void processOAuthPostLogin_ExistingUserWithSameProvider_ReturnsAuthResponse() throws WrongProviderException, AuthCommonSignatureMismatchException, AuthCommonInvalidTokenException {
         // Arrange
         String email = "test@example.com";
         String providerUserId = "google-123";
@@ -103,8 +108,8 @@ class OAuthServiceTest {
         when(existingUser.getProvider()).thenReturn(provider);
         when(existingUser.getUserId()).thenReturn(userId);
 
-        when(jwtUtil.generateAccessToken(userId)).thenReturn(accessToken);
-        when(jwtUtil.generateRefreshToken(userId)).thenReturn(refreshToken);
+        when(jwtGenerator.generateAccessToken(userId)).thenReturn(accessToken);
+        when(jwtGenerator.generateRefreshToken(userId)).thenReturn(refreshToken);
 
         // Act
         OAuthResponseDTO response = oAuthService.processOAuthPostLogin(oauthToken);

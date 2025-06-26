@@ -1,6 +1,7 @@
 package com.connect.auth.service;
 
-import com.connect.auth.dto.AuthResponseDTO;
+import com.connect.auth.common.exception.AuthCommonInvalidTokenException;
+import com.connect.auth.common.exception.AuthCommonSignatureMismatchException;
 import com.connect.auth.dto.OAuthResponseDTO;
 import com.connect.auth.enums.AuthProvider;
 import com.connect.auth.exception.WrongProviderException;
@@ -9,11 +10,10 @@ import com.connect.auth.model.User;
 import com.connect.auth.repository.AuthRepository;
 import com.connect.auth.service.oauth.extractor.OAuth2UserInfoExtractor;
 import com.connect.auth.service.oauth.extractor.OAuth2UserInfoExtractorRegistry;
-import com.connect.auth.common.util.JwtUtil;
+import com.connect.auth.common.util.AsymmetricJwtUtil;
+import com.connect.auth.service.token.JwtGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
@@ -26,11 +26,12 @@ import java.util.Optional;
 public class OAuthService {
 
     private final UserService userService;
-    private final JwtUtil jwtUtil;
+    private final AsymmetricJwtUtil jwtUtil;
+    private final JwtGenerator jwtGenerator;
     private final AuthRepository authRepository;
     private final OAuth2UserInfoExtractorRegistry oAuth2UserInfoExtractorRegistry;
 
-    public OAuthResponseDTO processOAuthPostLogin(OAuth2AuthenticationToken oauthToken) throws WrongProviderException {
+    public OAuthResponseDTO processOAuthPostLogin(OAuth2AuthenticationToken oauthToken) throws WrongProviderException, AuthCommonSignatureMismatchException, AuthCommonInvalidTokenException {
         OAuth2User oauthUser = oauthToken.getPrincipal();
 
         AuthProvider provider = AuthProvider.valueOf(oauthToken.getAuthorizedClientRegistrationId().toUpperCase());
@@ -61,9 +62,9 @@ public class OAuthService {
         return oauthProvider.equalsIgnoreCase(userProvider);
     }
 
-    private OAuthResponseDTO createOAuthResponse(User user, boolean isNewUser){
-        String accessToken = jwtUtil.generateAccessToken(user.getUserId());
-        String refreshToken = jwtUtil.generateRefreshToken(user.getUserId());
+    private OAuthResponseDTO createOAuthResponse(User user, boolean isNewUser) throws AuthCommonSignatureMismatchException, AuthCommonInvalidTokenException {
+        String accessToken = jwtGenerator.generateAccessToken(user.getUserId());
+        String refreshToken = jwtGenerator.generateRefreshToken(user.getUserId());
         log.info("generated access and refresh tokens for user: {}", user.getUserId());
         log.info("Access Token: {}", accessToken);
         log.info("Refresh Token: {}", refreshToken);
