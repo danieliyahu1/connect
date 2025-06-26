@@ -1,6 +1,6 @@
 package com.connect.connector.controller;
 
-import com.connect.auth.common.util.JwtUtil;
+import com.connect.auth.common.util.AsymmetricJwtUtil;
 import com.connect.connector.configuration.TestSecurityConfig;
 import com.connect.connector.dto.ConnectorSocialMediaDTO;
 import com.connect.connector.dto.response.ConnectorResponseDTO;
@@ -45,7 +45,7 @@ class ConnectorControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private JwtUtil jwtUtil;
+    private AsymmetricJwtUtil jwtUtil;
 
     @MockitoBean
     private ConnectorService connectorService;

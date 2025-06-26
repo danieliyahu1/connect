@@ -1,7 +1,7 @@
 package com.connect.connector.configuration;
 
 import com.connect.auth.common.security.JwtAuthenticationFilter;
-import com.connect.auth.common.util.JwtUtil;
+import com.connect.auth.common.util.AsymmetricJwtUtil;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
@@ -18,7 +18,7 @@ import java.util.List;
 public class TestSecurityConfig {
 
     @Bean
-    public SecurityFilterChain testSecurityFilterChain(HttpSecurity http, JwtUtil jwtUtil) throws Exception {
+    public SecurityFilterChain testSecurityFilterChain(HttpSecurity http, AsymmetricJwtUtil jwtUtil) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -1,13 +1,13 @@
-package com.connect.auth.config;
+package com.connect.connector.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
-import org.springframework.beans.factory.annotation.Value;
-
 
 @Configuration
 public class JwtConfig {
