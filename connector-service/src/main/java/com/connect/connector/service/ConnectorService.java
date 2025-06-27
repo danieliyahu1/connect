@@ -7,6 +7,7 @@ import com.connect.connector.dto.request.UpdateConnectorRequestDTO;
 import com.connect.connector.dto.response.ConnectorResponseDTO;
 import com.connect.connector.enums.City;
 import com.connect.connector.enums.Country;
+import com.connect.connector.enums.util.EnumUtil;
 import com.connect.connector.exception.*;
 import com.connect.connector.mapper.ConnectorImageMapper;
 import com.connect.connector.model.Connector;
@@ -33,10 +34,10 @@ public class ConnectorService {
             connector.setFirstName(updateConnectorRequestDTO.getFirstName());
         }
         if (updateConnectorRequestDTO.getCountry() != null) {
-            connector.setCountry(Country.valueOf(updateConnectorRequestDTO.getCountry()));
+            connector.setCountry(EnumUtil.fromDisplayName(Country.class, updateConnectorRequestDTO.getCountry()));
         }
         if (updateConnectorRequestDTO.getCity() != null) {
-            connector.setCity(City.valueOf(updateConnectorRequestDTO.getCity()));
+            connector.setCity(EnumUtil.fromDisplayName(City.class, updateConnectorRequestDTO.getCity()));
         }
         if (updateConnectorRequestDTO.getBio() != null) {
             connector.setBio(updateConnectorRequestDTO.getBio());
@@ -52,8 +53,8 @@ public class ConnectorService {
         Connector connector = Connector.builder()
                 .userId(userId)
                 .firstName(createConnectorRequestDTO.getFirstName())
-                .country(Country.valueOf(createConnectorRequestDTO.getCountry()))
-                .city(City.valueOf(createConnectorRequestDTO.getCity()))
+                .country(EnumUtil.fromDisplayName(Country.class, createConnectorRequestDTO.getCountry()))
+                .city(EnumUtil.fromDisplayName(City.class, createConnectorRequestDTO.getCity()))
                 .bio(createConnectorRequestDTO.getBio())
                 .build();
         Connector savedConnector = connectorRepository.save(connector);
@@ -126,7 +127,7 @@ public class ConnectorService {
                 .socialMediaLinks(connectorSocialMediaService.findByConnector_ConnectorId(connector.getConnectorId())
                         .stream()
                         .map(socialMedia -> ConnectorSocialMediaDTO.builder()
-                                .platform(socialMedia.getPlatform())
+                                .platform(socialMedia.getPlatform().name())
                                 .profileUrl(socialMedia.getProfileUrl())
                                 .build())
                         .collect(Collectors.toList()))

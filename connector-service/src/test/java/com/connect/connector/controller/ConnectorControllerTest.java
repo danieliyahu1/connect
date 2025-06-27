@@ -64,7 +64,7 @@ class ConnectorControllerTest {
                 .userId(userId)
                 .firstName("Updated Name")
                 .bio("Updated bio")
-                .socialMediaLinks(List.of(new ConnectorSocialMediaDTO(SocialMediaPlatform.INSTAGRAM, "instagram_handle")))
+                .socialMediaLinks(List.of(new ConnectorSocialMediaDTO("INSTAGRAM", "instagram_handle")))
                 .build();
 
         when(connectorService.updateMyProfile(userId, updateRequest)).thenReturn(responseDTO);
@@ -385,7 +385,7 @@ class ConnectorControllerTest {
     @Test
     void addSocialMediaPlatformLink_shouldReturnCreatedLink() throws Exception {
         UUID userId = UUID.randomUUID();
-        SocialMediaPlatform platform = SocialMediaPlatform.INSTAGRAM;
+        String platform = SocialMediaPlatform.INSTAGRAM.name();
         String profileUrl = "https://instagram.com/user";
 
         ConnectorSocialMediaDTO connectorSocialMediaDTO = new ConnectorSocialMediaDTO(platform, profileUrl);
@@ -406,7 +406,7 @@ class ConnectorControllerTest {
                         .content(objectMapper.writeValueAsString(connectorSocialMediaDTO)))
                 .andDo(print())
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.socialMediaLinks[0].platform").value(platform.name()))
+                .andExpect(jsonPath("$.socialMediaLinks[0].platform").value(platform))
                 .andExpect(jsonPath("$.socialMediaLinks[0].profileUrl").value(profileUrl));
 
         verify(connectorService).addSocialMediaPlatformLink(userId, connectorSocialMediaDTO);
@@ -415,7 +415,7 @@ class ConnectorControllerTest {
     @Test
     void addSocialMediaPlatformLink_shouldReturnBadRequest_whenInvalidUrl() throws Exception {
         UUID userId = UUID.randomUUID();
-        SocialMediaPlatform platform = SocialMediaPlatform.INSTAGRAM;
+        String platform = SocialMediaPlatform.INSTAGRAM.name();
         String invalidProfileUrl = "invalid_url";
 
         ConnectorSocialMediaDTO connectorSocialMediaDTO = new ConnectorSocialMediaDTO(platform, invalidProfileUrl);
@@ -445,7 +445,7 @@ class ConnectorControllerTest {
                 .firstName("John")
                 .bio("Updated bio")
                 .galleryImages(Collections.emptyList())
-                .socialMediaLinks(List.of(new ConnectorSocialMediaDTO(SocialMediaPlatform.INSTAGRAM, profileUrl)))
+                .socialMediaLinks(List.of(new ConnectorSocialMediaDTO(SocialMediaPlatform.INSTAGRAM.name(), profileUrl)))
                 .build();
 
         when(connectorService.updateSocialMediaPlatformLink(userId, platform, profileUrl))
@@ -517,7 +517,7 @@ class ConnectorControllerTest {
                 .firstName("John")
                 .bio("Updated bio")
                 .galleryImages(Collections.emptyList())
-                .socialMediaLinks(List.of(new ConnectorSocialMediaDTO(SocialMediaPlatform.valueOf(platform), null)))
+                .socialMediaLinks(List.of(new ConnectorSocialMediaDTO(platform, null)))
                 .build();
         when(connectorService.deleteSocialMediaPlatformLink(userId, platform))
                 .thenReturn(responseDTO);

@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -46,7 +47,7 @@ class ConnectorSocialMediaServiceTest {
                 .build();
 
         ConnectorSocialMediaDTO socialMediaDTO = new ConnectorSocialMediaDTO(
-                SocialMediaPlatform.valueOf(platform.toUpperCase()), "https://" + platform + ".com/john");
+                platform, "https://" + platform + ".com/john");
 
         connectorSocialMediaPlatformService.addSocialMediaPlatformLink(connector, socialMediaDTO);
 
@@ -71,7 +72,7 @@ class ConnectorSocialMediaServiceTest {
                 .build();
 
         ConnectorSocialMediaDTO socialMediaDTO = new ConnectorSocialMediaDTO(
-                SocialMediaPlatform.INSTAGRAM, profileUrl);
+                SocialMediaPlatform.INSTAGRAM.name(), profileUrl);
 
         assertThrows(InvalidProfileUrlException.class, () ->
             connectorSocialMediaPlatformService.addSocialMediaPlatformLink(connector, socialMediaDTO));
@@ -102,7 +103,7 @@ class ConnectorSocialMediaServiceTest {
 
         ConnectorSocialMedia existingSocialMedia = new ConnectorSocialMedia(connector, SocialMediaPlatform.INSTAGRAM, "https://instagram.com/olduser");
         when(connectorSocialMediaPlatformRepository.findByConnector_ConnectorIdAndPlatform(connector.getConnectorId(), SocialMediaPlatform.INSTAGRAM))
-                .thenReturn(existingSocialMedia);
+                .thenReturn(Optional.of(existingSocialMedia));
         String newProfileUrl = "https://instagram.com/newuser";
         ConnectorSocialMedia newConnectorSocialMedia = new ConnectorSocialMedia(connector, SocialMediaPlatform.INSTAGRAM, newProfileUrl);
 
@@ -122,7 +123,7 @@ class ConnectorSocialMediaServiceTest {
                 .build();
 
         when(connectorSocialMediaPlatformRepository.findByConnector_ConnectorIdAndPlatform(connector.getConnectorId(), SocialMediaPlatform.INSTAGRAM))
-                .thenReturn(null);
+                .thenReturn(Optional.empty());
 
         String newProfileUrl = "https://instagram.com/newuser";
 
@@ -139,7 +140,6 @@ class ConnectorSocialMediaServiceTest {
                 .userId(UUID.randomUUID())
                 .firstName("John")
                 .build();
-
         assertThrows(InvalidProfileUrlException.class, () ->
             connectorSocialMediaPlatformService.updateSocialMediaPlatformLink(connector, "INSTAGRAM", invalidProfileUrl));
 
@@ -155,7 +155,7 @@ class ConnectorSocialMediaServiceTest {
 
         ConnectorSocialMedia existingSocialMedia = new ConnectorSocialMedia(connector, SocialMediaPlatform.INSTAGRAM, "https://instagram.com/user");
         when(connectorSocialMediaPlatformRepository.findByConnector_ConnectorIdAndPlatform(connector.getConnectorId(), SocialMediaPlatform.INSTAGRAM))
-                .thenReturn(existingSocialMedia);
+                .thenReturn(Optional.of(existingSocialMedia));
 
         connectorSocialMediaPlatformService.deleteSocialMediaPlatformLink(connector, "INSTAGRAM");
 

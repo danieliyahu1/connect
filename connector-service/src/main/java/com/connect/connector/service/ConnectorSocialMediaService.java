@@ -2,6 +2,7 @@ package com.connect.connector.service;
 
 import com.connect.connector.dto.ConnectorSocialMediaDTO;
 import com.connect.connector.enums.SocialMediaPlatform;
+import com.connect.connector.enums.util.EnumUtil;
 import com.connect.connector.exception.ConnectorSocialMediaNotFoundException;
 import com.connect.connector.exception.InvalidProfileUrlException;
 import com.connect.connector.model.Connector;
@@ -26,7 +27,7 @@ public class ConnectorSocialMediaService {
 
         ConnectorSocialMedia connectorSocialMedia = ConnectorSocialMedia.builder()
                 .connector(connector)
-                .platform(connectorSocialMediaDTO.getPlatform())
+                .platform(EnumUtil.fromDisplayName(SocialMediaPlatform.class, connectorSocialMediaDTO.getPlatform()))
                 .profileUrl(connectorSocialMediaDTO.getProfileUrl())
                 .build();
         connectorSocialMediaRepository.save(connectorSocialMedia);
@@ -36,19 +37,11 @@ public class ConnectorSocialMediaService {
     public ConnectorSocialMediaDTO updateSocialMediaPlatformLink(Connector connector, String platform, String profileUrl) throws InvalidProfileUrlException, ConnectorSocialMediaNotFoundException {
         validateProfileUrl(profileUrl);
         ConnectorSocialMedia connectorSocialMedia = findSocialMediaPlatformLink(connector, platform);
-
-        if (connectorSocialMedia == null) {
-            throw new ConnectorSocialMediaNotFoundException("No social media link found for the specified platform");
-        }
-
         return convertSocialMediaModelToDTO(updateSocialMediaPlatformLink(connectorSocialMedia, profileUrl));
     }
 
     public ConnectorSocialMediaDTO deleteSocialMediaPlatformLink(Connector connectorByUserId, String platform) throws ConnectorSocialMediaNotFoundException {
         ConnectorSocialMedia connectorSocialMedia = findSocialMediaPlatformLink(connectorByUserId, platform);
-        if (connectorSocialMedia == null) {
-            throw new ConnectorSocialMediaNotFoundException("No social media link found for the specified platform");
-        }
         deleteSocialMediaPlatformLink(connectorSocialMedia);
         return convertSocialMediaModelToDTO(connectorSocialMedia);
     }
@@ -57,9 +50,12 @@ public class ConnectorSocialMediaService {
         connectorSocialMediaRepository.delete(connectorSocialMedia);
     }
 
-    private ConnectorSocialMedia findSocialMediaPlatformLink(Connector connector, String platform) {
+    private ConnectorSocialMedia findSocialMediaPlatformLink(Connector connector, String platform) throws ConnectorSocialMediaNotFoundException {
         return connectorSocialMediaRepository.findByConnector_ConnectorIdAndPlatform(
-                connector.getConnectorId(), SocialMediaPlatform.valueOf(platform));
+                connector.getConnectorId(),
+                        EnumUtil.fromDisplayName(SocialMediaPlatform.class, platform))
+                .orElseThrow(() -> new ConnectorSocialMediaNotFoundException
+                        ("No social media link found for the specified platform"));
     }
 
     private ConnectorSocialMedia updateSocialMediaPlatformLink(ConnectorSocialMedia connectorSocialMedia, String profileUrl) {
@@ -75,7 +71,7 @@ public class ConnectorSocialMediaService {
 
     private ConnectorSocialMediaDTO convertSocialMediaModelToDTO(ConnectorSocialMedia connectorSocialMedia) {
         return ConnectorSocialMediaDTO.builder()
-                .platform(connectorSocialMedia.getPlatform())
+                .platform(connectorSocialMedia.getPlatform().name())
                 .profileUrl(connectorSocialMedia.getProfileUrl())
                 .build();
     }

@@ -90,7 +90,7 @@ class ConnectorServiceTest {
             "Dina,ISRAEL,JERUSALEM,Hi there"
     })
     void createMyProfile_shouldCreate_whenNoExistingConnector(String firstName, String country, String city, String bio)
-            throws ExistingConnectorException, InvalidProfileUrlException {
+            throws ExistingConnectorException {
 
         CreateConnectorRequestDTO dto = new CreateConnectorRequestDTO(firstName, country, city, bio);
 

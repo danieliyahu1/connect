@@ -14,7 +14,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class ConnectorSocialMediaDTO {
     @NotNull(message = "Platform must not be not null")
-    private SocialMediaPlatform platform;
+    private String platform;
 
     @NotBlank(message = "Profile URL must not be blank")
     private String profileUrl;
