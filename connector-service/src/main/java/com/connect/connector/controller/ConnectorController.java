@@ -1,5 +1,6 @@
 package com.connect.connector.controller;
 
+import com.connect.connector.dto.response.CloudinaryUploadSignatureResponseDTO;
 import com.connect.connector.dto.ConnectorImageDTO;
 import com.connect.connector.dto.ConnectorSocialMediaDTO;
 import com.connect.connector.dto.request.CreateConnectorRequestDTO;
@@ -69,6 +70,18 @@ public class ConnectorController {
     @PostMapping("/internal/batch")
     public ResponseEntity<List<ConnectorResponseDTO>> getPublicBatch(@RequestBody List<UUID> userIds) {
         return ResponseEntity.ok(connectorService.getPublicProfiles(userIds));
+    }
+
+    @PostMapping("/me/gallery/signature")
+    public ResponseEntity<CloudinaryUploadSignatureResponseDTO> generateUploadSignature(
+            @RequestParam int orderIndex,
+            Authentication authentication) throws ImageIndexOutOfBoundException {
+        return ResponseEntity.ok(
+                connectorService.generateGalleryUploadSignature(
+                    getUserIdFromAuth(authentication),
+                    orderIndex
+                )
+        );
     }
 
     private UUID getUserIdFromAuth(Authentication authentication) {

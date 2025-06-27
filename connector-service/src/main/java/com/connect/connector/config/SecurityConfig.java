@@ -19,10 +19,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain connectorSecurityFilterChain(HttpSecurity http) throws Exception {
-        log.info("entering to common security filter");
-        System.out.println("entering common security");
         commonSecurityConfig.commonSecurityFilterChain(http);
-        log.info("exiting from common security filter");
         return http.build();
     }
 }

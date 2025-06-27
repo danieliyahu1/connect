@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.connect.connector.constants.ConnectorServiceConstants.*;
+
 @Service
 @RequiredArgsConstructor
 public class ConnectorImageService {
@@ -43,8 +45,9 @@ public class ConnectorImageService {
     }
 
     private void validateConnectorImageIndex(int imageOrderIndex) throws ImageIndexOutOfBoundException {
-        if (imageOrderIndex < 0 || imageOrderIndex > 5) {
-            throw new ImageIndexOutOfBoundException("Order index must be between 0 and 5");
+        if (imageOrderIndex < GALLERY_MIN_INDEX || imageOrderIndex > GALLERY_MAX_INDEX) {
+            throw new ImageIndexOutOfBoundException(
+                    String.format("Order index must be between %d and %d", GALLERY_MIN_INDEX, GALLERY_MAX_INDEX));
         }
     }
 
@@ -95,7 +98,7 @@ public class ConnectorImageService {
     }
 
     private void reorderGalleryImages(List<ConnectorImage> images, int removedIndex) {
-        ConnectorImage[] tempArray = new ConnectorImage[5];
+        ConnectorImage[] tempArray = new ConnectorImage[GALLERY_MAX_SIZE];
         for(ConnectorImage image : images) {
             tempArray[image.getOrderIndex()] = image;
         }

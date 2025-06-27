@@ -1,6 +1,7 @@
 package com.connect.connector.service;
 
 import com.connect.connector.dto.ConnectorImageDTO;
+import com.connect.connector.dto.response.CloudinaryUploadSignatureResponseDTO;
 import com.connect.connector.dto.response.ConnectorResponseDTO;
 import com.connect.connector.dto.request.CreateConnectorRequestDTO;
 import com.connect.connector.dto.request.UpdateConnectorRequestDTO;
@@ -32,6 +33,7 @@ class ConnectorServiceTest {
     @Mock private ConnectorRepository connectorRepository;
     @Mock private ConnectorSocialMediaService connectorSocialMediaService;
     @Mock private ConnectorImageService connectorImageService;
+    @Mock private MediaService mediaService;
 
     @InjectMocks private ConnectorService connectorService;
 
@@ -255,5 +257,38 @@ class ConnectorServiceTest {
         assertTrue(exception.getMessage().contains("Order index must be between 0 and 5"));
     }
 
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 2, 3, 4}) // Valid order indexes
+    void generateGalleryUploadSignature_validIndex_shouldReturnSignature(int orderIndex) throws ImageIndexOutOfBoundException {
+        String expectedFolder = "connectors/" + userId;
+        String expectedImageName = String.valueOf(orderIndex);
+        CloudinaryUploadSignatureResponseDTO mockResponse = new CloudinaryUploadSignatureResponseDTO(
+                "mockApiKey", "mockCloudName", "mockSignature", "1234567890", expectedFolder, expectedImageName
+        );
+
+        when(mediaService.createCloudinaryUploadSignature(expectedImageName, expectedFolder)).thenReturn(mockResponse);
+
+        CloudinaryUploadSignatureResponseDTO result = connectorService.generateGalleryUploadSignature(userId, orderIndex);
+
+        assertNotNull(result);
+        assertEquals("mockSignature", result.getSignature());
+        assertEquals(expectedFolder, result.getFolder());
+        assertEquals(expectedImageName, result.getPublicId());
+
+        verify(mediaService).createCloudinaryUploadSignature(expectedImageName, expectedFolder);
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {-1, 5, 100})
+    void generateGalleryUploadSignature_invalidIndex_shouldThrow(int invalidIndex) {
+        ConnectorService service = new ConnectorService(connectorRepository, connectorSocialMediaService, connectorImageService, mediaService);
+
+        ImageIndexOutOfBoundException exception = assertThrows(
+                ImageIndexOutOfBoundException.class,
+                () -> service.generateGalleryUploadSignature(userId, invalidIndex)
+        );
+
+        assertTrue(exception.getMessage().contains("Order index must be between"));
+    }
 
 }

@@ -19,6 +19,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.*;
 
+import static com.connect.connector.constants.ConnectorServiceConstants.GALLERY_MAX_INDEX;
+import static com.connect.connector.constants.ConnectorServiceConstants.GALLERY_MIN_INDEX;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -64,11 +66,13 @@ class ConnectorImageServiceTest {
 
         ImageIndexOutOfBoundException exception = assertThrows(ImageIndexOutOfBoundException.class,
                 () -> connectorImageService.addGalleryPhoto(imageDTO, mock(Connector.class)));
-        assertTrue(exception.getMessage().contains("Order index must be between 0 and 5"));
+        assertTrue(exception.getMessage().contains(
+                String.format("Order index must be between %d and %d", GALLERY_MIN_INDEX, GALLERY_MAX_INDEX)
+        ));
     }
 
     @ParameterizedTest
-    @ValueSource(ints = { 4, 5 })
+    @ValueSource(ints = { 3, 4 })
     void addGalleryPhoto_whenImageOrderIndexIsNotNextAvailable_shouldThrowInvalidImageOrderException(int orderIndex) {
         ConnectorImageDTO imageDTO = new ConnectorImageDTO("http://image.jpg", orderIndex);
         Connector mockedConnector = mock(Connector.class);
@@ -76,7 +80,6 @@ class ConnectorImageServiceTest {
         List<ConnectorImage> existingImages = new ArrayList<>();
         existingImages.add(new ConnectorImage(mockedConnector, "http://image1.jpg", 0));
         existingImages.add(new ConnectorImage(mockedConnector, "http://image2.jpg", 1));
-        existingImages.add(new ConnectorImage(mockedConnector, "http://image3.jpg", 2));
 
         when(connectorImageRepository.findByConnector_ConnectorId(mockedConnector.getConnectorId())).thenReturn(existingImages);
 
@@ -120,7 +123,9 @@ class ConnectorImageServiceTest {
     void deleteGalleryPhoto_invalidOrderIndex_throwsImageIndexOutOfBoundException(int orderIndexToDelete) throws Exception {
         ImageIndexOutOfBoundException exception = assertThrows(ImageIndexOutOfBoundException.class,
                 () -> connectorImageService.deleteGalleryPhoto(orderIndexToDelete, mock(Connector.class)));
-        assertTrue(exception.getMessage().contains("Order index must be between 0 and 5"));
+        assertTrue(exception.getMessage().contains(
+                String.format("Order index must be between %d and %d", GALLERY_MIN_INDEX, GALLERY_MAX_INDEX)
+        ));
     }
 
     @Test
@@ -141,7 +146,7 @@ class ConnectorImageServiceTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {0, 1, 2, 3, 4, 5})
+    @ValueSource(ints = {0, 1, 2, 3, 4})
     void deleteGalleryPhoto_imageNotFound_throwsImageNotFoundException(int orderIndexToDelete) {
         UUID userId = UUID.randomUUID();
         Connector mockedConnector = mock(Connector.class);

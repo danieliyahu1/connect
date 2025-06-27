@@ -3,6 +3,7 @@ package com.connect.connector.controller;
 import com.connect.auth.common.util.AsymmetricJwtUtil;
 import com.connect.connector.configuration.TestSecurityConfig;
 import com.connect.connector.dto.ConnectorSocialMediaDTO;
+import com.connect.connector.dto.response.CloudinaryUploadSignatureResponseDTO;
 import com.connect.connector.dto.response.ConnectorResponseDTO;
 import com.connect.connector.dto.request.CreateConnectorRequestDTO;
 import com.connect.connector.dto.request.UpdateConnectorRequestDTO;
@@ -551,5 +552,52 @@ class ConnectorControllerTest {
                 .andExpect(jsonPath("$.message").value("Social media platform not found"));
 
         verify(connectorService).deleteSocialMediaPlatformLink(userId, platform);
+    }
+
+    @Test
+    void generateUploadSignature_shouldReturnValidSignature() throws Exception {
+        UUID userId = UUID.randomUUID();
+        int orderIndex = 2;
+
+        CloudinaryUploadSignatureResponseDTO mockResponse = new CloudinaryUploadSignatureResponseDTO(
+                "mockApiKey", "mockCloudName", "mockSignature", "1234567890", "connectors/" + userId, String.valueOf(orderIndex)
+        );
+
+        when(connectorService.generateGalleryUploadSignature(userId, orderIndex)).thenReturn(mockResponse);
+
+        Authentication auth = new TestingAuthenticationToken(userId.toString(), null);
+
+        mockMvc.perform(post(URIPREFIX + "/me/gallery/signature")
+                        .principal(auth)
+                        .param("orderIndex", String.valueOf(orderIndex)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.apiKey").value("mockApiKey"))
+                .andExpect(jsonPath("$.cloudName").value("mockCloudName"))
+                .andExpect(jsonPath("$.signature").value("mockSignature"))
+                .andExpect(jsonPath("$.timestamp").value("1234567890"))
+                .andExpect(jsonPath("$.folder").value("connectors/" + userId.toString()))
+                .andExpect(jsonPath("$.publicId").value(String.valueOf(orderIndex)));
+
+        verify(connectorService).generateGalleryUploadSignature(userId, orderIndex);
+    }
+
+    @Test
+    void generateUploadSignature_invalidOrderIndex_shouldReturnBadRequest() throws Exception {
+        UUID userId = UUID.randomUUID();
+        int invalidOrderIndex = 99;
+
+        when(connectorService.generateGalleryUploadSignature(userId, invalidOrderIndex))
+                .thenThrow(new ImageIndexOutOfBoundException("Order index must be between 0 and 5"));
+
+        Authentication auth = new TestingAuthenticationToken(userId.toString(), null);
+
+        mockMvc.perform(post(URIPREFIX + "/me/gallery/signature")
+                        .principal(auth)
+                        .param("orderIndex", String.valueOf(invalidOrderIndex)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Image Index Out of Bound"))
+                .andExpect(jsonPath("$.message").value("Order index must be between 0 and 5"));
+
+        verify(connectorService).generateGalleryUploadSignature(userId, invalidOrderIndex);
     }
 }
