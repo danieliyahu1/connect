@@ -14,6 +14,9 @@
       <assistant-state connection-id="b8544e9f-80b2-4a26-9057-d2faab265866" default-profile-name="" selected-profile-name="" selected-model-name="" assistant-type="GENERIC" selected-action="SHOW_SQL" availability="UNAVAILABLE" acknowledgement="NONE">
         <messages />
       </assistant-state>
+      <assistant-state connection-id="e2456182-698c-4854-adc1-7102c0256423" default-profile-name="" selected-profile-name="" selected-model-name="" assistant-type="GENERIC" selected-action="SHOW_SQL" availability="UNAVAILABLE" acknowledgement="NONE">
+        <messages />
+      </assistant-state>
     </assistants>
   </component>
   <component name="DBNavigator.Project.DatabaseBrowserManager">
@@ -23,11 +26,11 @@
     <loaded-nodes />
   </component>
   <component name="DBNavigator.Project.DatabaseConsoleManager">
-    <connection id="b8544e9f-80b2-4a26-9057-d2faab265866">
-      <console name="connect-auth-service-db" type="STANDARD" schema="db" session="Main" />
-    </connection>
     <connection id="ce6f20cb-38d7-4bf3-a01e-bc891fe92b60">
       <console name="connect-connector-service-db" type="STANDARD" schema="connect-connector" session="Main" />
+    </connection>
+    <connection id="e2456182-698c-4854-adc1-7102c0256423">
+      <console name="connect-auth-service-db" type="STANDARD" schema="connect-auth" session="Main" />
     </connection>
   </component>
   <component name="DBNavigator.Project.DatabaseEditorStateManager">
@@ -37,38 +40,48 @@
     <open-files />
   </component>
   <component name="DBNavigator.Project.DatabaseSessionManager">
-    <connection id="b8544e9f-80b2-4a26-9057-d2faab265866" />
     <connection id="ce6f20cb-38d7-4bf3-a01e-bc891fe92b60" />
+    <connection id="e2456182-698c-4854-adc1-7102c0256423" />
+  </component>
+  <component name="DBNavigator.Project.DatasetFilterManager">
+    <filter-actions connection-id="e2456182-698c-4854-adc1-7102c0256423" dataset="public.refresh_tokens" active-filter-id="" />
   </component>
   <component name="DBNavigator.Project.ExecutionManager">
     <retain-sticky-names value="false" />
   </component>
-  <component name="DBNavigator.Project.FileConnectionMappingManager">
-    <mapping file-url="file://$PROJECT_DIR$/auth-service/src/main/resources/data.sql" connection-id="b8544e9f-80b2-4a26-9057-d2faab265866" session-id="MAIN" current-schema="db" />
+  <component name="DBNavigator.Project.MethodExecutionManager">
+    <method-browser />
+    <execution-history>
+      <group-entries value="true" />
+      <execution-inputs />
+    </execution-history>
+    <execution-variables-cache />
   </component>
   <component name="DBNavigator.Project.ObjectQuickFilterManager">
     <last-used-operator value="EQUAL" />
     <filters />
   </component>
   <component name="DBNavigator.Project.ScriptExecutionManager" clear-outputs="true">
-    <recently-used-interfaces />
+    <recently-used-interfaces>
+      <mapping database-type="POSTGRES" interface-id="DEFAULT" />
+    </recently-used-interfaces>
   </component>
   <component name="DBNavigator.Project.Settings">
     <connections>
-      <connection id="b8544e9f-80b2-4a26-9057-d2faab265866" active="true" signed="true">
+      <connection id="ce6f20cb-38d7-4bf3-a01e-bc891fe92b60" active="true" signed="true">
         <database>
-          <name value="connect-auth-service-db" />
+          <name value="connect-connector-service-db" />
           <description value="" />
           <database-type value="POSTGRES" />
           <config-type value="BASIC" />
-          <database-version value="17.4" />
+          <database-version value="17.5" />
           <driver-source value="BUNDLED" />
           <driver-library value="" />
           <driver value="" />
           <url-type value="DATABASE" />
           <host value="localhost" />
-          <port value="5000" />
-          <database value="connect-auth" />
+          <port value="5001" />
+          <database value="connect-connector" />
           <tns-folder value="" />
           <tns-profile value="" />
           <type value="USER_PASSWORD" />
@@ -76,7 +89,7 @@
           <token-type value="" />
           <token-config-file value="" />
           <token-profile value="" />
-          <session-user value="" />
+          <session-user value="admin_user" />
         </database>
         <properties>
           <auto-commit value="false" />
@@ -156,20 +169,20 @@
           </object-type-filter>
         </object-filters>
       </connection>
-      <connection id="ce6f20cb-38d7-4bf3-a01e-bc891fe92b60" active="true" signed="true">
+      <connection id="e2456182-698c-4854-adc1-7102c0256423" active="true" signed="true">
         <database>
-          <name value="connect-connector-service-db" />
+          <name value="connect-auth-service-db" />
           <description value="" />
           <database-type value="POSTGRES" />
           <config-type value="BASIC" />
-          <database-version value="9999.0" />
+          <database-version value="17.5" />
           <driver-source value="BUNDLED" />
           <driver-library value="" />
           <driver value="" />
           <url-type value="DATABASE" />
           <host value="localhost" />
-          <port value="5001" />
-          <database value="connect-connector" />
+          <port value="5000" />
+          <database value="connect-auth" />
           <tns-folder value="" />
           <tns-profile value="" />
           <type value="USER_PASSWORD" />
@@ -177,7 +190,7 @@
           <token-type value="" />
           <token-config-file value="" />
           <token-profile value="" />
-          <session-user value="" />
+          <session-user value="admin_user" />
         </database>
         <properties>
           <auto-commit value="false" />

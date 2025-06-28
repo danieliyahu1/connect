@@ -1,17 +1,14 @@
 package com.connect.connector.service;
 
 import com.connect.connector.dto.ConnectorImageDTO;
-import com.connect.connector.dto.response.CloudinaryUploadSignatureResponseDTO;
+import com.connect.connector.dto.response.UploadSignatureResponseDTO;
 import com.connect.connector.dto.response.ConnectorResponseDTO;
 import com.connect.connector.dto.request.CreateConnectorRequestDTO;
 import com.connect.connector.dto.request.UpdateConnectorRequestDTO;
 import com.connect.connector.enums.City;
 import com.connect.connector.enums.Country;
 import com.connect.connector.exception.*;
-import com.connect.connector.mapper.ConnectorImageMapper;
 import com.connect.connector.model.Connector;
-import com.connect.connector.model.ConnectorImage;
-import com.connect.connector.service.ConnectorImageService;
 import com.connect.connector.repository.ConnectorRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,7 +30,7 @@ class ConnectorServiceTest {
     @Mock private ConnectorRepository connectorRepository;
     @Mock private ConnectorSocialMediaService connectorSocialMediaService;
     @Mock private ConnectorImageService connectorImageService;
-    @Mock private MediaService mediaService;
+    @Mock private MediaStorageService mediaService;
 
     @InjectMocks private ConnectorService connectorService;
 
@@ -262,20 +259,20 @@ class ConnectorServiceTest {
     void generateGalleryUploadSignature_validIndex_shouldReturnSignature(int orderIndex) throws ImageIndexOutOfBoundException {
         String expectedFolder = "connectors/" + userId;
         String expectedImageName = String.valueOf(orderIndex);
-        CloudinaryUploadSignatureResponseDTO mockResponse = new CloudinaryUploadSignatureResponseDTO(
+        UploadSignatureResponseDTO mockResponse = new UploadSignatureResponseDTO(
                 "mockApiKey", "mockCloudName", "mockSignature", "1234567890", expectedFolder, expectedImageName
         );
 
-        when(mediaService.createCloudinaryUploadSignature(expectedImageName, expectedFolder)).thenReturn(mockResponse);
+        when(mediaService.generateUploadSignature(expectedImageName, expectedFolder)).thenReturn(mockResponse);
 
-        CloudinaryUploadSignatureResponseDTO result = connectorService.generateGalleryUploadSignature(userId, orderIndex);
+        UploadSignatureResponseDTO result = connectorService.generateGalleryUploadSignature(userId, orderIndex);
 
         assertNotNull(result);
         assertEquals("mockSignature", result.getSignature());
         assertEquals(expectedFolder, result.getFolder());
         assertEquals(expectedImageName, result.getPublicId());
 
-        verify(mediaService).createCloudinaryUploadSignature(expectedImageName, expectedFolder);
+        verify(mediaService).generateUploadSignature(expectedImageName, expectedFolder);
     }
 
     @ParameterizedTest

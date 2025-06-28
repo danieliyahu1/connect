@@ -3,7 +3,7 @@ package com.connect.connector.controller;
 import com.connect.auth.common.util.AsymmetricJwtUtil;
 import com.connect.connector.configuration.TestSecurityConfig;
 import com.connect.connector.dto.ConnectorSocialMediaDTO;
-import com.connect.connector.dto.response.CloudinaryUploadSignatureResponseDTO;
+import com.connect.connector.dto.response.UploadSignatureResponseDTO;
 import com.connect.connector.dto.response.ConnectorResponseDTO;
 import com.connect.connector.dto.request.CreateConnectorRequestDTO;
 import com.connect.connector.dto.request.UpdateConnectorRequestDTO;
@@ -14,7 +14,6 @@ import com.connect.connector.service.ConnectorService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -559,7 +558,7 @@ class ConnectorControllerTest {
         UUID userId = UUID.randomUUID();
         int orderIndex = 2;
 
-        CloudinaryUploadSignatureResponseDTO mockResponse = new CloudinaryUploadSignatureResponseDTO(
+        UploadSignatureResponseDTO mockResponse = new UploadSignatureResponseDTO(
                 "mockApiKey", "mockCloudName", "mockSignature", "1234567890", "connectors/" + userId, String.valueOf(orderIndex)
         );
 

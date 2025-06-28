@@ -1,6 +1,6 @@
 package com.connect.connector.service;
 
-import com.connect.connector.dto.response.CloudinaryUploadSignatureResponseDTO;
+import com.connect.connector.dto.response.UploadSignatureResponseDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
@@ -16,13 +16,13 @@ import java.util.stream.Collectors;
 import static com.connect.connector.constants.ConnectorServiceConstants.*;
 
 @Service
-public class MediaService {
+public class CloudinaryMediaStorageService  implements MediaStorageService{
 
     private final String cloudinaryApiKey;
     private final String cloudinaryCloudName;
     private final String cloudinaryApiSecret;
 
-    public MediaService(
+    public CloudinaryMediaStorageService(
             @Value("${cloudinary.api.key}") String cloudinaryApiKey,
             @Value("${cloudinary.cloud.name}") String cloudinaryCloudName,
             @Value("${cloudinary.api.secret}") String cloudinaryApiSecret
@@ -32,14 +32,14 @@ public class MediaService {
         this.cloudinaryApiSecret = cloudinaryApiSecret;
     }
 
-    public CloudinaryUploadSignatureResponseDTO createCloudinaryUploadSignature(String imageName, String folder) {
+    public UploadSignatureResponseDTO generateUploadSignature(String imageName, String folder) {
         String timestamp = String.valueOf(Instant.now().getEpochSecond());
 
         Map<String, String> paramsToSign = generateParamsToSign(imageName, folder, timestamp);
 
         String signature = generateCloudinarySignature(paramsToSign);
 
-        return new CloudinaryUploadSignatureResponseDTO(
+        return new UploadSignatureResponseDTO(
                 cloudinaryApiKey,
                 cloudinaryCloudName,
                 signature,

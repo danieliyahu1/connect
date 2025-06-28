@@ -1,6 +1,6 @@
 package com.connect.connector.controller;
 
-import com.connect.connector.dto.response.CloudinaryUploadSignatureResponseDTO;
+import com.connect.connector.dto.response.UploadSignatureResponseDTO;
 import com.connect.connector.dto.ConnectorImageDTO;
 import com.connect.connector.dto.ConnectorSocialMediaDTO;
 import com.connect.connector.dto.request.CreateConnectorRequestDTO;
@@ -73,7 +73,7 @@ public class ConnectorController {
     }
 
     @PostMapping("/me/gallery/signature")
-    public ResponseEntity<CloudinaryUploadSignatureResponseDTO> generateUploadSignature(
+    public ResponseEntity<UploadSignatureResponseDTO> generateUploadSignature(
             @RequestParam int orderIndex,
             Authentication authentication) throws ImageIndexOutOfBoundException {
         return ResponseEntity.ok(

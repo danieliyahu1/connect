@@ -4,13 +4,12 @@ import com.connect.connector.dto.ConnectorImageDTO;
 import com.connect.connector.dto.ConnectorSocialMediaDTO;
 import com.connect.connector.dto.request.CreateConnectorRequestDTO;
 import com.connect.connector.dto.request.UpdateConnectorRequestDTO;
-import com.connect.connector.dto.response.CloudinaryUploadSignatureResponseDTO;
+import com.connect.connector.dto.response.UploadSignatureResponseDTO;
 import com.connect.connector.dto.response.ConnectorResponseDTO;
 import com.connect.connector.enums.City;
 import com.connect.connector.enums.Country;
 import com.connect.connector.enums.util.EnumUtil;
 import com.connect.connector.exception.*;
-import com.connect.connector.mapper.ConnectorImageMapper;
 import com.connect.connector.model.Connector;
 import com.connect.connector.repository.ConnectorRepository;
 import jakarta.validation.Valid;
@@ -30,7 +29,7 @@ public class ConnectorService {
     private final ConnectorRepository connectorRepository;
     private final ConnectorSocialMediaService connectorSocialMediaService;
     private final ConnectorImageService connectorImageService;
-    private final MediaService mediaService;
+    private final MediaStorageService mediaService;
 
     public ConnectorResponseDTO updateMyProfile(UUID userId, @Valid UpdateConnectorRequestDTO updateConnectorRequestDTO) throws InvalidProfileUrlException {
         Connector connector = findConnectorByUserId(userId);
@@ -110,7 +109,7 @@ public class ConnectorService {
         return buildConnectorResponse(connector);
     }
 
-    public CloudinaryUploadSignatureResponseDTO generateGalleryUploadSignature(UUID userId, int orderIndex) throws ImageIndexOutOfBoundException {
+    public UploadSignatureResponseDTO generateGalleryUploadSignature(UUID userId, int orderIndex) throws ImageIndexOutOfBoundException {
         if (orderIndex < GALLERY_MIN_INDEX || orderIndex > GALLERY_MAX_INDEX) {
             throw new ImageIndexOutOfBoundException("Order index must be between " + GALLERY_MIN_INDEX + " and " + GALLERY_MAX_INDEX);
         }
@@ -119,7 +118,7 @@ public class ConnectorService {
 
         String imageName = String.valueOf(orderIndex);
 
-        return mediaService.createCloudinaryUploadSignature(imageName, folder);
+        return mediaService.generateUploadSignature(imageName, folder);
     }
 
     private void validateConnectorDoesNotExist(UUID userId) throws ExistingConnectorException {

@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class CloudinaryUploadSignatureResponseDTO {
+public class UploadSignatureResponseDTO {
     private String apiKey;
     private String cloudName;
     private String signature;
