@@ -6,12 +6,14 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface TripRepository extends JpaRepository<Trip, String> {
 
     List<Trip> findByUserId(UUID userId);
+    Optional<Trip> findByIdAndUserId(UUID id, UUID userId);
 
     // Incoming trip queries
     List<Trip> findByCountryIgnoreCase(String country);

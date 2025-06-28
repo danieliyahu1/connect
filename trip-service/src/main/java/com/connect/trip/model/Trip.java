@@ -1,10 +1,13 @@
 package com.connect.trip.model;
 
+import com.connect.trip.enums.City;
+import com.connect.trip.enums.Country;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -16,7 +19,7 @@ import java.util.UUID;
 public class Trip {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private String id = UUID.randomUUID().toString();
+    private UUID id;
 
     @NotNull
     @Column(name = "user_id", nullable = false)
@@ -24,14 +27,22 @@ public class Trip {
 
     @NotNull
     @Column(nullable = false)
-    private String country;
+    @Enumerated(EnumType.STRING)
+    @Setter
+    private Country country;
 
-    private String city;
+    @Setter
+    @Enumerated(EnumType.STRING)
+    private City city;
+
+    @Setter
     private LocalDate startDate;
+
+    @Setter
     private LocalDate endDate;
 
     @Builder
-    public Trip(UUID userId, String country, String city, LocalDate startDate, LocalDate endDate) {
+    public Trip(UUID userId, Country country, City city, LocalDate startDate, LocalDate endDate) {
         this.userId = userId;
         this.country = country;
         this.city = city;

@@ -43,9 +43,8 @@ public class TripController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTrip(@PathVariable String id, Authentication authentication) {
-        tripService.deleteTrip(id, getUserIdFromAuth(authentication));
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<TripResponseDTO> deleteTrip(@PathVariable String id, Authentication authentication) {
+        return ResponseEntity.ok(tripService.deleteTrip(id, getUserIdFromAuth(authentication)));
     }
 
     @GetMapping("/incoming")

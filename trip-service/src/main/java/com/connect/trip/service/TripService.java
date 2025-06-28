@@ -2,11 +2,14 @@ package com.connect.trip.service;
 
 import com.connect.trip.dto.request.TripRequestDTO;
 import com.connect.trip.dto.response.TripResponseDTO;
+import com.connect.trip.enums.City;
+import com.connect.trip.enums.Country;
+import com.connect.trip.enums.util.EnumUtil;
+import com.connect.trip.mapper.TripMapper;
 import com.connect.trip.model.Trip;
 import com.connect.trip.repository.TripRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -16,59 +19,55 @@ import java.util.stream.Collectors;
 public class TripService {
 
     private final TripRepository tripRepository;
+    private final TripMapper tripMapper;
 
     public TripResponseDTO createTrip(TripRequestDTO request, UUID userId) {
         Trip trip = Trip.builder()
                 .userId(userId)
-                .country(request.getCountry())
-                .city(request.getCity())
+                .country(EnumUtil.fromDisplayName(Country.class, request.getCountry()))
+                .city(EnumUtil.fromDisplayName(City.class, request.getCity()))
                 .startDate(parseDate(request.getStartDate()))
                 .endDate(parseDate(request.getEndDate()))
                 .build();
 
-        return mapToDTO(tripRepository.save(trip));
+        return tripMapper.toDto(tripRepository.save(trip));
     }
 
     public List<TripResponseDTO> getTripsByUser(UUID userId) {
         return tripRepository.findByUserId(userId)
                 .stream()
-                .map(this::mapToDTO)
+                .map(tripMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     public TripResponseDTO updateTrip(String id, TripRequestDTO request, UUID userId) {
-        Trip trip = tripRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Trip not found"));
+        Trip trip = tripRepository.findByIdAndUserId(UUID.fromString(id), userId)
+                .orElseThrow(() -> new NoSuchElementException("Trip not found or unauthorized"));
 
-        if (!trip.getUserId().equals(userId)) {
-            throw new SecurityException("You are not authorized to update this trip");
+        // Update only the relevant fields
+        if (request.getCountry() != null) {
+            trip.setCountry(EnumUtil.fromDisplayName(Country.class, request.getCountry()));
+        }
+        if (request.getCity() != null) {
+            trip.setCity(EnumUtil.fromDisplayName(City.class, request.getCity()));
+        }
+        if (request.getStartDate() != null) {
+            trip.setStartDate(parseDate(request.getStartDate()));
+        }
+        if (request.getEndDate() != null) {
+            trip.setEndDate(parseDate(request.getEndDate()));
         }
 
-        // Update fields
-        trip = Trip.builder()
-                .userId(userId)
-                .country(request.getCountry())
-                .city(request.getCity())
-                .startDate(parseDate(request.getStartDate()))
-                .endDate(parseDate(request.getEndDate()))
-                .build();
-
-        // Set the existing ID
-        trip = new Trip(trip.getUserId(), trip.getCountry(), trip.getCity(), trip.getStartDate(), trip.getEndDate());
-        tripRepository.deleteById(id); // Remove old trip
-        trip.setId(id); // Reuse the same ID
-        return mapToDTO(tripRepository.save(trip));
+        Trip updatedTrip = tripRepository.save(trip);
+        return tripMapper.toDto(updatedTrip);
     }
 
-    public void deleteTrip(String id, UUID userId) {
-        Trip trip = tripRepository.findById(id)
+    public TripResponseDTO deleteTrip(String id, UUID userId) {
+        Trip trip = tripRepository.findByIdAndUserId(UUID.fromString(id), userId)
                 .orElseThrow(() -> new NoSuchElementException("Trip not found"));
 
-        if (!trip.getUserId().equals(userId)) {
-            throw new SecurityException("You are not authorized to delete this trip");
-        }
-
         tripRepository.deleteById(id);
+        return tripMapper.toDto(trip);
     }
 
     public Map<String, Object> getIncomingTrips(String country, String city, String from, String to) {
@@ -93,19 +92,8 @@ public class TripService {
 
         Map<String, Object> result = new HashMap<>();
         result.put("total", filtered.size());
-        result.put("items", filtered.stream().map(this::mapToDTO).collect(Collectors.toList()));
+        result.put("items", filtered.stream().map(tripMapper::toDto).collect(Collectors.toList()));
         return result;
-    }
-
-    private TripResponseDTO mapToDTO(Trip trip) {
-        return TripResponseDTO.builder()
-                .id(trip.getId())
-                .country(trip.getCountry())
-                .city(trip.getCity())
-                .startDate(trip.getStartDate())
-                .endDate(trip.getEndDate())
-                .userId(trip.getUserId())
-                .build();
     }
 
     private LocalDate parseDate(String dateStr) {
