@@ -1,5 +1,6 @@
 package com.connect.trip.controller;
 
+import com.connect.auth.common.util.AsymmetricJwtUtil;
 import com.connect.trip.configuration.TestSecurityConfig;
 import com.connect.trip.dto.request.TripRequestDTO;
 import com.connect.trip.dto.response.TripResponseDTO;
@@ -32,9 +33,13 @@ class TripControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
+    private AsymmetricJwtUtil jwtUtil;
+
+    @MockitoBean
     private TripService tripService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+
     private static final String URI_PREFIX = "/trips";
 
     @Test
