@@ -12,5 +12,8 @@ public class EnumUtil {
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Unknown enum name: " + displayName);
         }
+        catch (NullPointerException e) {
+            throw new IllegalArgumentException("Display name is invalid: " + displayName);
+        }
     }
 }

@@ -26,17 +26,17 @@ public class ConnectorController {
     private final ConnectorService connectorService;
 
     @PutMapping("/me")
-    public ResponseEntity<ConnectorResponseDTO> updateMyProfile(@RequestBody UpdateConnectorRequestDTO updateConnectorRequestDTO, Authentication authentication) throws InvalidProfileUrlException {
+    public ResponseEntity<ConnectorResponseDTO> updateMyProfile(@RequestBody @Valid UpdateConnectorRequestDTO updateConnectorRequestDTO, Authentication authentication) throws InvalidProfileUrlException {
         return ResponseEntity.ok(connectorService.updateMyProfile(getUserIdFromAuth(authentication), updateConnectorRequestDTO));
     }
 
     @PostMapping("/me")
-    public ResponseEntity<ConnectorResponseDTO> createMyProfile(@RequestBody CreateConnectorRequestDTO createConnectorRequestDTO, Authentication authentication) throws ExistingConnectorException {
+    public ResponseEntity<ConnectorResponseDTO> createMyProfile(@RequestBody @Valid CreateConnectorRequestDTO createConnectorRequestDTO, Authentication authentication) throws ExistingConnectorException {
         return ResponseEntity.status(HttpStatus.CREATED).body(connectorService.createMyProfile(getUserIdFromAuth(authentication), createConnectorRequestDTO));
     }
 
     @PostMapping("/me/gallery")
-    public ResponseEntity<ConnectorResponseDTO> addGalleryPhoto(@RequestBody ConnectorImageDTO connectorImageDTO, Authentication authentication) throws ImageIndexOutOfBoundException, ImageNotFoundException, InvalidImageOrderException {
+    public ResponseEntity<ConnectorResponseDTO> addGalleryPhoto(@RequestBody @Valid ConnectorImageDTO connectorImageDTO, Authentication authentication) throws ImageIndexOutOfBoundException, ImageNotFoundException, InvalidImageOrderException {
         return ResponseEntity.ok(connectorService.addGalleryPhoto(getUserIdFromAuth(authentication), connectorImageDTO));
     }
 

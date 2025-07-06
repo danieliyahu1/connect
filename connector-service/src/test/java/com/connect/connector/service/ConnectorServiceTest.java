@@ -65,8 +65,8 @@ class ConnectorServiceTest {
         ConnectorResponseDTO response = connectorService.updateMyProfile(userId, dto);
 
         assertEquals(firstName, response.getFirstName());
-        assertEquals(country, response.getCountry());
-        assertEquals(city, response.getCity());
+        assertEquals(Country.valueOf(country).getDisplayValue(), response.getCountry());
+        assertEquals(City.valueOf(city).getDisplayValue(), response.getCity());
         assertEquals(bio, response.getBio());
 
         verify(connectorRepository).save(any(Connector.class));
@@ -101,8 +101,8 @@ class ConnectorServiceTest {
         ConnectorResponseDTO response = connectorService.createMyProfile(userId, dto);
 
         assertEquals(firstName, response.getFirstName());
-        assertEquals(country, response.getCountry());
-        assertEquals(city, response.getCity());
+        assertEquals(Country.valueOf(country).getDisplayValue(), response.getCountry());
+        assertEquals(City.valueOf(city).getDisplayValue(), response.getCity());
         assertEquals(bio, response.getBio());
 
         verify(connectorRepository).save(any(Connector.class));
@@ -120,6 +120,8 @@ class ConnectorServiceTest {
 
     @Test
     void getPublicProfile_shouldReturnProfile_whenFound() {
+        String country = "POLAND";
+        String city = "KRAKOW";
         when(connectorRepository.findByUserId(userId)).thenReturn(Optional.of(connector));
         when(connectorImageService.findByConnector_ConnectorId(connector.getConnectorId())).thenReturn(Collections.emptyList());
         when(connectorSocialMediaService.findByConnector_ConnectorId(connector.getConnectorId())).thenReturn(Collections.emptyList());
@@ -128,8 +130,8 @@ class ConnectorServiceTest {
 
         assertEquals(userId, response.getUserId());
         assertEquals("John", response.getFirstName());
-        assertEquals("POLAND", response.getCountry());
-        assertEquals("KRAKOW", response.getCity());
+        assertEquals(Country.valueOf(country).getDisplayValue(), response.getCountry());
+        assertEquals(City.valueOf(city).getDisplayValue(), response.getCity());
     }
 
     @Test

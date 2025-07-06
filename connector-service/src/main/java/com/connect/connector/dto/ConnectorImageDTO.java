@@ -11,8 +11,8 @@ import lombok.Getter;
 public class ConnectorImageDTO {
     @NotBlank
     private String mediaUrl; // ID received from Media Service
-    @NotBlank
+
     @Min(value = 0, message = "Order index must be non-negative")
-    @Max(value = 5, message = "Order index must be less than or equal to 5")
+    @Max(value = 4, message = "Order index must be less than or equal to 5")
     private int orderIndex; // for ordering images in gallery
 }

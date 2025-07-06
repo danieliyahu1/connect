@@ -58,7 +58,7 @@ class ConnectorControllerTest {
     void updateMyProfile_returnsUpdatedProfile() throws Exception {
         UUID userId = UUID.randomUUID();
 
-        UpdateConnectorRequestDTO updateRequest = new UpdateConnectorRequestDTO("Updated Name", "Updated Country", "Updated City", "Updated bio");
+        UpdateConnectorRequestDTO updateRequest = new UpdateConnectorRequestDTO("Updated Name", "Updated Country", "Updated City", "Updated bio must be more than 15 characters");
 
         ConnectorResponseDTO responseDTO = ConnectorResponseDTO.builder()
                 .userId(userId)
@@ -202,7 +202,7 @@ class ConnectorControllerTest {
     void addGalleryPhoto_notNextAvailableOrderIndex_returnsBadRequest() throws Exception {
         UUID userId = UUID.randomUUID();
 
-        ConnectorImageDTO connectorImageDTO = new ConnectorImageDTO("Sample Photo", 10); // Invalid order index
+        ConnectorImageDTO connectorImageDTO = new ConnectorImageDTO("Sample Photo", 4); // Invalid order index
 
         when(connectorService.addGalleryPhoto(eq(userId), any(ConnectorImageDTO.class)))
                 .thenThrow(new InvalidImageOrderException("Order index must be between 0 and 5"));
