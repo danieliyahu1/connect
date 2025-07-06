@@ -2,14 +2,16 @@ package com.connect.trip.controller;
 
 import com.connect.trip.dto.request.TripRequestDTO;
 import com.connect.trip.dto.response.TripResponseDTO;
+import com.connect.trip.exception.TripNotFoundException;
 import com.connect.trip.service.TripService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List; // Added missing import
-import java.util.Map;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -19,9 +21,9 @@ public class TripController {
 
     private final TripService tripService;
 
-    @PostMapping
-    public ResponseEntity<TripResponseDTO> createTrip(@RequestBody TripRequestDTO request, Authentication authentication) {
-        return ResponseEntity.ok(
+    @PostMapping("/me")
+    public ResponseEntity<TripResponseDTO> createTrip(@RequestBody @Valid TripRequestDTO request, Authentication authentication) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(
                 tripService.createTrip(request, getUserIdFromAuth(authentication))
         );
     }
@@ -35,20 +37,20 @@ public class TripController {
 
     @PutMapping("/{id}")
     public ResponseEntity<TripResponseDTO> updateTrip(@PathVariable String id,
-                                                      @RequestBody TripRequestDTO request,
-                                                      Authentication authentication) {
+                                                      @RequestBody @Valid TripRequestDTO request,
+                                                      Authentication authentication) throws TripNotFoundException {
         return ResponseEntity.ok(
                 tripService.updateTrip(id, request, getUserIdFromAuth(authentication))
         );
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<TripResponseDTO> deleteTrip(@PathVariable String id, Authentication authentication) {
+    @DeleteMapping("/me/{id}")
+    public ResponseEntity<TripResponseDTO> deleteTrip(@PathVariable String id, Authentication authentication) throws TripNotFoundException {
         return ResponseEntity.ok(tripService.deleteTrip(id, getUserIdFromAuth(authentication)));
     }
 
     @GetMapping("/incoming")
-    public ResponseEntity<Map<String, Object>> getIncomingTrips(@RequestParam String country,
+    public ResponseEntity<List<TripResponseDTO>> getIncomingTrips(@RequestParam String country,
                                                                 @RequestParam(required = false) String city,
                                                                 @RequestParam(required = false) String from,
                                                                 @RequestParam(required = false) String to) {

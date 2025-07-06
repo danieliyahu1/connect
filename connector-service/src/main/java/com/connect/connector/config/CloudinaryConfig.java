@@ -16,9 +16,9 @@ public class CloudinaryConfig {
     private final String apiSecret;
 
     public CloudinaryConfig(
-            @Value("${cloudinary.cloud-name}") String cloudName,
-            @Value("${cloudinary.api-key}") String apiKey,
-            @Value("${cloudinary.api-secret}") String apiSecret) {
+            @Value("${cloudinary.cloud.name}") String cloudName,
+            @Value("${cloudinary.api.key}") String apiKey,
+            @Value("${cloudinary.api.secret}") String apiSecret) {
         this.cloudName = cloudName;
         this.apiKey = apiKey;
         this.apiSecret = apiSecret;

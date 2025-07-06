@@ -2,7 +2,7 @@ package com.connect.connector.enums.util;
 
 public class EnumUtil {
 
-    public static <E extends Enum<E>> E fromDisplayName(Class<E> enumClass, String displayName) {
+    public static <E extends Enum<E>> E getEnumFromDisplayName(Class<E> enumClass, String displayName) {
         String normalized = displayName
                 .toUpperCase()
                 .replaceAll("[-\\s]", "_"); // replace dash or space with underscore

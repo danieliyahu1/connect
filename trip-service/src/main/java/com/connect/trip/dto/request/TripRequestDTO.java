@@ -11,7 +11,10 @@ import lombok.Getter;
 public class TripRequestDTO {
     @NotBlank
     private String country;
+    @NotBlank
     private String city;
-    private String startDate;           // optional ISO-8601 string (e.g., "2025-08-01")
+    @NotBlank
+    private String startDate;
+    @NotBlank
     private String endDate;
 }

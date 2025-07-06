@@ -27,7 +27,7 @@ public class ConnectorSocialMediaService {
 
         ConnectorSocialMedia connectorSocialMedia = ConnectorSocialMedia.builder()
                 .connector(connector)
-                .platform(EnumUtil.fromDisplayName(SocialMediaPlatform.class, connectorSocialMediaDTO.getPlatform()))
+                .platform(EnumUtil.getEnumFromDisplayName(SocialMediaPlatform.class, connectorSocialMediaDTO.getPlatform()))
                 .profileUrl(connectorSocialMediaDTO.getProfileUrl())
                 .build();
         connectorSocialMediaRepository.save(connectorSocialMedia);
@@ -53,7 +53,7 @@ public class ConnectorSocialMediaService {
     private ConnectorSocialMedia findSocialMediaPlatformLink(Connector connector, String platform) throws ConnectorSocialMediaNotFoundException {
         return connectorSocialMediaRepository.findByConnector_ConnectorIdAndPlatform(
                 connector.getConnectorId(),
-                        EnumUtil.fromDisplayName(SocialMediaPlatform.class, platform))
+                        EnumUtil.getEnumFromDisplayName(SocialMediaPlatform.class, platform))
                 .orElseThrow(() -> new ConnectorSocialMediaNotFoundException
                         ("No social media link found for the specified platform"));
     }

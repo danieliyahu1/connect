@@ -4,6 +4,7 @@ import com.connect.auth.common.util.AsymmetricJwtUtil;
 import com.connect.trip.configuration.TestSecurityConfig;
 import com.connect.trip.dto.request.TripRequestDTO;
 import com.connect.trip.dto.response.TripResponseDTO;
+import com.connect.trip.exception.TripNotFoundException;
 import com.connect.trip.service.TripService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -15,9 +16,7 @@ import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import static org.mockito.Mockito.*;
@@ -58,11 +57,11 @@ class TripControllerTest {
 
         Authentication auth = new TestingAuthenticationToken(userId.toString(), null);
 
-        mockMvc.perform(post(URI_PREFIX)
+        mockMvc.perform(post(URI_PREFIX + "/me")
                         .principal(auth)
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.country").value("Japan"))
                 .andExpect(jsonPath("$.city").value("Tokyo"))
                 .andExpect(jsonPath("$.userId").value(userId.toString()));
@@ -123,30 +122,43 @@ class TripControllerTest {
     }
 
     @Test
-    void deleteTrip_shouldReturnNoContent() throws Exception {
+    void deleteTrip_shouldReturnDeletedTrip() throws Exception {
         UUID userId = UUID.randomUUID();
         String tripId = UUID.randomUUID().toString();
+        TripResponseDTO response = TripResponseDTO.builder()
+                .userId(userId.toString())
+                .country("Italy")
+                .city("Rome")
+                .startDate("2025-09-01")
+                .endDate("2025-09-10")
+                .build();
+
+        when(tripService.deleteTrip(eq(tripId), eq(userId))).thenReturn(response);
 
         Authentication auth = new TestingAuthenticationToken(userId.toString(), null);
 
-        mockMvc.perform(delete(URI_PREFIX + "/" + tripId)
+        mockMvc.perform(delete(URI_PREFIX + "/me/" + tripId)
                         .principal(auth))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.country").value("Italy"))
+                .andExpect(jsonPath("$.city").value("Rome"))
+                .andExpect(jsonPath("$.userId").value(userId.toString()));
 
         verify(tripService).deleteTrip(tripId, userId);
     }
 
     @Test
-    void getIncomingTrips_shouldReturnTrips() throws Exception {
+    void getIncomingTrips_shouldReturnListOfTrips() throws Exception {
         TripResponseDTO trip = TripResponseDTO.builder()
                 .userId(UUID.randomUUID().toString())
                 .country("Spain")
+                .city("Barcelona")
                 .startDate("2025-07-01")
                 .endDate("2025-07-10")
                 .build();
 
         when(tripService.getIncomingTrips("Spain", "Barcelona", "2025-07-01", "2025-07-10"))
-                .thenReturn(Map.of("results", List.of(trip)));
+                .thenReturn(List.of(trip));
 
         mockMvc.perform(get(URI_PREFIX + "/incoming")
                         .param("country", "Spain")
@@ -154,9 +166,48 @@ class TripControllerTest {
                         .param("from", "2025-07-01")
                         .param("to", "2025-07-10"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.results[0].country").value("Spain"))
-                .andExpect(jsonPath("$.results[0].city").doesNotExist());
+                .andExpect(jsonPath("$[0].country").value("Spain"))
+                .andExpect(jsonPath("$[0].city").value("Barcelona"));
 
         verify(tripService).getIncomingTrips("Spain", "Barcelona", "2025-07-01", "2025-07-10");
     }
+
+    @Test
+    void deleteTrip_shouldReturnNotFound_whenTripNotFound() throws Exception {
+        UUID userId = UUID.randomUUID();
+        String tripId = UUID.randomUUID().toString();
+
+        when(tripService.deleteTrip(eq(tripId), eq(userId)))
+                .thenThrow(new TripNotFoundException("You are not authorized to delete this trip"));
+
+        Authentication auth = new TestingAuthenticationToken(userId.toString(), null);
+
+        mockMvc.perform(delete(URI_PREFIX + "/me/" + tripId)
+                        .principal(auth))
+                .andExpect(status().isNotFound());
+
+        verify(tripService).deleteTrip(tripId, userId);
+    }
+
+    @Test
+    void updateTrip_shouldReturnNotFound_whenTripDoesNotExist() throws Exception {
+        UUID userId = UUID.randomUUID();
+        String tripId = UUID.randomUUID().toString();
+        TripRequestDTO request = new TripRequestDTO("France", "Paris", "2025-08-01", "2025-08-10");
+
+        when(tripService.updateTrip(eq(tripId), eq(request), eq(userId)))
+                .thenThrow(new TripNotFoundException("Trip not found"));
+
+        Authentication auth = new TestingAuthenticationToken(userId.toString(), null);
+
+        mockMvc.perform(put(URI_PREFIX + "/" + tripId)
+                        .principal(auth)
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Trip not found")));
+
+        verify(tripService).updateTrip(tripId, request, userId);
+    }
+
 }

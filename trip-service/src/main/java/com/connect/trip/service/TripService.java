@@ -5,6 +5,7 @@ import com.connect.trip.dto.response.TripResponseDTO;
 import com.connect.trip.enums.City;
 import com.connect.trip.enums.Country;
 import com.connect.trip.enums.util.EnumUtil;
+import com.connect.trip.exception.TripNotFoundException;
 import com.connect.trip.mapper.TripMapper;
 import com.connect.trip.model.Trip;
 import com.connect.trip.repository.TripRepository;
@@ -24,12 +25,12 @@ public class TripService {
     public TripResponseDTO createTrip(TripRequestDTO request, UUID userId) {
         Trip trip = Trip.builder()
                 .userId(userId)
-                .country(EnumUtil.fromDisplayName(Country.class, request.getCountry()))
-                .city(EnumUtil.fromDisplayName(City.class, request.getCity()))
+                .country(EnumUtil.getEnumFromDisplayName(Country.class, request.getCountry()))
+                .city(EnumUtil.getEnumFromDisplayName(City.class, request.getCity()))
                 .startDate(parseDate(request.getStartDate()))
                 .endDate(parseDate(request.getEndDate()))
                 .build();
-
+        tripRepository.save(trip);
         return tripMapper.toDto(tripRepository.save(trip));
     }
 
@@ -40,16 +41,16 @@ public class TripService {
                 .collect(Collectors.toList());
     }
 
-    public TripResponseDTO updateTrip(String id, TripRequestDTO request, UUID userId) {
+    public TripResponseDTO updateTrip(String id, TripRequestDTO request, UUID userId) throws TripNotFoundException {
         Trip trip = tripRepository.findByIdAndUserId(UUID.fromString(id), userId)
-                .orElseThrow(() -> new NoSuchElementException("Trip not found or unauthorized"));
+                .orElseThrow(() -> new TripNotFoundException("Trip not found or unauthorized"));
 
         // Update only the relevant fields
         if (request.getCountry() != null) {
-            trip.setCountry(EnumUtil.fromDisplayName(Country.class, request.getCountry()));
+            trip.setCountry(EnumUtil.getEnumFromDisplayName(Country.class, request.getCountry()));
         }
         if (request.getCity() != null) {
-            trip.setCity(EnumUtil.fromDisplayName(City.class, request.getCity()));
+            trip.setCity(EnumUtil.getEnumFromDisplayName(City.class, request.getCity()));
         }
         if (request.getStartDate() != null) {
             trip.setStartDate(parseDate(request.getStartDate()));
@@ -62,38 +63,23 @@ public class TripService {
         return tripMapper.toDto(updatedTrip);
     }
 
-    public TripResponseDTO deleteTrip(String id, UUID userId) {
+    public TripResponseDTO deleteTrip(String id, UUID userId) throws TripNotFoundException {
         Trip trip = tripRepository.findByIdAndUserId(UUID.fromString(id), userId)
-                .orElseThrow(() -> new NoSuchElementException("Trip not found"));
+                .orElseThrow(() -> new TripNotFoundException("Trip not found"));
 
-        tripRepository.deleteById(id);
+        tripRepository.deleteById(UUID.fromString(id));
         return tripMapper.toDto(trip);
     }
 
-    public Map<String, Object> getIncomingTrips(String country, String city, String from, String to) {
-        LocalDate fromDate = parseDate(from);
-        LocalDate toDate = parseDate(to);
-
-        List<Trip> filtered;
-
-        if (city != null && fromDate != null && toDate != null) {
-            filtered = tripRepository.findByCountryIgnoreCaseAndCityIgnoreCaseAndStartDateGreaterThanEqualAndEndDateLessThanEqual(
-                    country, city, fromDate, toDate
-            );
-        } else if (city != null) {
-            filtered = tripRepository.findByCountryIgnoreCaseAndCityIgnoreCase(country, city);
-        } else if (fromDate != null && toDate != null) {
-            filtered = tripRepository.findByCountryIgnoreCaseAndStartDateGreaterThanEqualAndEndDateLessThanEqual(
-                    country, fromDate, toDate
-            );
-        } else {
-            filtered = tripRepository.findByCountryIgnoreCase(country);
-        }
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("total", filtered.size());
-        result.put("items", filtered.stream().map(tripMapper::toDto).collect(Collectors.toList()));
-        return result;
+    public List<TripResponseDTO> getIncomingTrips(String country, String city, String from, String to) {
+        return tripRepository.searchTrips(
+                        country,
+                        city,
+                        parseDate(from),
+                        parseDate(to)
+                ).stream()
+                .map(tripMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     private LocalDate parseDate(String dateStr) {

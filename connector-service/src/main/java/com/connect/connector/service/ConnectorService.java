@@ -38,10 +38,10 @@ public class ConnectorService {
             connector.setFirstName(updateConnectorRequestDTO.getFirstName());
         }
         if (updateConnectorRequestDTO.getCountry() != null) {
-            connector.setCountry(EnumUtil.fromDisplayName(Country.class, updateConnectorRequestDTO.getCountry()));
+            connector.setCountry(EnumUtil.getEnumFromDisplayName(Country.class, updateConnectorRequestDTO.getCountry()));
         }
         if (updateConnectorRequestDTO.getCity() != null) {
-            connector.setCity(EnumUtil.fromDisplayName(City.class, updateConnectorRequestDTO.getCity()));
+            connector.setCity(EnumUtil.getEnumFromDisplayName(City.class, updateConnectorRequestDTO.getCity()));
         }
         if (updateConnectorRequestDTO.getBio() != null) {
             connector.setBio(updateConnectorRequestDTO.getBio());
@@ -57,8 +57,8 @@ public class ConnectorService {
         Connector connector = Connector.builder()
                 .userId(userId)
                 .firstName(createConnectorRequestDTO.getFirstName())
-                .country(EnumUtil.fromDisplayName(Country.class, createConnectorRequestDTO.getCountry()))
-                .city(EnumUtil.fromDisplayName(City.class, createConnectorRequestDTO.getCity()))
+                .country(EnumUtil.getEnumFromDisplayName(Country.class, createConnectorRequestDTO.getCountry()))
+                .city(EnumUtil.getEnumFromDisplayName(City.class, createConnectorRequestDTO.getCity()))
                 .bio(createConnectorRequestDTO.getBio())
                 .build();
         Connector savedConnector = connectorRepository.save(connector);
