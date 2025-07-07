@@ -12,7 +12,7 @@ public class ConnectorImageDTO {
     @NotBlank
     private String mediaUrl; // ID received from Media Service
 
-    @Min(value = 0, message = "Order index must be non-negative")
-    @Max(value = 4, message = "Order index must be less than or equal to 5")
+    @Min(value = 0, message = "Order index must be between 0 and 4")
+    @Max(value = 4, message = "Order index must be between 0 and 4")
     private int orderIndex; // for ordering images in gallery
 }

@@ -3,12 +3,14 @@ package com.connect.connector.component;
 import com.connect.auth.common.exception.AuthCommonInvalidAccessTokenException;
 import com.connect.auth.common.exception.AuthCommonSignatureMismatchException;
 import com.connect.auth.common.util.AsymmetricJwtUtil;
+import com.connect.connector.dto.ConnectorImageDTO;
 import com.connect.connector.dto.request.CreateConnectorRequestDTO;
 import com.connect.connector.dto.response.ConnectorResponseDTO;
 import com.connect.connector.enums.City;
 import com.connect.connector.enums.Country;
 import com.connect.connector.exception.ExistingConnectorException;
 import com.connect.connector.model.Connector;
+import com.connect.connector.model.ConnectorImage;
 import com.connect.connector.repository.ConnectorImageRepository;
 import com.connect.connector.repository.ConnectorRepository;
 import com.connect.connector.repository.ConnectorSocialMediaRepository;
@@ -23,10 +25,12 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -179,6 +183,154 @@ class ConnectorServiceComponentTest {
         ResponseEntity<String> response = restTemplate.postForEntity(getBaseUrl() + "/me", entity, String.class);
 
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+    }
+
+    @Test
+    void addGalleryPhoto_ValidInput_ReturnsOk() {
+        // Given: image DTO with correct orderIndex and valid media URL
+        ConnectorImageDTO imageDTO = new ConnectorImageDTO(
+                "https://cdn.test.com/image.jpg",
+                0
+        );
+
+        // Mock connector retrieval
+        when(connectorRepository.findByUserId(userId)).thenReturn(Optional.of(mockConnector));
+        when(connectorImageRepository.findByConnector_ConnectorId(mockConnector.getConnectorId()))
+                .thenReturn(List.of()); // No existing images
+
+        // Create and return mock image (with ID set via reflection)
+        ConnectorImage savedImage = ConnectorImage.builder()
+                .connector(mockConnector)
+                .mediaUrl(imageDTO.getMediaUrl())
+                .orderIndex(imageDTO.getOrderIndex())
+                .build();
+        setField(savedImage, "id", UUID.randomUUID());
+        when(connectorImageRepository.save(any(ConnectorImage.class))).thenReturn(savedImage);
+
+        // We expect the service to call again after saving to fetch current images
+        when(connectorImageRepository.findByConnector_ConnectorId(mockConnector.getConnectorId()))
+                .thenReturn(List.of(savedImage)); // Now includes the saved image
+
+        HttpEntity<ConnectorImageDTO> request = new HttpEntity<>(imageDTO, jsonHeaders());
+
+        // When
+        ResponseEntity<ConnectorResponseDTO> response = restTemplate.postForEntity(
+                getBaseUrl() + "/me/gallery", request, ConnectorResponseDTO.class);
+
+        // Then
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        ConnectorResponseDTO body = response.getBody();
+        assertNotNull(body);
+        assertEquals(mockConnector.getFirstName(), body.getFirstName());
+        assertEquals(Country.POLAND.getDisplayValue(), body.getCountry());
+        assertEquals(City.KRAKOW.getDisplayValue(), body.getCity());
+        assertEquals("I love meeting new people in hostels!", body.getBio());
+
+        // Gallery images should contain 1 image
+        assertNotNull(body.getGalleryImages());
+        assertEquals(1, body.getGalleryImages().size());
+
+        ConnectorImageDTO returnedImage = body.getGalleryImages().get(0);
+        assertEquals(imageDTO.getMediaUrl(), returnedImage.getMediaUrl());
+        assertEquals(imageDTO.getOrderIndex(), returnedImage.getOrderIndex());
+
+        // Social links may be empty if not mocked — skip assertion unless mocked
+    }
+
+    @Test
+    void addGalleryPhoto_WhenInvalidIndex_ReturnsBadRequest() {
+        ConnectorImageDTO imageDTO = new ConnectorImageDTO("https://cdn.test.com/image.jpg", 100); // Invalid index
+
+        HttpEntity<ConnectorImageDTO> request = new HttpEntity<>(imageDTO, jsonHeaders());
+
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                getBaseUrl() + "/me/gallery", request, String.class);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().contains("Order index must be between 0 and 4"));
+    }
+
+    @Test
+    void addGalleryPhoto_WhenConnectorNotFound_ReturnsNotFound() {
+        ConnectorImageDTO imageDTO = new ConnectorImageDTO("https://cdn.test.com/image.jpg", 0);
+
+        when(connectorRepository.findByUserId(userId)).thenReturn(Optional.empty());
+
+        HttpEntity<ConnectorImageDTO> request = new HttpEntity<>(imageDTO, jsonHeaders());
+
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                getBaseUrl() + "/me/gallery", request, String.class);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().contains("Connector not found"));
+    }
+
+    @Test
+    void addGalleryPhoto_WhenImageIndexNotNextAvailable_ReturnsBadRequest() {
+        ConnectorImageDTO imageDTO = new ConnectorImageDTO("https://cdn.test.com/image.jpg", 2); // Invalid: not next spot
+
+        when(connectorRepository.findByUserId(userId)).thenReturn(Optional.of(mockConnector));
+
+        ConnectorImage existingImage = ConnectorImage.builder()
+                .connector(mockConnector)
+                .mediaUrl("existing.jpg")
+                .orderIndex(0)
+                .build();
+        setField(existingImage, "id", UUID.randomUUID());
+
+        when(connectorImageRepository.findByConnector_ConnectorId(mockConnector.getConnectorId()))
+                .thenReturn(List.of(existingImage)); // Only orderIndex=0 exists, so 2 is invalid
+
+        HttpEntity<ConnectorImageDTO> request = new HttpEntity<>(imageDTO, jsonHeaders());
+
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                getBaseUrl() + "/me/gallery", request, String.class);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertTrue(response.getBody().contains("Order index is 2 but should be equal to the next spot available"));
+    }
+
+    @Test
+    void addGalleryPhoto_WhenReplacingExistingImage_Success() {
+        ConnectorImageDTO imageDTO = new ConnectorImageDTO("https://cdn.test.com/new.jpg", 0); // Replaces image at index 0
+
+        when(connectorRepository.findByUserId(userId)).thenReturn(Optional.of(mockConnector));
+
+        ConnectorImage existingImage = ConnectorImage.builder()
+                .connector(mockConnector)
+                .mediaUrl("old.jpg")
+                .orderIndex(0)
+                .build();
+        setField(existingImage, "id", UUID.randomUUID());
+
+        when(connectorImageRepository.findByConnector_ConnectorId(mockConnector.getConnectorId()))
+                .thenReturn(List.of(existingImage));
+
+        ConnectorImage savedImage = ConnectorImage.builder()
+                .connector(mockConnector)
+                .mediaUrl(imageDTO.getMediaUrl())
+                .orderIndex(imageDTO.getOrderIndex())
+                .build();
+        setField(savedImage, "id", UUID.randomUUID());
+
+        when(connectorImageRepository.save(any())).thenReturn(savedImage);
+
+        // After replacement, we expect the new one to be returned
+        when(connectorImageRepository.findByConnector_ConnectorId(mockConnector.getConnectorId()))
+                .thenReturn(List.of(savedImage));
+
+        HttpEntity<ConnectorImageDTO> request = new HttpEntity<>(imageDTO, jsonHeaders());
+
+        ResponseEntity<ConnectorResponseDTO> response = restTemplate.postForEntity(
+                getBaseUrl() + "/me/gallery", request, ConnectorResponseDTO.class);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        ConnectorResponseDTO body = response.getBody();
+        assertNotNull(body);
+        assertEquals(1, body.getGalleryImages().size());
+        assertEquals("https://cdn.test.com/new.jpg", body.getGalleryImages().get(0).getMediaUrl());
     }
 
 }
