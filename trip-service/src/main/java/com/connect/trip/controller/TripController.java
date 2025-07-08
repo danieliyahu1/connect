@@ -22,7 +22,10 @@ public class TripController {
     private final TripService tripService;
 
     @PostMapping("/me")
-    public ResponseEntity<TripResponseDTO> createTrip(@RequestBody @Valid TripRequestDTO request, Authentication authentication) {
+    public ResponseEntity<TripResponseDTO> createTrip(
+            @RequestBody @Valid TripRequestDTO request,
+            Authentication authentication
+    ) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 tripService.createTrip(request, getUserIdFromAuth(authentication))
         );
@@ -35,25 +38,34 @@ public class TripController {
         );
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<TripResponseDTO> updateTrip(@PathVariable String id,
-                                                      @RequestBody @Valid TripRequestDTO request,
-                                                      Authentication authentication) throws TripNotFoundException {
+    @PutMapping("/me/{id}")
+    public ResponseEntity<TripResponseDTO> updateTrip(
+            @PathVariable String id,
+            @RequestBody @Valid TripRequestDTO request,
+            Authentication authentication
+    ) throws TripNotFoundException {
         return ResponseEntity.ok(
                 tripService.updateTrip(id, request, getUserIdFromAuth(authentication))
         );
     }
 
     @DeleteMapping("/me/{id}")
-    public ResponseEntity<TripResponseDTO> deleteTrip(@PathVariable String id, Authentication authentication) throws TripNotFoundException {
-        return ResponseEntity.ok(tripService.deleteTrip(id, getUserIdFromAuth(authentication)));
+    public ResponseEntity<TripResponseDTO> deleteTrip(
+            @PathVariable String id,
+            Authentication authentication
+    ) throws TripNotFoundException {
+        return ResponseEntity.ok(
+                tripService.deleteTrip(id, getUserIdFromAuth(authentication))
+        );
     }
 
-    @GetMapping("/incoming")
-    public ResponseEntity<List<TripResponseDTO>> getIncomingTrips(@RequestParam String country,
-                                                                @RequestParam(required = false) String city,
-                                                                @RequestParam(required = false) String from,
-                                                                @RequestParam(required = false) String to) {
+    @GetMapping("/internal/incoming")
+    public ResponseEntity<List<TripResponseDTO>> getIncomingTrips(
+            @RequestParam String country,
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) String from,
+            @RequestParam(required = false) String to
+    ) {
         return ResponseEntity.ok(
                 tripService.getIncomingTrips(country, city, from, to)
         );

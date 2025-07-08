@@ -4,22 +4,29 @@ server:
 spring:
   cloud:
     gateway:
-      server:
-        webflux:
-          routes:
-            - id: connector-service-route
-              uri: http://connect-connector-service:4001
-              predicates:
-                - Path=/api/connectors/**
-              filters:
-                - StripPrefix=1
+      routes:
+        - id: connector-service-route
+          uri: http://connect-connector-service:4001
+          predicates:
+            - Path=/api/connectors/public/**
+            - Path=/api/connectors/me/**
+          filters:
+            - StripPrefix=1
 
-            - id: auth-service-route
-              uri: http://connect-auth-service:4000
-              predicates:
-                - Path=/auth/**
-              filters:
-                - name: RewritePath
-                  args:
-                    regexp: "/auth/(?<segment>.*)"
-                    replacement: "/auth/public/${segment}"
+        - id: trip-service-route
+          uri: http://connect-trip-service:4002
+          predicates:
+            - Path=/api/trips/public/**
+            - Path=/api/trips/me/**
+          filters:
+            - StripPrefix=1
+
+        - id: auth-service-route
+          uri: http://connect-auth-service:4000
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - name: RewritePath
+              args:
+                regexp: "/api/auth/(?<segment>.*)"
+                replacement: "/auth/public/${segment}"

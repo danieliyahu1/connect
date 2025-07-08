@@ -109,7 +109,7 @@ class TripControllerTest {
 
         Authentication auth = new TestingAuthenticationToken(userId.toString(), null);
 
-        mockMvc.perform(put(URI_PREFIX + "/" + tripId)
+        mockMvc.perform(put(URI_PREFIX + "/me/" + tripId)
                         .principal(auth)
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(request)))
@@ -160,7 +160,7 @@ class TripControllerTest {
         when(tripService.getIncomingTrips("Spain", "Barcelona", "2025-07-01", "2025-07-10"))
                 .thenReturn(List.of(trip));
 
-        mockMvc.perform(get(URI_PREFIX + "/incoming")
+        mockMvc.perform(get(URI_PREFIX + "/internal/incoming")
                         .param("country", "Spain")
                         .param("city", "Barcelona")
                         .param("from", "2025-07-01")
@@ -200,7 +200,7 @@ class TripControllerTest {
 
         Authentication auth = new TestingAuthenticationToken(userId.toString(), null);
 
-        mockMvc.perform(put(URI_PREFIX + "/" + tripId)
+        mockMvc.perform(put(URI_PREFIX + "/me/" + tripId)
                         .principal(auth)
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(request)))

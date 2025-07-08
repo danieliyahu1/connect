@@ -133,7 +133,7 @@ class TripServiceComponentTest {
 
     @Test
     void getIncomingTrips_withCountry_returnsTripsList() {
-        String url = baseUrl() + "/incoming?country=Israel";
+        String url = baseUrl() + "/internal/incoming?country=Israel";
 
         ResponseEntity<List> response = restTemplate.exchange(
                 url,
@@ -161,7 +161,7 @@ class TripServiceComponentTest {
         HttpEntity<String> entity = new HttpEntity<>(jsonRequest, jsonHeaders());
 
         ResponseEntity<TripResponseDTO> response = restTemplate.exchange(
-                baseUrl() + "/" + tripId,
+                baseUrl() + "/me/" + tripId,
                 HttpMethod.PUT,
                 entity,
                 TripResponseDTO.class
@@ -190,7 +190,7 @@ class TripServiceComponentTest {
 
     @Test
     void getIncomingTrips_withAllFilters_returnsFilteredTrips() {
-        String url = baseUrl() + "/incoming?country=Israel&city=Tel Aviv";
+        String url = baseUrl() + "/internal/incoming?country=Israel&city=Tel Aviv";
 
         ResponseEntity<List> response = restTemplate.exchange(
                 url,
