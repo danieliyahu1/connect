@@ -1,6 +1,5 @@
 package com.connect.connector.dto.request;
 
-import com.connect.connector.dto.ConnectorImageDTO;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 

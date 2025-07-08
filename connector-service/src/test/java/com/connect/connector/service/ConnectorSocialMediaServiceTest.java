@@ -3,6 +3,7 @@ package com.connect.connector.service;
 import com.connect.connector.dto.ConnectorSocialMediaDTO;
 import com.connect.connector.enums.SocialMediaPlatform;
 import com.connect.connector.exception.ConnectorSocialMediaNotFoundException;
+import com.connect.connector.exception.ExistingSocialMediaPlatformException;
 import com.connect.connector.exception.InvalidProfileUrlException;
 import com.connect.connector.model.Connector;
 import com.connect.connector.model.ConnectorSocialMedia;
@@ -40,7 +41,7 @@ class ConnectorSocialMediaServiceTest {
             "linkedin",
             "tiktok",
     })
-    void addSocialMediaPlatformLink_shouldSaveAllLinks_whenValidInput(String platform) throws InvalidProfileUrlException {
+    void addSocialMediaPlatformLink_shouldSaveAllLinks_whenValidInput(String platform) throws InvalidProfileUrlException, ExistingSocialMediaPlatformException {
         Connector connector = Connector.builder()
                 .userId(UUID.randomUUID())
                 .firstName("John")

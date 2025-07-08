@@ -12,6 +12,7 @@ import java.util.UUID;
 @Repository
 public interface ConnectorSocialMediaRepository extends JpaRepository<ConnectorSocialMedia, UUID> {
     List<ConnectorSocialMedia> findByConnector_ConnectorId(UUID connectorId);
+    boolean existsByConnector_ConnectorIdAndPlatform(UUID connectorId, SocialMediaPlatform platform);
 
     Optional<ConnectorSocialMedia> findByConnector_ConnectorIdAndPlatform(UUID connectorId, SocialMediaPlatform platform);
 }

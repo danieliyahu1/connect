@@ -4,17 +4,19 @@ import com.connect.auth.common.exception.AuthCommonInvalidAccessTokenException;
 import com.connect.auth.common.exception.AuthCommonSignatureMismatchException;
 import com.connect.auth.common.util.AsymmetricJwtUtil;
 import com.connect.connector.dto.ConnectorImageDTO;
+import com.connect.connector.dto.ConnectorSocialMediaDTO;
 import com.connect.connector.dto.request.CreateConnectorRequestDTO;
 import com.connect.connector.dto.response.ConnectorResponseDTO;
+import com.connect.connector.dto.response.UploadSignatureResponseDTO;
 import com.connect.connector.enums.City;
 import com.connect.connector.enums.Country;
-import com.connect.connector.exception.ExistingConnectorException;
+import com.connect.connector.enums.SocialMediaPlatform;
 import com.connect.connector.model.Connector;
 import com.connect.connector.model.ConnectorImage;
+import com.connect.connector.model.ConnectorSocialMedia;
 import com.connect.connector.repository.ConnectorImageRepository;
 import com.connect.connector.repository.ConnectorRepository;
 import com.connect.connector.repository.ConnectorSocialMediaRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,7 @@ import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -63,6 +66,7 @@ class ConnectorServiceComponentTest {
 
     private static UUID userId;
     private Connector mockConnector;
+    private ConnectorSocialMedia mockConnectorSocialMedia;
 
 
     // Helper method for base URL, consistent with reference
@@ -92,6 +96,11 @@ class ConnectorServiceComponentTest {
         mockConnector.setCity(City.KRAKOW);
         mockConnector.setBio("I love meeting new people in hostels!");
 
+        mockConnectorSocialMedia = ConnectorSocialMedia.builder()
+                .connector(mockConnector)
+                .platform(SocialMediaPlatform.INSTAGRAM)
+                .profileUrl("https://instagram.com/testuser")
+                .build();
     }
 
     @Test
@@ -128,7 +137,7 @@ class ConnectorServiceComponentTest {
                 "Name", "Israel", "Tel Aviv", "This is a valid bio with more than fifteen characters."
         );
 
-        when(connectorRepository.save(any())).thenThrow(new com.connect.connector.exception.ConnectorNotFoundException("No connector"));
+        when(connectorRepository.save(any())).thenReturn(Optional.empty());
 
         ResponseEntity<String> response = restTemplate.exchange(
                 getBaseUrl() + "/me",
@@ -332,5 +341,353 @@ class ConnectorServiceComponentTest {
         assertEquals(1, body.getGalleryImages().size());
         assertEquals("https://cdn.test.com/new.jpg", body.getGalleryImages().get(0).getMediaUrl());
     }
+
+    @Test
+    void getPublicProfile_WhenUserExists_ReturnsOk() {
+        // Given
+        UUID otherUserId = UUID.fromString("99999999-8888-7777-6666-555555555555");
+
+        Connector otherConnector = new Connector();
+        setField(otherConnector, "connectorId", UUID.randomUUID());
+        setField(otherConnector, "userId", otherUserId);
+        otherConnector.setFirstName("Alice");
+        otherConnector.setCountry(Country.POLAND);
+        otherConnector.setCity(City.KRAKOW);
+        otherConnector.setBio("Traveling around the world!");
+
+        when(connectorRepository.findByUserId(otherUserId)).thenReturn(Optional.of(otherConnector));
+        when(connectorImageRepository.findByConnector_ConnectorId(otherConnector.getConnectorId()))
+                .thenReturn(List.of()); // Assume no images
+        when(connectorSocialMediaRepository.findByConnector_ConnectorId(otherConnector.getConnectorId()))
+                .thenReturn(List.of()); // Assume no social media
+
+        HttpEntity<Void> request = new HttpEntity<>(jsonHeaders());
+
+        ResponseEntity<ConnectorResponseDTO> response = restTemplate.exchange(
+                getBaseUrl() + "/public/" + otherUserId,
+                HttpMethod.GET,
+                request,
+                ConnectorResponseDTO.class
+        );
+
+        // Then
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        ConnectorResponseDTO body = response.getBody();
+        assertNotNull(body);
+        assertEquals("Alice", body.getFirstName());
+        assertEquals(Country.POLAND.getDisplayValue(), body.getCountry());
+        assertEquals(City.KRAKOW.getDisplayValue(), body.getCity());
+        assertEquals("Traveling around the world!", body.getBio());
+    }
+
+    @Test
+    void getPublicProfile_WhenUserNotFound_ReturnsNotFound() {
+        // Given
+        UUID missingUserId = UUID.fromString("12121212-3434-5656-7878-909090909090");
+
+        when(connectorRepository.findByUserId(missingUserId)).thenReturn(Optional.empty());
+
+        HttpEntity<Void> request = new HttpEntity<>(jsonHeaders());
+
+        ResponseEntity<String> response = restTemplate.exchange(
+                getBaseUrl() + "/public/" + missingUserId,
+                HttpMethod.GET,
+                request,
+                String.class
+        );
+
+        // Then
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().contains("Connector not found"));
+    }
+
+    @Test
+    void addSocialMediaLink_ValidInput_SavesEntityAndReturnsCreated() {
+        // Arrange
+        ConnectorSocialMediaDTO dto = new ConnectorSocialMediaDTO("Instagram", "https://instagram.com/testuser");
+
+        when(connectorRepository.findByUserId(userId)).thenReturn(Optional.of(mockConnector));
+        when(connectorSocialMediaRepository.save(any())).thenReturn(mockConnectorSocialMedia);
+
+        when(connectorSocialMediaRepository.existsByConnector_ConnectorIdAndPlatform(
+                eq(mockConnector.getConnectorId()), eq(SocialMediaPlatform.INSTAGRAM)))
+                .thenReturn(false);
+
+        HttpEntity<ConnectorSocialMediaDTO> request = new HttpEntity<>(dto, jsonHeaders());
+
+        // Act
+        ResponseEntity<ConnectorResponseDTO> response = restTemplate.postForEntity(
+                getBaseUrl() + "/me/social-media",
+                request,
+                ConnectorResponseDTO.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("Daniel", response.getBody().getFirstName());
+        verify(connectorSocialMediaRepository).save(any());
+    }
+
+    @Test
+    void addSocialMediaLink_BlankUrl_ReturnsBadRequest() {
+        // Arrange
+        ConnectorSocialMediaDTO dto = new ConnectorSocialMediaDTO("Instagram", "   "); // blank URL
+        HttpEntity<ConnectorSocialMediaDTO> request = new HttpEntity<>(dto, jsonHeaders());
+
+
+        when(connectorSocialMediaRepository.existsByConnector_ConnectorIdAndPlatform(
+                eq(mockConnector.getConnectorId()), eq(SocialMediaPlatform.INSTAGRAM)))
+                .thenReturn(false);
+
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                getBaseUrl() + "/me/social-media",
+                request,
+                String.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertTrue(response.getBody().contains("Profile URL must not be blank"));
+    }
+
+    @Test
+    void addSocialMediaLink_MissingPlatform_ReturnsBadRequest() {
+        // Arrange
+        ConnectorSocialMediaDTO dto = new ConnectorSocialMediaDTO(null, "https://instagram.com/testuser");
+        HttpEntity<ConnectorSocialMediaDTO> request = new HttpEntity<>(dto, jsonHeaders());
+
+        when(connectorSocialMediaRepository.existsByConnector_ConnectorIdAndPlatform(
+                eq(mockConnector.getConnectorId()), eq(SocialMediaPlatform.INSTAGRAM)))
+                .thenReturn(false);
+
+        // Act
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                getBaseUrl() + "/me/social-media",
+                request,
+                String.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertTrue(response.getBody().contains("Platform must not be not null"));
+    }
+
+    @Test
+    void updateSocialMediaLink_ValidInput_UpdatesProfileUrl() {
+        // Arrange
+        when(connectorRepository.findByUserId(userId)).thenReturn(Optional.of(mockConnector));
+        when(connectorSocialMediaRepository.findByConnector_ConnectorIdAndPlatform(
+                eq(mockConnector.getConnectorId()), eq(SocialMediaPlatform.INSTAGRAM)))
+                .thenReturn(Optional.of(mockConnectorSocialMedia));
+
+        ConnectorSocialMedia updatedSocialMedia = ConnectorSocialMedia.builder()
+                .connector(mockConnector)
+                .platform(SocialMediaPlatform.INSTAGRAM)
+                .profileUrl("https://instagram.com/newuser")
+                .build();
+        when(connectorSocialMediaRepository.save(any())).thenReturn(updatedSocialMedia);
+
+        HttpEntity<String> request = new HttpEntity<>("https://instagram.com/newuser", jsonHeaders());
+
+        // Act
+        ResponseEntity<ConnectorResponseDTO> response = restTemplate.exchange(
+                getBaseUrl() + "/me/social-media/Instagram",
+                HttpMethod.PUT,
+                request,
+                ConnectorResponseDTO.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        verify(connectorSocialMediaRepository).save(any());
+    }
+
+    @Test
+    void updateSocialMediaLink_PlatformNotFound_Returns404() {
+        // Arrange
+        when(connectorRepository.findByUserId(userId)).thenReturn(Optional.of(mockConnector));
+        when(connectorSocialMediaRepository.findByConnector_ConnectorIdAndPlatform(
+                any(), any())).thenReturn(Optional.empty());
+
+        HttpEntity<String> request = new HttpEntity<>("https://linkedin.com/newuser", jsonHeaders());
+
+        // Act
+        ResponseEntity<String> response = restTemplate.exchange(
+                getBaseUrl() + "/me/social-media/LinkedIn",
+                HttpMethod.PUT,
+                request,
+                String.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertTrue(response.getBody().contains("No social media link found"));
+    }
+
+    @Test
+    void deleteSocialMediaLink_ValidInput_DeletesPlatform() {
+        // Arrange
+        when(connectorRepository.findByUserId(userId)).thenReturn(Optional.of(mockConnector));
+        when(connectorSocialMediaRepository.findByConnector_ConnectorIdAndPlatform(
+                eq(mockConnector.getConnectorId()), eq(SocialMediaPlatform.INSTAGRAM)))
+                .thenReturn(Optional.of(mockConnectorSocialMedia));
+
+        // Act
+        ResponseEntity<ConnectorResponseDTO> response = restTemplate.exchange(
+                getBaseUrl() + "/me/social-media/Instagram",
+                HttpMethod.DELETE,
+                new HttpEntity<>(jsonHeaders()),
+                ConnectorResponseDTO.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        verify(connectorSocialMediaRepository).delete(any());
+    }
+
+    @Test
+    void deleteSocialMediaLink_PlatformNotFound_Returns404() {
+        // Arrange
+        when(connectorRepository.findByUserId(userId)).thenReturn(Optional.of(mockConnector));
+        when(connectorSocialMediaRepository.findByConnector_ConnectorIdAndPlatform(
+                any(), any())).thenReturn(Optional.empty());
+
+        // Act
+        ResponseEntity<String> response = restTemplate.exchange(
+                getBaseUrl() + "/me/social-media/Instagram",
+                HttpMethod.DELETE,
+                new HttpEntity<>(jsonHeaders()),
+                String.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertTrue(response.getBody().contains("No social media link found"));
+    }
+
+    @Test
+    void addSocialMedia_DuplicatePlatform_ReturnsConflict() {
+        ConnectorSocialMediaDTO dto = new ConnectorSocialMediaDTO("Instagram", "https://instagram.com/testuser");
+
+        when(connectorRepository.findByUserId(userId)).thenReturn(Optional.of(mockConnector));
+
+        HttpEntity<ConnectorSocialMediaDTO> request = new HttpEntity<>(dto, jsonHeaders());
+
+        when(connectorSocialMediaRepository.existsByConnector_ConnectorIdAndPlatform(
+                eq(mockConnector.getConnectorId()), eq(SocialMediaPlatform.INSTAGRAM)))
+                .thenReturn(true);
+
+        // Act – duplicate insert
+        ResponseEntity<String> duplicateResponse = restTemplate.postForEntity(
+                getBaseUrl() + "/me/social-media",
+                request,
+                String.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.CONFLICT, duplicateResponse.getStatusCode());
+        assertTrue(duplicateResponse.getBody().contains("already exists")); // assuming your exception has a message like this
+    }
+
+    @Test
+    void getAllPublicProfiles_ReturnsExpectedConnectors() {
+        Connector secondConnector = new Connector();
+        UUID secondUserId = UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+        UUID secondConnectorId = UUID.fromString("cccccccc-cccc-cccc-cccc-cccccccccccc");
+
+        setField(secondConnector, "userId", secondUserId);
+        setField(secondConnector, "connectorId", secondConnectorId);
+        secondConnector.setFirstName("Alice");
+        secondConnector.setCountry(Country.ISRAEL);
+        secondConnector.setCity(City.TEL_AVIV);
+        secondConnector.setBio("Solo traveler");
+
+        when(connectorRepository.findAllByUserIdIn(any())).thenReturn(List.of(mockConnector, secondConnector));
+
+        List<UUID> userIds = List.of(userId, secondUserId);
+        HttpEntity<List<UUID>> request = new HttpEntity<>(userIds, jsonHeaders());
+
+        ResponseEntity<ConnectorResponseDTO[]> response = restTemplate.postForEntity(
+                getBaseUrl() + "/internal/batch",
+                request,
+                ConnectorResponseDTO[].class
+        );
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        ConnectorResponseDTO[] connectors = response.getBody();
+
+        assertNotNull(connectors);
+        assertEquals(2, connectors.length);
+
+        List<String> names = Arrays.stream(connectors).map(ConnectorResponseDTO::getFirstName).toList();
+        assertTrue(names.contains("Daniel"));
+        assertTrue(names.contains("Alice"));
+
+        verify(connectorRepository).findAllByUserIdIn(userIds);
+    }
+
+    @Test
+    void generateGalleryUploadSignature_ValidOrderIndex_ReturnsExpectedFields() {
+
+        int orderIndex = 2;
+        String expectedFolder = "connectors/" + userId;
+        String expectedPublicId = String.valueOf(orderIndex);
+
+        HttpEntity<Void> request = new HttpEntity<>(jsonHeaders());
+
+        // Act
+        ResponseEntity<UploadSignatureResponseDTO> response = restTemplate.postForEntity(
+                getBaseUrl() + "/me/gallery/signature?orderIndex=" + orderIndex,
+                request,
+                UploadSignatureResponseDTO.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode(), "Expected status 200 OK");
+
+        UploadSignatureResponseDTO body = response.getBody();
+        assertNotNull(body, "Response body must not be null");
+
+        // Fields that should match exact values
+        assertEquals(expectedFolder, body.getFolder(), "Folder path mismatch");
+        assertEquals(expectedPublicId, body.getPublicId(), "Public ID should match order index");
+
+        // Fields that should not be null or empty
+        assertNotNull(body.getApiKey(), "API key must not be null");
+        assertFalse(body.getApiKey().isBlank(), "API key must not be blank");
+
+        assertNotNull(body.getCloudName(), "Cloud name must not be null");
+        assertFalse(body.getCloudName().isBlank(), "Cloud name must not be blank");
+
+        assertNotNull(body.getSignature(), "Signature must not be null");
+        assertFalse(body.getSignature().isBlank(), "Signature must not be blank");
+
+        assertNotNull(body.getTimestamp(), "Timestamp must not be null");
+        assertTrue(body.getTimestamp().matches("\\d+"), "Timestamp must be numeric");
+        assertTrue(Long.parseLong(body.getTimestamp()) > 0, "Timestamp must be a positive number");
+    }
+
+
+    @Test
+    void generateGalleryUploadSignature_InvalidOrderIndex_ReturnsBadRequest() {
+        int invalidOrderIndex = 9;
+
+        HttpEntity<Void> request = new HttpEntity<>(jsonHeaders());
+
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                getBaseUrl() + "/me/gallery/signature?orderIndex=" + invalidOrderIndex,
+                request,
+                String.class
+        );
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().contains("Order index must be between 0 and 4"));
+    }
+
 
 }

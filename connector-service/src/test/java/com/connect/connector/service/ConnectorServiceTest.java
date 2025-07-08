@@ -54,7 +54,7 @@ class ConnectorServiceTest {
             "Jane,POLAND,KRAKOW,New bio",
             "Mike,ISRAEL,TEL_AVIV,Another bio"
     })
-    void updateMyProfile_shouldUpdate_whenFieldsAreNotNull(String firstName, String country, String city, String bio) throws InvalidProfileUrlException {
+    void updateMyProfile_shouldUpdate_whenFieldsAreNotNull(String firstName, String country, String city, String bio) throws InvalidProfileUrlException, ConnectorNotFoundException {
         UpdateConnectorRequestDTO dto = new UpdateConnectorRequestDTO(firstName, country, city, bio);
 
         when(connectorRepository.findByUserId(userId)).thenReturn(Optional.of(connector));
@@ -119,7 +119,7 @@ class ConnectorServiceTest {
     }
 
     @Test
-    void getPublicProfile_shouldReturnProfile_whenFound() {
+    void getPublicProfile_shouldReturnProfile_whenFound() throws ConnectorNotFoundException {
         String country = "POLAND";
         String city = "KRAKOW";
         when(connectorRepository.findByUserId(userId)).thenReturn(Optional.of(connector));

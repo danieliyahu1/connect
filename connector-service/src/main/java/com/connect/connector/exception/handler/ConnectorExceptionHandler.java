@@ -89,4 +89,12 @@ public class ConnectorExceptionHandler {
 
         return ResponseEntity.badRequest().body(message);
     }
+
+    @ExceptionHandler(ExistingSocialMediaPlatformException.class)
+    public ResponseEntity<Map<String, String>> handleExistingSocialMediaPlatformException(ExistingSocialMediaPlatformException ex) {
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", "Existing Social Media Platform");
+        errorResponse.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
 }

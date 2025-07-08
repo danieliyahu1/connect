@@ -4,6 +4,7 @@ import com.connect.connector.dto.ConnectorSocialMediaDTO;
 import com.connect.connector.enums.SocialMediaPlatform;
 import com.connect.connector.enums.util.EnumUtil;
 import com.connect.connector.exception.ConnectorSocialMediaNotFoundException;
+import com.connect.connector.exception.ExistingSocialMediaPlatformException;
 import com.connect.connector.exception.InvalidProfileUrlException;
 import com.connect.connector.model.Connector;
 import com.connect.connector.model.ConnectorSocialMedia;
@@ -22,9 +23,10 @@ public class ConnectorSocialMediaService {
         return connectorSocialMediaRepository.findByConnector_ConnectorId(id);
     }
 
-    public ConnectorSocialMediaDTO addSocialMediaPlatformLink(Connector connector, ConnectorSocialMediaDTO connectorSocialMediaDTO) throws InvalidProfileUrlException {
+    public ConnectorSocialMediaDTO addSocialMediaPlatformLink(Connector connector, ConnectorSocialMediaDTO connectorSocialMediaDTO) throws InvalidProfileUrlException, ExistingSocialMediaPlatformException {
         validateProfileUrl(connectorSocialMediaDTO.getProfileUrl());
-
+        validateConnectorDoesNotHaveSocialMediaPlatformLink(connector.getConnectorId(),
+                EnumUtil.getEnumFromDisplayName(SocialMediaPlatform.class, connectorSocialMediaDTO.getPlatform()));
         ConnectorSocialMedia connectorSocialMedia = ConnectorSocialMedia.builder()
                 .connector(connector)
                 .platform(EnumUtil.getEnumFromDisplayName(SocialMediaPlatform.class, connectorSocialMediaDTO.getPlatform()))
@@ -48,6 +50,12 @@ public class ConnectorSocialMediaService {
 
     private void deleteSocialMediaPlatformLink(ConnectorSocialMedia connectorSocialMedia) {
         connectorSocialMediaRepository.delete(connectorSocialMedia);
+    }
+
+    private void validateConnectorDoesNotHaveSocialMediaPlatformLink(UUID connectorId, SocialMediaPlatform platform) throws ExistingSocialMediaPlatformException {
+        if(connectorSocialMediaRepository.existsByConnector_ConnectorIdAndPlatform(connectorId, platform)) {
+            throw new ExistingSocialMediaPlatformException("Social media link for this platform already exists");
+        }
     }
 
     private ConnectorSocialMedia findSocialMediaPlatformLink(Connector connector, String platform) throws ConnectorSocialMediaNotFoundException {

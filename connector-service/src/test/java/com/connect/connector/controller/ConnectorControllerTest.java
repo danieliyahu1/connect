@@ -85,20 +85,18 @@ class ConnectorControllerTest {
     }
 
     @Test
-    void updateMyProfile_withInvalidProfileUrl_returnsBadRequest() throws Exception {
+    void updateMyProfile_whenConnectorNotFound_returnsBadRequest() throws Exception {
         UUID userId = UUID.randomUUID();
 
         UpdateConnectorRequestDTO updateRequest = new UpdateConnectorRequestDTO("Invalid User", "Country", "City", "Bio with invalid URL");
-
-        when(connectorService.updateMyProfile(userId, updateRequest)).thenThrow(InvalidProfileUrlException.class);
-
+        when(connectorService.updateMyProfile(userId, updateRequest)).thenThrow(ConnectorNotFoundException.class);
         Authentication auth = new TestingAuthenticationToken(userId.toString(), null);
 
         mockMvc.perform(put(URIPREFIX + "/me")
                         .principal(auth)
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(updateRequest)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotFound());
 
         verify(connectorService).updateMyProfile(userId, updateRequest);
     }
