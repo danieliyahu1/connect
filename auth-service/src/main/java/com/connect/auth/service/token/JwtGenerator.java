@@ -4,7 +4,6 @@ import io.jsonwebtoken.Jwts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.stereotype.Service;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
@@ -13,8 +12,8 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.UUID;
 
-import static com.connect.auth.common.constants.JwtConstants.ACCESS_TOKEN_LIFE_SPAN;
-import static com.connect.auth.common.constants.JwtConstants.REFRESH_TOKEN_LIFE_SPAN;
+import static com.connect.auth.constants.JwtConstants.ACCESS_TOKEN_LIFE_SPAN;
+import static com.connect.auth.constants.JwtConstants.REFRESH_TOKEN_LIFE_SPAN;
 
 @Service
 public class JwtGenerator {

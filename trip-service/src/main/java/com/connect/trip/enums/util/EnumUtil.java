@@ -1,8 +1,10 @@
 package com.connect.trip.enums.util;
 
+import com.connect.trip.exception.IllegalEnumException;
+
 public class EnumUtil {
 
-    public static <E extends Enum<E>> E getEnumFromDisplayName(Class<E> enumClass, String displayName) {
+    public static <E extends Enum<E>> E getEnumFromDisplayName(Class<E> enumClass, String displayName) throws IllegalEnumException {
         String normalized = displayName
                 .toUpperCase()
                 .replaceAll("[-\\s]", "_"); // replace dash or space with underscore
@@ -10,10 +12,10 @@ public class EnumUtil {
         try {
             return Enum.valueOf(enumClass, normalized);
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Unknown enum name: " + displayName);
+            throw new IllegalEnumException("Unknown enum name: " + displayName);
         }
         catch (NullPointerException e) {
-            throw new IllegalArgumentException("Display name is invalid: " + displayName);
+            throw new IllegalEnumException("Display name is invalid: " + displayName);
         }
     }
 }

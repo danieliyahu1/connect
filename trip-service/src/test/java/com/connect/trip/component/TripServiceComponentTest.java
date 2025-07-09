@@ -52,8 +52,9 @@ class TripServiceComponentTest {
     @MockitoBean
     private AsymmetricJwtUtil asymmetricJwtUtil;
 
-    private static UUID userId;
-    private static UUID tripId;
+    private UUID userId;
+    private UUID tripId;
+    private UUID publicTripId;
 
     @BeforeEach
     void setUpAuthentication() throws AuthCommonInvalidAccessTokenException, AuthCommonSignatureMismatchException, NoSuchFieldException, IllegalAccessException {
@@ -71,14 +72,16 @@ class TripServiceComponentTest {
                 .build();
 
         // Use reflection or setId manually (if you add a setter only for test, see note below)
-        Field idField = Trip.class.getDeclaredField("id");
+        Field idField = Trip.class.getDeclaredField("dbId");
         idField.setAccessible(true);
         idField.set(mockTrip, tripId);
 
+        publicTripId = mockTrip.getPublicId();
+
         when(tripRepository.save(any(Trip.class))).thenReturn(mockTrip);
         when(tripRepository.findByUserId(userId)).thenReturn(List.of(mockTrip));
-        when(tripRepository.findByIdAndUserId(eq(tripId), eq(userId))).thenReturn(Optional.of(mockTrip));
-        when(tripRepository.searchTrips(anyString(), anyString(), any(), any())).thenReturn(List.of(mockTrip));
+        when(tripRepository.findByPublicIdAndUserId(eq(mockTrip.getPublicId()), eq(userId))).thenReturn(Optional.of(mockTrip));
+        when(tripRepository.searchTrips(any(Country.class), any(City.class), any(), any())).thenReturn(List.of(mockTrip));
     }
 
     private String baseUrl() {
@@ -161,7 +164,7 @@ class TripServiceComponentTest {
         HttpEntity<String> entity = new HttpEntity<>(jsonRequest, jsonHeaders());
 
         ResponseEntity<TripResponseDTO> response = restTemplate.exchange(
-                baseUrl() + "/me/" + tripId,
+                baseUrl() + "/me/" + publicTripId,
                 HttpMethod.PUT,
                 entity,
                 TripResponseDTO.class
@@ -177,7 +180,7 @@ class TripServiceComponentTest {
     @Test
     void deleteTrip_validId_returnsDeletedTrip() {
         ResponseEntity<TripResponseDTO> response = restTemplate.exchange(
-                baseUrl() + "/me/" + tripId,
+                baseUrl() + "/me/" + publicTripId,
                 HttpMethod.DELETE,
                 new HttpEntity<>(jsonHeaders()),
                 TripResponseDTO.class

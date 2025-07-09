@@ -1,10 +1,7 @@
 package com.connect.connector.service;
 
 import com.connect.connector.dto.ConnectorImageDTO;
-import com.connect.connector.exception.ImageIndexOutOfBoundException;
-import com.connect.connector.exception.ImageNotFoundException;
-import com.connect.connector.exception.InvalidImageOrderException;
-import com.connect.connector.exception.ProfilePictureRequiredException;
+import com.connect.connector.exception.*;
 import com.connect.connector.mapper.ConnectorImageMapper;
 import com.connect.connector.model.Connector;
 import com.connect.connector.model.ConnectorImage;
@@ -23,9 +20,16 @@ public class ConnectorImageService {
     private final ConnectorImageRepository connectorImageRepository;
     private final ConnectorImageMapper connectorImageMapper;
 
-    public ConnectorImageDTO addGalleryPhoto(ConnectorImageDTO connectorImageDTO, Connector connector) throws ImageIndexOutOfBoundException, InvalidImageOrderException, ImageNotFoundException {
+    public ConnectorImageDTO addGalleryPhoto(ConnectorImageDTO connectorImageDTO, Connector connector) throws ImageIndexOutOfBoundException, InvalidImageOrderException, ImageNotFoundException, ExistingImageException {
         validateConnectorImageIndex(connectorImageDTO.getOrderIndex());
+        checkImageNotExists(connectorImageDTO, connector);
         return connectorImageMapper.toDto(saveConnectorImage(connectorImageDTO, connector));
+    }
+
+    private void checkImageNotExists(ConnectorImageDTO connectorImageDTO, Connector connector) throws ExistingImageException {
+        if( connectorImageRepository.existsByConnectorAndMediaUrl(connector, connectorImageDTO.getMediaUrl())) {
+            throw new ExistingImageException("Image with the same media URL already exists for this connector.");
+        }
     }
 
     public ConnectorImageDTO deleteGalleryPhoto(int orderIndex, Connector connector) throws ImageIndexOutOfBoundException, ImageNotFoundException, ProfilePictureRequiredException {

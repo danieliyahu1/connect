@@ -54,7 +54,7 @@ class ConnectorServiceTest {
             "Jane,POLAND,KRAKOW,New bio",
             "Mike,ISRAEL,TEL_AVIV,Another bio"
     })
-    void updateMyProfile_shouldUpdate_whenFieldsAreNotNull(String firstName, String country, String city, String bio) throws InvalidProfileUrlException, ConnectorNotFoundException {
+    void updateMyProfile_shouldUpdate_whenFieldsAreNotNull(String firstName, String country, String city, String bio) throws InvalidProfileUrlException, ConnectorNotFoundException, IllegalEnumException {
         UpdateConnectorRequestDTO dto = new UpdateConnectorRequestDTO(firstName, country, city, bio);
 
         when(connectorRepository.findByUserId(userId)).thenReturn(Optional.of(connector));
@@ -89,7 +89,7 @@ class ConnectorServiceTest {
             "Dina,ISRAEL,JERUSALEM,Hi there"
     })
     void createMyProfile_shouldCreate_whenNoExistingConnector(String firstName, String country, String city, String bio)
-            throws ExistingConnectorException {
+            throws ExistingConnectorException, IllegalEnumException {
 
         CreateConnectorRequestDTO dto = new CreateConnectorRequestDTO(firstName, country, city, bio);
 
@@ -188,7 +188,7 @@ class ConnectorServiceTest {
 
     @ParameterizedTest
     @ValueSource(ints = {-1, 6, 100})
-    void addGalleryPhoto_invalidOrderIndex_throwsImageIndexOutOfBoundException(int orderIndex) throws ImageNotFoundException, ImageIndexOutOfBoundException, InvalidImageOrderException {
+    void addGalleryPhoto_invalidOrderIndex_throwsImageIndexOutOfBoundException(int orderIndex) throws ImageNotFoundException, ImageIndexOutOfBoundException, InvalidImageOrderException, ExistingImageException {
         ConnectorImageDTO imageDTO = new ConnectorImageDTO("http://image.jpg", orderIndex);
         Connector mockedConnector = mock(Connector.class);
 

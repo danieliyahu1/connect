@@ -9,7 +9,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class ConnectorImageDTO {
-    @NotBlank
+    @NotBlank(message = "media url must not be blank")
     private String mediaUrl; // ID received from Media Service
 
     @Min(value = 0, message = "Order index must be between 0 and 4")

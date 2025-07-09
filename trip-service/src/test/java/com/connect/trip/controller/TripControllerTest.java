@@ -51,6 +51,7 @@ class TripControllerTest {
                 .city("Tokyo")
                 .startDate("2025-01-01")
                 .endDate("2025-01-10")
+                .publicId(UUID.randomUUID().toString())
                 .build();
 
         when(tripService.createTrip(eq(request), eq(userId))).thenReturn(response);
@@ -77,6 +78,7 @@ class TripControllerTest {
                 .country("Germany")
                 .startDate("2025-06-01")
                 .endDate("2025-06-15")
+                .publicId(UUID.randomUUID().toString())
                 .build();
 
         when(tripService.getTripsByUser(userId)).thenReturn(List.of(trip));
@@ -103,6 +105,7 @@ class TripControllerTest {
                 .city("Paris")
                 .startDate("2025-08-01")
                 .endDate("2025-08-10")
+                .publicId(UUID.randomUUID().toString())
                 .build();
 
         when(tripService.updateTrip(eq(tripId), eq(request), eq(userId))).thenReturn(response);
@@ -131,6 +134,7 @@ class TripControllerTest {
                 .city("Rome")
                 .startDate("2025-09-01")
                 .endDate("2025-09-10")
+                .publicId(UUID.randomUUID().toString())
                 .build();
 
         when(tripService.deleteTrip(eq(tripId), eq(userId))).thenReturn(response);
@@ -155,6 +159,7 @@ class TripControllerTest {
                 .city("Barcelona")
                 .startDate("2025-07-01")
                 .endDate("2025-07-10")
+                .publicId(UUID.randomUUID().toString())
                 .build();
 
         when(tripService.getIncomingTrips("Spain", "Barcelona", "2025-07-01", "2025-07-10"))

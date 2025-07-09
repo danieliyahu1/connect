@@ -10,6 +10,8 @@ public class TripResponseDTO {
     @NonNull
     private String userId;
     @NonNull
+    private String publicId;
+    @NonNull
     private String country;
     private String city;
     private String startDate;

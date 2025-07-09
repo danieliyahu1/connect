@@ -97,4 +97,12 @@ public class ConnectorExceptionHandler {
         errorResponse.put("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
     }
+
+    @ExceptionHandler(ExistingImageException.class)
+    public ResponseEntity<Map<String, String>> handleExistingImageException(ExistingImageException ex) {
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", "Existing Image");
+        errorResponse.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
 }

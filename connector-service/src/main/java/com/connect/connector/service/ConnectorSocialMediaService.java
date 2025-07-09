@@ -5,6 +5,7 @@ import com.connect.connector.enums.SocialMediaPlatform;
 import com.connect.connector.enums.util.EnumUtil;
 import com.connect.connector.exception.ConnectorSocialMediaNotFoundException;
 import com.connect.connector.exception.ExistingSocialMediaPlatformException;
+import com.connect.connector.exception.IllegalEnumException;
 import com.connect.connector.exception.InvalidProfileUrlException;
 import com.connect.connector.model.Connector;
 import com.connect.connector.model.ConnectorSocialMedia;
@@ -23,7 +24,7 @@ public class ConnectorSocialMediaService {
         return connectorSocialMediaRepository.findByConnector_ConnectorId(id);
     }
 
-    public ConnectorSocialMediaDTO addSocialMediaPlatformLink(Connector connector, ConnectorSocialMediaDTO connectorSocialMediaDTO) throws InvalidProfileUrlException, ExistingSocialMediaPlatformException {
+    public ConnectorSocialMediaDTO addSocialMediaPlatformLink(Connector connector, ConnectorSocialMediaDTO connectorSocialMediaDTO) throws InvalidProfileUrlException, ExistingSocialMediaPlatformException, IllegalEnumException {
         validateProfileUrl(connectorSocialMediaDTO.getProfileUrl());
         validateConnectorDoesNotHaveSocialMediaPlatformLink(connector.getConnectorId(),
                 EnumUtil.getEnumFromDisplayName(SocialMediaPlatform.class, connectorSocialMediaDTO.getPlatform()));
@@ -36,13 +37,13 @@ public class ConnectorSocialMediaService {
         return convertSocialMediaModelToDTO(connectorSocialMedia);
     }
 
-    public ConnectorSocialMediaDTO updateSocialMediaPlatformLink(Connector connector, String platform, String profileUrl) throws InvalidProfileUrlException, ConnectorSocialMediaNotFoundException {
+    public ConnectorSocialMediaDTO updateSocialMediaPlatformLink(Connector connector, String platform, String profileUrl) throws InvalidProfileUrlException, ConnectorSocialMediaNotFoundException, IllegalEnumException {
         validateProfileUrl(profileUrl);
         ConnectorSocialMedia connectorSocialMedia = findSocialMediaPlatformLink(connector, platform);
         return convertSocialMediaModelToDTO(updateSocialMediaPlatformLink(connectorSocialMedia, profileUrl));
     }
 
-    public ConnectorSocialMediaDTO deleteSocialMediaPlatformLink(Connector connectorByUserId, String platform) throws ConnectorSocialMediaNotFoundException {
+    public ConnectorSocialMediaDTO deleteSocialMediaPlatformLink(Connector connectorByUserId, String platform) throws ConnectorSocialMediaNotFoundException, IllegalEnumException {
         ConnectorSocialMedia connectorSocialMedia = findSocialMediaPlatformLink(connectorByUserId, platform);
         deleteSocialMediaPlatformLink(connectorSocialMedia);
         return convertSocialMediaModelToDTO(connectorSocialMedia);
@@ -58,7 +59,7 @@ public class ConnectorSocialMediaService {
         }
     }
 
-    private ConnectorSocialMedia findSocialMediaPlatformLink(Connector connector, String platform) throws ConnectorSocialMediaNotFoundException {
+    private ConnectorSocialMedia findSocialMediaPlatformLink(Connector connector, String platform) throws ConnectorSocialMediaNotFoundException, IllegalEnumException {
         return connectorSocialMediaRepository.findByConnector_ConnectorIdAndPlatform(
                 connector.getConnectorId(),
                         EnumUtil.getEnumFromDisplayName(SocialMediaPlatform.class, platform))

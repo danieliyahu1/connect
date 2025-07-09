@@ -13,6 +13,7 @@ import java.util.UUID;
 public interface ConnectorImageRepository extends JpaRepository<ConnectorImage, UUID> {
     List<ConnectorImage> findByConnector(Connector connector);
 
-    // OR if you want to search by the connector's ID directly:
+    boolean existsByConnectorAndMediaUrl(Connector connector, String mediaUrl);
+
     List<ConnectorImage> findByConnector_ConnectorId(UUID connectorId);
 }

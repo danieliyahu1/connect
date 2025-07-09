@@ -2,6 +2,7 @@ package com.connect.connector.enums.util;
 
 import com.connect.connector.enums.City;
 import com.connect.connector.enums.Country;
+import com.connect.connector.exception.IllegalEnumException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -19,7 +20,7 @@ class EnumUtilTest {
             "tEl_aViV",   // Mixed case with underscore
             "TEL AVIV"
     })
-    void getEnumFromDisplayName_shouldReturnCorrectCityForVariousValidFormats(String inputCityName) {
+    void getEnumFromDisplayName_shouldReturnCorrectCityForVariousValidFormats(String inputCityName) throws IllegalEnumException {
         // Arrange & Act
         City city = EnumUtil.getEnumFromDisplayName(City.class, inputCityName);
 
@@ -33,7 +34,7 @@ class EnumUtilTest {
             "poland",   // All lowercase
             "Poland"    // Title case
     })
-    void getEnumFromDisplayName_shouldReturnCorrectCountryForVariousValidFormats(String inputCountryName) {
+    void getEnumFromDisplayName_shouldReturnCorrectCountryForVariousValidFormats(String inputCountryName) throws IllegalEnumException {
         // Arrange & Act
         Country country = EnumUtil.getEnumFromDisplayName(Country.class, inputCountryName);
 
@@ -43,15 +44,15 @@ class EnumUtilTest {
 
     @Test
     void getEnumFromDisplayName_shouldThrow_whenInputIsUnknown() {
-        IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
+        IllegalEnumException ex = assertThrows(
+                IllegalEnumException.class,
                 () -> EnumUtil.getEnumFromDisplayName(City.class, "not-a-city")
         );
         assertTrue(ex.getMessage().contains("Unknown enum name"));
     }
 
     @Test
-    void getEnumFromDisplayName_shouldBeCaseInsensitive() {
+    void getEnumFromDisplayName_shouldBeCaseInsensitive() throws IllegalEnumException {
         City city = EnumUtil.getEnumFromDisplayName(City.class, "TeL AvIv");
         assertEquals(City.TEL_AVIV, city);
     }
@@ -64,7 +65,7 @@ class EnumUtilTest {
 
     @Test
     void getEnumFromDisplayName_shouldThrow_whenInputIsEmpty() {
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(IllegalEnumException.class, () ->
                 EnumUtil.getEnumFromDisplayName(City.class, ""));
     }
 }

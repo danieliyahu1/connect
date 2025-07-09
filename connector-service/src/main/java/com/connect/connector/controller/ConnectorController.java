@@ -26,17 +26,17 @@
         private final ConnectorService connectorService;
 
         @PutMapping("/me")
-        public ResponseEntity<ConnectorResponseDTO> updateMyProfile(@RequestBody @Valid UpdateConnectorRequestDTO updateConnectorRequestDTO, Authentication authentication) throws ConnectorNotFoundException {
+        public ResponseEntity<ConnectorResponseDTO> updateMyProfile(@RequestBody @Valid UpdateConnectorRequestDTO updateConnectorRequestDTO, Authentication authentication) throws ConnectorNotFoundException, IllegalEnumException {
             return ResponseEntity.ok(connectorService.updateMyProfile(getUserIdFromAuth(authentication), updateConnectorRequestDTO));
         }
 
         @PostMapping("/me")
-        public ResponseEntity<ConnectorResponseDTO> createMyProfile(@RequestBody @Valid CreateConnectorRequestDTO createConnectorRequestDTO, Authentication authentication) throws ExistingConnectorException {
+        public ResponseEntity<ConnectorResponseDTO> createMyProfile(@RequestBody @Valid CreateConnectorRequestDTO createConnectorRequestDTO, Authentication authentication) throws ExistingConnectorException, IllegalEnumException {
             return ResponseEntity.status(HttpStatus.CREATED).body(connectorService.createMyProfile(getUserIdFromAuth(authentication), createConnectorRequestDTO));
         }
 
         @PostMapping("/me/gallery")
-        public ResponseEntity<ConnectorResponseDTO> addGalleryPhoto(@RequestBody @Valid ConnectorImageDTO connectorImageDTO, Authentication authentication) throws ImageIndexOutOfBoundException, ImageNotFoundException, InvalidImageOrderException, ConnectorNotFoundException {
+        public ResponseEntity<ConnectorResponseDTO> addGalleryPhoto(@RequestBody @Valid ConnectorImageDTO connectorImageDTO, Authentication authentication) throws ImageIndexOutOfBoundException, ImageNotFoundException, InvalidImageOrderException, ConnectorNotFoundException, ExistingImageException {
             return ResponseEntity.ok(connectorService.addGalleryPhoto(getUserIdFromAuth(authentication), connectorImageDTO));
         }
 
@@ -53,17 +53,17 @@
         }
 
         @PostMapping("/me/social-media")
-        public ResponseEntity<ConnectorResponseDTO> addSocialMediaPlatformLink(@Valid @RequestBody ConnectorSocialMediaDTO dto, Authentication auth) throws InvalidProfileUrlException, ConnectorNotFoundException, ExistingSocialMediaPlatformException {
+        public ResponseEntity<ConnectorResponseDTO> addSocialMediaPlatformLink(@Valid @RequestBody ConnectorSocialMediaDTO dto, Authentication auth) throws InvalidProfileUrlException, ConnectorNotFoundException, ExistingSocialMediaPlatformException, IllegalEnumException {
             return ResponseEntity.status(HttpStatus.CREATED).body(connectorService.addSocialMediaPlatformLink(getUserIdFromAuth(auth), dto));
         }
 
         @PutMapping("/me/social-media/{platform}")
-        public ResponseEntity<ConnectorResponseDTO> updateSocialMediaPlatformLink(@PathVariable String platform, @RequestBody String profileUrl, Authentication auth) throws InvalidProfileUrlException, ConnectorSocialMediaNotFoundException, ConnectorNotFoundException {
+        public ResponseEntity<ConnectorResponseDTO> updateSocialMediaPlatformLink(@PathVariable String platform, @RequestBody String profileUrl, Authentication auth) throws InvalidProfileUrlException, ConnectorSocialMediaNotFoundException, ConnectorNotFoundException, IllegalEnumException {
             return ResponseEntity.ok(connectorService.updateSocialMediaPlatformLink(getUserIdFromAuth(auth), platform, profileUrl));
         }
 
         @DeleteMapping("/me/social-media/{platform}")
-        public ResponseEntity<ConnectorResponseDTO> deleteSocialMediaPlatformLink(@PathVariable String platform, Authentication auth) throws ConnectorSocialMediaNotFoundException, ConnectorNotFoundException {
+        public ResponseEntity<ConnectorResponseDTO> deleteSocialMediaPlatformLink(@PathVariable String platform, Authentication auth) throws ConnectorSocialMediaNotFoundException, ConnectorNotFoundException, IllegalEnumException {
             return ResponseEntity.ok(connectorService.deleteSocialMediaPlatformLink(getUserIdFromAuth(auth), platform));
         }
 

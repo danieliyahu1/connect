@@ -31,7 +31,7 @@ public class ConnectorService {
     private final ConnectorImageService connectorImageService;
     private final MediaStorageService mediaService;
 
-    public ConnectorResponseDTO updateMyProfile(UUID userId, @Valid UpdateConnectorRequestDTO updateConnectorRequestDTO) throws ConnectorNotFoundException {
+    public ConnectorResponseDTO updateMyProfile(UUID userId, @Valid UpdateConnectorRequestDTO updateConnectorRequestDTO) throws ConnectorNotFoundException, IllegalEnumException {
         Connector connector = findConnectorByUserId(userId);
 
         if (updateConnectorRequestDTO.getFirstName() != null) {
@@ -52,7 +52,7 @@ public class ConnectorService {
         return buildConnectorResponse(updatedConnector);
     }
 
-    public ConnectorResponseDTO createMyProfile(UUID userId, CreateConnectorRequestDTO createConnectorRequestDTO) throws ExistingConnectorException {
+    public ConnectorResponseDTO createMyProfile(UUID userId, CreateConnectorRequestDTO createConnectorRequestDTO) throws ExistingConnectorException, IllegalEnumException {
         validateConnectorDoesNotExist(userId);
         Connector connector = Connector.builder()
                 .userId(userId)
@@ -66,7 +66,7 @@ public class ConnectorService {
         return buildConnectorResponse(savedConnector);
     }
 
-    public ConnectorResponseDTO addGalleryPhoto(UUID userId, ConnectorImageDTO connectorImageDTO) throws ImageIndexOutOfBoundException, ImageNotFoundException, InvalidImageOrderException, ConnectorNotFoundException {
+    public ConnectorResponseDTO addGalleryPhoto(UUID userId, ConnectorImageDTO connectorImageDTO) throws ImageIndexOutOfBoundException, ImageNotFoundException, InvalidImageOrderException, ConnectorNotFoundException, ExistingImageException {
         Connector connector = findConnectorByUserId(userId);
         connectorImageService.addGalleryPhoto(connectorImageDTO, connector);
         return buildConnectorResponse(connector);
@@ -91,19 +91,19 @@ public class ConnectorService {
         return buildConnectorResponse(connector);
     }
 
-    public ConnectorResponseDTO addSocialMediaPlatformLink(UUID userIdFromAuth, @Valid ConnectorSocialMediaDTO dto) throws InvalidProfileUrlException, ConnectorNotFoundException, ExistingSocialMediaPlatformException {
+    public ConnectorResponseDTO addSocialMediaPlatformLink(UUID userIdFromAuth, @Valid ConnectorSocialMediaDTO dto) throws InvalidProfileUrlException, ConnectorNotFoundException, ExistingSocialMediaPlatformException, IllegalEnumException {
         Connector connector = findConnectorByUserId(userIdFromAuth);
         connectorSocialMediaService.addSocialMediaPlatformLink(connector, dto);
         return buildConnectorResponse(connector);
     }
 
-    public ConnectorResponseDTO updateSocialMediaPlatformLink(UUID userIdFromAuth, String platform, String profileUrl) throws InvalidProfileUrlException, ConnectorSocialMediaNotFoundException, ConnectorNotFoundException {
+    public ConnectorResponseDTO updateSocialMediaPlatformLink(UUID userIdFromAuth, String platform, String profileUrl) throws InvalidProfileUrlException, ConnectorSocialMediaNotFoundException, ConnectorNotFoundException, IllegalEnumException {
         Connector connector = findConnectorByUserId(userIdFromAuth);
         connectorSocialMediaService.updateSocialMediaPlatformLink(findConnectorByUserId(userIdFromAuth), platform, profileUrl);
         return buildConnectorResponse(connector);
     }
 
-    public ConnectorResponseDTO deleteSocialMediaPlatformLink(UUID userIdFromAuth, String platform) throws ConnectorSocialMediaNotFoundException, ConnectorNotFoundException {
+    public ConnectorResponseDTO deleteSocialMediaPlatformLink(UUID userIdFromAuth, String platform) throws ConnectorSocialMediaNotFoundException, ConnectorNotFoundException, IllegalEnumException {
         Connector connector = findConnectorByUserId(userIdFromAuth);
         connectorSocialMediaService.deleteSocialMediaPlatformLink(findConnectorByUserId(userIdFromAuth), platform);
         return buildConnectorResponse(connector);

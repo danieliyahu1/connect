@@ -4,6 +4,8 @@ import com.connect.trip.dto.request.TripRequestDTO;
 import com.connect.trip.dto.response.TripResponseDTO;
 import com.connect.trip.enums.City;
 import com.connect.trip.enums.Country;
+import com.connect.trip.exception.ExistingTripException;
+import com.connect.trip.exception.IllegalEnumException;
 import com.connect.trip.exception.TripNotFoundException;
 import com.connect.trip.mapper.TripMapper;
 import com.connect.trip.model.Trip;
@@ -14,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -33,9 +36,10 @@ class TripServiceTest {
     private TripRequestDTO requestDto;
     private TripResponseDTO responseDto;
     private String tripId;
+    private String publicId;
 
     @BeforeEach
-    void setup() {
+    void setup() throws NoSuchFieldException, IllegalAccessException {
         userId = UUID.randomUUID();
         tripId = UUID.randomUUID().toString();
 
@@ -47,6 +51,12 @@ class TripServiceTest {
                 .endDate(LocalDate.of(2025, 6, 10))
                 .build();
 
+        Field dbIdField = Trip.class.getDeclaredField("dbId");
+        dbIdField.setAccessible(true);
+        dbIdField.set(trip, UUID.fromString(tripId));
+
+        publicId = trip.getPublicId().toString();
+
         requestDto = new TripRequestDTO("Israel", "Tel Aviv", "2025-06-01", "2025-06-10");
 
         responseDto = TripResponseDTO.builder()
@@ -55,11 +65,12 @@ class TripServiceTest {
                 .city("Tel Aviv")
                 .startDate("2025-06-01")
                 .endDate("2025-06-10")
+                .publicId(publicId)
                 .build();
     }
 
     @Test
-    void createTrip_withValidRequest_shouldSaveAndReturnDto() {
+    void createTrip_withValidRequest_shouldSaveAndReturnDto() throws ExistingTripException, IllegalEnumException {
         when(tripRepository.save(any(Trip.class))).thenReturn(trip);
         when(tripMapper.toDto(trip)).thenReturn(responseDto);
 
@@ -89,7 +100,7 @@ class TripServiceTest {
     }
 
     @Test
-    void updateTrip_withValidIdAndRequest_shouldUpdateAndReturnDto() throws TripNotFoundException {
+    void updateTrip_withValidIdAndRequest_shouldUpdateAndReturnDto() throws TripNotFoundException, IllegalEnumException {
         TripRequestDTO updateRequest = new TripRequestDTO("Israel", "Jerusalem", "2025-07-01", "2025-07-05");
         Trip updatedTrip = Trip.builder()
                 .userId(userId)
@@ -104,65 +115,66 @@ class TripServiceTest {
                 .city("Jerusalem")
                 .startDate("2025-07-01")
                 .endDate("2025-07-05")
+                .publicId(updatedTrip.getPublicId().toString())
                 .build();
 
-        when(tripRepository.findByIdAndUserId(UUID.fromString(tripId), userId)).thenReturn(Optional.of(trip));
+        when(tripRepository.findByPublicIdAndUserId(UUID.fromString(publicId), userId)).thenReturn(Optional.of(trip));
         when(tripRepository.save(any(Trip.class))).thenReturn(updatedTrip);
         when(tripMapper.toDto(updatedTrip)).thenReturn(updatedDto);
 
-        TripResponseDTO result = tripService.updateTrip(tripId, updateRequest, userId);
+        TripResponseDTO result = tripService.updateTrip(publicId, updateRequest, userId);
 
         assertEquals("Jerusalem", result.getCity());
         assertEquals("Israel", result.getCountry());
         assertEquals("2025-07-01", result.getStartDate());
 
-        verify(tripRepository).findByIdAndUserId(UUID.fromString(tripId), userId);
+        verify(tripRepository).findByPublicIdAndUserId(UUID.fromString(publicId), userId);
         verify(tripRepository).save(any(Trip.class));
         verify(tripMapper).toDto(updatedTrip);
     }
 
     @Test
     void updateTrip_withNonExistingTrip_shouldThrowTripNotFoundException() {
-        when(tripRepository.findByIdAndUserId(UUID.fromString(tripId), userId)).thenReturn(Optional.empty());
+        when(tripRepository.findByPublicIdAndUserId(UUID.fromString(publicId), userId)).thenReturn(Optional.empty());
 
         TripNotFoundException ex = assertThrows(TripNotFoundException.class,
-                () -> tripService.updateTrip(tripId, requestDto, userId));
+                () -> tripService.updateTrip(publicId, requestDto, userId));
 
         assertTrue(ex.getMessage().contains("Trip not found or unauthorized"));
-        verify(tripRepository).findByIdAndUserId(UUID.fromString(tripId), userId);
+        verify(tripRepository).findByPublicIdAndUserId(UUID.fromString(publicId), userId);
         verifyNoMoreInteractions(tripRepository, tripMapper);
     }
 
     @Test
     void deleteTrip_withExistingTrip_shouldDeleteAndReturnDto() throws TripNotFoundException {
-        when(tripRepository.findByIdAndUserId(UUID.fromString(tripId), userId)).thenReturn(Optional.of(trip));
+        when(tripRepository.findByPublicIdAndUserId(UUID.fromString(publicId), userId)).thenReturn(Optional.of(trip));
         doNothing().when(tripRepository).deleteById(UUID.fromString(tripId));
         when(tripMapper.toDto(trip)).thenReturn(responseDto);
 
-        TripResponseDTO result = tripService.deleteTrip(tripId, userId);
+        TripResponseDTO result = tripService.deleteTrip(publicId, userId);
 
         assertEquals("Israel", result.getCountry());
-        verify(tripRepository).findByIdAndUserId(UUID.fromString(tripId), userId);
+        verify(tripRepository).findByPublicIdAndUserId(UUID.fromString(publicId), userId);
         verify(tripRepository).deleteById(UUID.fromString(tripId));
         verify(tripMapper).toDto(trip);
     }
 
     @Test
     void deleteTrip_withNonExistingTrip_shouldThrowTripNotFoundException() {
-        when(tripRepository.findByIdAndUserId(UUID.fromString(tripId), userId)).thenReturn(Optional.empty());
+        when(tripRepository.findByPublicIdAndUserId(UUID.fromString(publicId), userId)).thenReturn(Optional.empty());
 
         TripNotFoundException ex = assertThrows(TripNotFoundException.class,
-                () -> tripService.deleteTrip(tripId, userId));
+                () -> tripService.deleteTrip(publicId, userId));
 
         assertTrue(ex.getMessage().contains("Trip not found"));
-        verify(tripRepository).findByIdAndUserId(UUID.fromString(tripId), userId);
+        verify(tripRepository).findByPublicIdAndUserId(UUID.fromString(publicId), userId);
         verifyNoMoreInteractions(tripRepository, tripMapper);
     }
 
     @Test
-    void getIncomingTrips_withValidFilters_shouldReturnFilteredDtoList() {
+    void getIncomingTrips_withValidFilters_shouldReturnFilteredDtoList() throws IllegalEnumException {
         List<Trip> trips = List.of(trip);
-        when(tripRepository.searchTrips(anyString(), anyString(), any(), any())).thenReturn(trips);
+        when(tripRepository.searchTrips(any(Country.class), any(City.class), any(), any())).thenReturn(trips);
         when(tripMapper.toDto(trip)).thenReturn(responseDto);
 
         List<TripResponseDTO> result = tripService.getIncomingTrips("Israel", "Tel Aviv", "2025-06-01", "2025-06-10");
@@ -170,7 +182,7 @@ class TripServiceTest {
         assertEquals(1, result.size());
         assertEquals("Israel", result.get(0).getCountry());
 
-        verify(tripRepository).searchTrips(eq("Israel"), eq("Tel Aviv"), eq(LocalDate.parse("2025-06-01")), eq(LocalDate.parse("2025-06-10")));
+        verify(tripRepository).searchTrips(eq(Country.ISRAEL), eq(City.TEL_AVIV), eq(LocalDate.parse("2025-06-01")), eq(LocalDate.parse("2025-06-10")));
         verify(tripMapper).toDto(trip);
     }
 }

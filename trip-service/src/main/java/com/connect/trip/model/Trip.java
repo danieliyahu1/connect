@@ -4,10 +4,7 @@ import com.connect.trip.enums.City;
 import com.connect.trip.enums.Country;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -19,7 +16,11 @@ import java.util.UUID;
 public class Trip {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    @Column(name = "id")
+    private UUID dbId;
+
+    @Column(name = "public_id", unique = true, nullable = false)
+    private UUID publicId;
 
     @NotNull
     @Column(name = "user_id", nullable = false)
@@ -48,6 +49,7 @@ public class Trip {
         this.city = city;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.publicId = UUID.randomUUID();
     }
 
 }

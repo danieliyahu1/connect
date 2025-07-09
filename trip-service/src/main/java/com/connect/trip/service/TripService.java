@@ -5,6 +5,8 @@ import com.connect.trip.dto.response.TripResponseDTO;
 import com.connect.trip.enums.City;
 import com.connect.trip.enums.Country;
 import com.connect.trip.enums.util.EnumUtil;
+import com.connect.trip.exception.ExistingTripException;
+import com.connect.trip.exception.IllegalEnumException;
 import com.connect.trip.exception.TripNotFoundException;
 import com.connect.trip.mapper.TripMapper;
 import com.connect.trip.model.Trip;
@@ -22,7 +24,8 @@ public class TripService {
     private final TripRepository tripRepository;
     private final TripMapper tripMapper;
 
-    public TripResponseDTO createTrip(TripRequestDTO request, UUID userId) {
+    public TripResponseDTO createTrip(TripRequestDTO request, UUID userId) throws ExistingTripException, IllegalEnumException {
+        checkTripExists(request, userId);
         Trip trip = Trip.builder()
                 .userId(userId)
                 .country(EnumUtil.getEnumFromDisplayName(Country.class, request.getCountry()))
@@ -34,6 +37,17 @@ public class TripService {
         return tripMapper.toDto(tripRepository.save(trip));
     }
 
+    private void checkTripExists(TripRequestDTO request, UUID userId) throws ExistingTripException, IllegalEnumException {
+        Country country = getCountryEnumOrNull(request.getCountry());
+        City city = getCityEnumOrNull(request.getCity());
+        LocalDate startDate = parseDate(request.getStartDate());
+        LocalDate endDate = parseDate(request.getEndDate());
+
+        if (tripRepository.existsTrip(userId, country, city, startDate, endDate)) {
+            throw new ExistingTripException("Trip already exists for the user with the same details");
+        }
+    }
+
     public List<TripResponseDTO> getTripsByUser(UUID userId) {
         return tripRepository.findByUserId(userId)
                 .stream()
@@ -41,8 +55,8 @@ public class TripService {
                 .collect(Collectors.toList());
     }
 
-    public TripResponseDTO updateTrip(String id, TripRequestDTO request, UUID userId) throws TripNotFoundException {
-        Trip trip = tripRepository.findByIdAndUserId(UUID.fromString(id), userId)
+    public TripResponseDTO updateTrip(String publicId, TripRequestDTO request, UUID userId) throws TripNotFoundException, IllegalEnumException {
+        Trip trip = tripRepository.findByPublicIdAndUserId(UUID.fromString(publicId), userId)
                 .orElseThrow(() -> new TripNotFoundException("Trip not found or unauthorized"));
 
         // Update only the relevant fields
@@ -63,18 +77,18 @@ public class TripService {
         return tripMapper.toDto(updatedTrip);
     }
 
-    public TripResponseDTO deleteTrip(String id, UUID userId) throws TripNotFoundException {
-        Trip trip = tripRepository.findByIdAndUserId(UUID.fromString(id), userId)
+    public TripResponseDTO deleteTrip(String publicId, UUID userId) throws TripNotFoundException {
+        Trip trip = tripRepository.findByPublicIdAndUserId(UUID.fromString(publicId), userId)
                 .orElseThrow(() -> new TripNotFoundException("Trip not found"));
 
-        tripRepository.deleteById(UUID.fromString(id));
+        tripRepository.deleteById(trip.getDbId());
         return tripMapper.toDto(trip);
     }
 
-    public List<TripResponseDTO> getIncomingTrips(String country, String city, String from, String to) {
+    public List<TripResponseDTO> getIncomingTrips(String country, String city, String from, String to) throws IllegalEnumException {
         return tripRepository.searchTrips(
-                        country,
-                        city,
+                        getCountryEnumOrNull(country),
+                        getCityEnumOrNull(city),
                         parseDate(from),
                         parseDate(to)
                 ).stream()
@@ -85,5 +99,19 @@ public class TripService {
     private LocalDate parseDate(String dateStr) {
         if (dateStr == null || dateStr.isBlank()) return null;
         return LocalDate.parse(dateStr);
+    }
+
+    private Country getCountryEnumOrNull(String countryDisplayName) throws IllegalEnumException {
+        if (countryDisplayName != null && !countryDisplayName.trim().isEmpty()) {
+            return EnumUtil.getEnumFromDisplayName(Country.class, countryDisplayName);
+        }
+        return null;
+    }
+
+    private City getCityEnumOrNull(String cityDisplayName) throws IllegalEnumException {
+        if (cityDisplayName != null && !cityDisplayName.trim().isEmpty()) {
+            return EnumUtil.getEnumFromDisplayName(City.class, cityDisplayName);
+        }
+        return null;
     }
 }
