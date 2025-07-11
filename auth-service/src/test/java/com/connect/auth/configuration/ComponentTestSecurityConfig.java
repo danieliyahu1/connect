@@ -27,7 +27,7 @@ public class ComponentTestSecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 // **** IMPORTANT: ADD A SPECIFIC SECURITY MATCHER HERE ****
                 .securityMatcher(
-                        "/auth/internal/**"      // Example: paths specifically for testing
+                        "/**"      // Example: paths specifically for testing
                         // Do NOT include "/**" or anything that would catch ALL requests
                 )
                 .authorizeHttpRequests(auth -> auth

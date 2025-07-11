@@ -1,6 +1,6 @@
 //package com.connect.auth.component;
 //
-//import com.connect.auth.configuration.ComponentTestConfig;
+//import com.connect.auth.configuration.ComponentTestSecurityConfig;
 //import com.connect.auth.dto.OAuthResponseDTO;
 //import com.connect.auth.enums.AuthProvider;
 //import com.connect.auth.model.RefreshToken;
@@ -36,7 +36,7 @@
 //        JpaRepositoriesAutoConfiguration.class,
 //        HibernateJpaAutoConfiguration.class
 //})
-//@Import(ComponentTestConfig.class)
+//@Import(ComponentTestSecurityConfig.class)
 //@ActiveProfiles("component-test")
 //@AutoConfigureMockMvc
 //    public class OAuthServiceComponentTest {

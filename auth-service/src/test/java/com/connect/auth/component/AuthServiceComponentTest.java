@@ -1,6 +1,5 @@
 package com.connect.auth.component;
 
-import com.connect.auth.config.JpaAuditingConfig;
 import com.connect.auth.configuration.ComponentTestSecurityConfig;
 import com.connect.auth.dto.AuthResponseDTO;
 import com.connect.auth.model.RefreshToken;
