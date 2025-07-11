@@ -1,6 +1,7 @@
 package com.connect.connector.service;
 
 import com.connect.connector.dto.response.UploadSignatureResponseDTO;
+import com.connect.connector.exception.MediaStorageSignatureGenerationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
@@ -8,6 +9,8 @@ import org.springframework.util.DigestUtils;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.Map;
 import java.util.TreeMap;
@@ -68,9 +71,9 @@ public class CloudinaryMediaStorageService  implements MediaStorageService{
             hmacSha1.init(secretKey);
 
             byte[] hash = hmacSha1.doFinal(paramString.getBytes(StandardCharsets.UTF_8));
-            return DigestUtils.md5DigestAsHex(hash); // You may use hex manually if needed
-        } catch (Exception e) {
-            throw new RuntimeException("Error generating Cloudinary signature", e);
+            return DigestUtils.md5DigestAsHex(hash);
+        } catch (IllegalArgumentException | NullPointerException | InvalidKeyException | NoSuchAlgorithmException e) {
+            throw new MediaStorageSignatureGenerationException("Error generating Cloudinary signature");
         }
     }
 }

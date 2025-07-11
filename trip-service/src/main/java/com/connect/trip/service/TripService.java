@@ -87,7 +87,7 @@ public class TripService {
                 .collect(Collectors.toList());
     }
 
-    private void checkTripExists(TripRequestDTO request, UUID userId) throws OverlapTripException, IllegalEnumException, InvalidDateException {
+    private void checkTripExists(TripRequestDTO request, UUID userId) throws OverlapTripException, InvalidDateException {
         LocalDate startDate = parseDate(request.getStartDate());
         LocalDate endDate = parseDate(request.getEndDate());
 

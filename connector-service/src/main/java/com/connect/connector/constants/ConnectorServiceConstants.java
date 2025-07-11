@@ -15,4 +15,7 @@ public class ConnectorServiceConstants {
     public static final int GALLERY_MAX_INDEX = 4;
     public static final int GALLERY_MAX_SIZE = GALLERY_MAX_INDEX + 1;
 
+    public static final String ERROR = "error";
+    public static final String MESSAGE = "message";
+
 }

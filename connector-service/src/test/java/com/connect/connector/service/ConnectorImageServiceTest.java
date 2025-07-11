@@ -120,7 +120,7 @@ class ConnectorImageServiceTest {
 
     @ParameterizedTest
     @ValueSource(ints = {-1, 6, 100})
-    void deleteGalleryPhoto_invalidOrderIndex_throwsImageIndexOutOfBoundException(int orderIndexToDelete) throws Exception {
+    void deleteGalleryPhoto_invalidOrderIndex_throwsImageIndexOutOfBoundException(int orderIndexToDelete) {
         ImageIndexOutOfBoundException exception = assertThrows(ImageIndexOutOfBoundException.class,
                 () -> connectorImageService.deleteGalleryPhoto(orderIndexToDelete, mock(Connector.class)));
         assertTrue(exception.getMessage().contains(
@@ -129,7 +129,7 @@ class ConnectorImageServiceTest {
     }
 
     @Test
-    void deleteGalleryPhoto_removeAllPictures_throwsProfilePictureRequiredException() throws Exception {
+    void deleteGalleryPhoto_removeAllPictures_throwsProfilePictureRequiredException() {
         int orderIndexToDelete = 0;
         UUID userId = UUID.randomUUID();
 

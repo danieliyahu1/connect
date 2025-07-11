@@ -1,6 +1,5 @@
 package com.connect.connector.repository;
 
-import com.connect.connector.dto.ConnectorImageDTO;
 import com.connect.connector.model.Connector;
 import com.connect.connector.model.ConnectorImage;
 import org.springframework.data.jpa.repository.JpaRepository;

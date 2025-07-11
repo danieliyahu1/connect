@@ -1,8 +1,6 @@
 package com.connect.connector.exception.handler;
 
 import com.connect.connector.exception.*;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,96 +11,81 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.connect.connector.constants.ConnectorServiceConstants.ERROR;
+import static com.connect.connector.constants.ConnectorServiceConstants.MESSAGE;
+
 @RestControllerAdvice
 public class ConnectorExceptionHandler {
 
+    private ResponseEntity<Map<String, String>> createErrorResponse(HttpStatus status, String errorConstant, String message) {
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put(ERROR, errorConstant);
+        errorResponse.put(MESSAGE, message);
+        return ResponseEntity.status(status).body(errorResponse);
+    }
+
     @ExceptionHandler(ExistingConnectorException.class)
     public ResponseEntity<Map<String, String>> handleExistingConnectorException(ExistingConnectorException ex) {
-        Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("error", "Existing Connector");
-        errorResponse.put("message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+        return createErrorResponse(HttpStatus.CONFLICT, "Existing Connector", ex.getMessage());
     }
 
     @ExceptionHandler(ConnectorNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleConnectorNotFoundException(ConnectorNotFoundException ex) {
-        Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("error", "Connector Not Found");
-        errorResponse.put("message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        return createErrorResponse(HttpStatus.NOT_FOUND, "Connector Not Found", ex.getMessage());
     }
 
     @ExceptionHandler(ImageIndexOutOfBoundException.class)
     public ResponseEntity<Map<String, String>> handleImageIndexOutOfBoundException(ImageIndexOutOfBoundException ex) {
-        Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("error", "Image Index Out of Bound");
-        errorResponse.put("message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        return createErrorResponse(HttpStatus.BAD_REQUEST, "Image Index Out of Bound", ex.getMessage());
     }
 
     @ExceptionHandler(ProfilePictureRequiredException.class)
     public ResponseEntity<Map<String, String>> handleProfilePictureRequiredException(ProfilePictureRequiredException ex) {
-        Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("error", "Profile Picture Required");
-        errorResponse.put("message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        return createErrorResponse(HttpStatus.BAD_REQUEST, "Profile Picture Required", ex.getMessage());
     }
 
     @ExceptionHandler(ImageNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleImageNotFoundException(ImageNotFoundException ex) {
-        Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("error", "Image Not Found");
-        errorResponse.put("message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        return createErrorResponse(HttpStatus.NOT_FOUND, "Image Not Found", ex.getMessage());
     }
 
     @ExceptionHandler(InvalidProfileUrlException.class)
     public ResponseEntity<Map<String, String>> handleInvalidProfileUrlException(InvalidProfileUrlException ex) {
-        Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("error", "Invalid Profile URL");
-        errorResponse.put("message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        return createErrorResponse(HttpStatus.BAD_REQUEST, "Invalid Profile URL", ex.getMessage());
     }
 
     @ExceptionHandler(ConnectorSocialMediaNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleConnectorSocialMediaNotFoundException(ConnectorSocialMediaNotFoundException ex) {
-        Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("error", "Connector Social Media Not Found");
-        errorResponse.put("message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        return createErrorResponse(HttpStatus.NOT_FOUND, "Connector Social Media Not Found", ex.getMessage());
     }
 
     @ExceptionHandler(InvalidImageOrderException.class)
     public ResponseEntity<Map<String, String>> handleInvalidImageOrderException(InvalidImageOrderException ex) {
-        Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("error", "Invalid Image Order");
-        errorResponse.put("message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        return createErrorResponse(HttpStatus.BAD_REQUEST, "Invalid Image Order", ex.getMessage());
+    }
+
+    @ExceptionHandler(ExistingSocialMediaPlatformException.class)
+    public ResponseEntity<Map<String, String>> handleExistingSocialMediaPlatformException(ExistingSocialMediaPlatformException ex) {
+        return createErrorResponse(HttpStatus.CONFLICT, "Existing Social Media Platform", ex.getMessage());
+    }
+
+    @ExceptionHandler(ExistingImageException.class)
+    public ResponseEntity<Map<String, String>> handleExistingImageException(ExistingImageException ex) {
+        return createErrorResponse(HttpStatus.CONFLICT, "Existing Image", ex.getMessage());
+    }
+
+    @ExceptionHandler(MediaStorageSignatureGenerationException.class)
+    public ResponseEntity<Map<String, String>> handleSignatureGenerationException(MediaStorageSignatureGenerationException ex) {
+        return createErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Signature Generation Failed", ex.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<String> handleValidationException(MethodArgumentNotValidException ex) {
+    public ResponseEntity<Map<String, String>> handleValidationException(MethodArgumentNotValidException ex) {
         String message = ex.getBindingResult().getFieldErrors().stream()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .findFirst()
                 .orElse("Invalid input");
 
-        return ResponseEntity.badRequest().body(message);
-    }
-
-    @ExceptionHandler(ExistingSocialMediaPlatformException.class)
-    public ResponseEntity<Map<String, String>> handleExistingSocialMediaPlatformException(ExistingSocialMediaPlatformException ex) {
-        Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("error", "Existing Social Media Platform");
-        errorResponse.put("message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
-    }
-
-    @ExceptionHandler(ExistingImageException.class)
-    public ResponseEntity<Map<String, String>> handleExistingImageException(ExistingImageException ex) {
-        Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("error", "Existing Image");
-        errorResponse.put("message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+        return createErrorResponse(HttpStatus.BAD_REQUEST, "Validation Error", message);
     }
 }
