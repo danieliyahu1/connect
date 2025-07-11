@@ -1,5 +1,6 @@
 package com.connect.trip.exception.handler;
 
+import com.connect.trip.exception.InvalidDateException;
 import com.connect.trip.exception.OverlapTripException;
 import com.connect.trip.exception.IllegalEnumException;
 import com.connect.trip.exception.TripNotFoundException;
@@ -35,6 +36,14 @@ public class TripExceptionHandler {
     {
         Map<String, String> errorResponse = new HashMap<>();
         errorResponse.put("error", "Illegal destination");
+        errorResponse.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    @ExceptionHandler(InvalidDateException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidDateException(InvalidDateException ex) {
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", "Invalid Date");
         errorResponse.put("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }

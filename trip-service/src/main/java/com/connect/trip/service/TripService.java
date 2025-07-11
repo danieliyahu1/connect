@@ -5,6 +5,7 @@ import com.connect.trip.dto.response.TripResponseDTO;
 import com.connect.trip.enums.City;
 import com.connect.trip.enums.Country;
 import com.connect.trip.enums.util.EnumUtil;
+import com.connect.trip.exception.InvalidDateException;
 import com.connect.trip.exception.OverlapTripException;
 import com.connect.trip.exception.IllegalEnumException;
 import com.connect.trip.exception.TripNotFoundException;
@@ -14,6 +15,7 @@ import com.connect.trip.repository.TripRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -24,7 +26,7 @@ public class TripService {
     private final TripRepository tripRepository;
     private final TripMapper tripMapper;
 
-    public TripResponseDTO createTrip(TripRequestDTO request, UUID userId) throws OverlapTripException, IllegalEnumException {
+    public TripResponseDTO createTrip(TripRequestDTO request, UUID userId) throws OverlapTripException, IllegalEnumException, InvalidDateException {
         checkTripExists(request, userId);
         Trip trip = Trip.builder()
                 .userId(userId)
@@ -44,7 +46,7 @@ public class TripService {
                 .collect(Collectors.toList());
     }
 
-    public TripResponseDTO updateTrip(String publicId, TripRequestDTO request, UUID userId) throws TripNotFoundException, IllegalEnumException {
+    public TripResponseDTO updateTrip(String publicId, TripRequestDTO request, UUID userId) throws TripNotFoundException, IllegalEnumException, InvalidDateException {
         Trip trip = tripRepository.findByPublicIdAndUserId(UUID.fromString(publicId), userId)
                 .orElseThrow(() -> new TripNotFoundException("Trip not found or unauthorized"));
 
@@ -74,7 +76,7 @@ public class TripService {
         return tripMapper.toDto(trip);
     }
 
-    public List<TripResponseDTO> getIncomingTrips(String country, String city, String from, String to) throws IllegalEnumException {
+    public List<TripResponseDTO> getIncomingTrips(String country, String city, String from, String to) throws IllegalEnumException, InvalidDateException {
         return tripRepository.searchTrips(
                         getCountryEnumOrNull(country),
                         getCityEnumOrNull(city),
@@ -85,7 +87,7 @@ public class TripService {
                 .collect(Collectors.toList());
     }
 
-    private void checkTripExists(TripRequestDTO request, UUID userId) throws OverlapTripException, IllegalEnumException {
+    private void checkTripExists(TripRequestDTO request, UUID userId) throws OverlapTripException, IllegalEnumException, InvalidDateException {
         LocalDate startDate = parseDate(request.getStartDate());
         LocalDate endDate = parseDate(request.getEndDate());
 
@@ -94,9 +96,15 @@ public class TripService {
         }
     }
 
-    private LocalDate parseDate(String dateStr) {
-        if (dateStr == null || dateStr.isBlank()) return null;
-        return LocalDate.parse(dateStr);
+    private LocalDate parseDate(String dateStr) throws InvalidDateException {
+        try{
+            if (dateStr == null || dateStr.isBlank()) return null;
+            return LocalDate.parse(dateStr);
+        }
+        catch (DateTimeParseException dateTimeParseException)
+        {
+            throw new InvalidDateException("Make sure your date is valid and in ISO format (YYYY-MM-DD)");
+        }
     }
 
     private Country getCountryEnumOrNull(String countryDisplayName) throws IllegalEnumException {

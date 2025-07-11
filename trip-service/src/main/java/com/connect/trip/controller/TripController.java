@@ -2,6 +2,7 @@ package com.connect.trip.controller;
 
 import com.connect.trip.dto.request.TripRequestDTO;
 import com.connect.trip.dto.response.TripResponseDTO;
+import com.connect.trip.exception.InvalidDateException;
 import com.connect.trip.exception.OverlapTripException;
 import com.connect.trip.exception.IllegalEnumException;
 import com.connect.trip.exception.TripNotFoundException;
@@ -27,7 +28,7 @@ public class TripController {
     public ResponseEntity<TripResponseDTO> createTrip(
             @RequestBody @Valid TripRequestDTO request,
             Authentication authentication
-    ) throws OverlapTripException, IllegalEnumException {
+    ) throws OverlapTripException, IllegalEnumException, InvalidDateException {
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 tripService.createTrip(request, getUserIdFromAuth(authentication))
         );
@@ -45,7 +46,7 @@ public class TripController {
             @PathVariable String publicId,
             @RequestBody @Valid TripRequestDTO request,
             Authentication authentication
-    ) throws TripNotFoundException, IllegalEnumException {
+    ) throws TripNotFoundException, IllegalEnumException, InvalidDateException {
         return ResponseEntity.ok(
                 tripService.updateTrip(publicId, request, getUserIdFromAuth(authentication))
         );
@@ -67,7 +68,7 @@ public class TripController {
             @RequestParam(required = false) String city,
             @RequestParam(required = false) String from,
             @RequestParam(required = false) String to
-    ) throws IllegalEnumException {
+    ) throws IllegalEnumException, InvalidDateException {
         return ResponseEntity.ok(
                 tripService.getIncomingTrips(country, city, from, to)
         );

@@ -4,6 +4,7 @@ import com.connect.trip.dto.request.TripRequestDTO;
 import com.connect.trip.dto.response.TripResponseDTO;
 import com.connect.trip.enums.City;
 import com.connect.trip.enums.Country;
+import com.connect.trip.exception.InvalidDateException;
 import com.connect.trip.exception.OverlapTripException;
 import com.connect.trip.exception.IllegalEnumException;
 import com.connect.trip.exception.TripNotFoundException;
@@ -70,7 +71,7 @@ class TripServiceTest {
     }
 
     @Test
-    void createTrip_withValidRequest_shouldSaveAndReturnDto() throws OverlapTripException, IllegalEnumException {
+    void createTrip_withValidRequest_shouldSaveAndReturnDto() throws OverlapTripException, IllegalEnumException, InvalidDateException {
         when(tripRepository.save(any(Trip.class))).thenReturn(trip);
         when(tripMapper.toDto(trip)).thenReturn(responseDto);
 
@@ -100,7 +101,7 @@ class TripServiceTest {
     }
 
     @Test
-    void updateTrip_withValidIdAndRequest_shouldUpdateAndReturnDto() throws TripNotFoundException, IllegalEnumException {
+    void updateTrip_withValidIdAndRequest_shouldUpdateAndReturnDto() throws TripNotFoundException, IllegalEnumException, InvalidDateException {
         TripRequestDTO updateRequest = new TripRequestDTO("Israel", "Jerusalem", "2025-07-01", "2025-07-05");
         Trip updatedTrip = Trip.builder()
                 .userId(userId)
@@ -172,7 +173,7 @@ class TripServiceTest {
     }
 
     @Test
-    void getIncomingTrips_withValidFilters_shouldReturnFilteredDtoList() throws IllegalEnumException {
+    void getIncomingTrips_withValidFilters_shouldReturnFilteredDtoList() throws IllegalEnumException, InvalidDateException {
         List<Trip> trips = List.of(trip);
         when(tripRepository.searchTrips(any(Country.class), any(City.class), any(), any())).thenReturn(trips);
         when(tripMapper.toDto(trip)).thenReturn(responseDto);
