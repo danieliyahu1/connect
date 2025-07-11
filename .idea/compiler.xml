@@ -9,6 +9,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="api-gateway" />
         <module name="auth-service" />
+        <module name="discovery-service" />
       </profile>
       <profile name="Annotation profile for connector-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -47,6 +48,7 @@
       <module name="auth-common" options="-parameters" />
       <module name="auth-service" options="-parameters" />
       <module name="connector-service" options="-parameters -Amapstruct.defaultComponentModel=spring -Amapstruct.unmappedTargetPolicy=IGNORE" />
+      <module name="discovery-service" options="-parameters" />
       <module name="trip-service" options="-parameters" />
     </option>
   </component>

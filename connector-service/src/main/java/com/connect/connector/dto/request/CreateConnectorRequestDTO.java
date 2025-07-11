@@ -1,13 +1,8 @@
 package com.connect.connector.dto.request;
 
-import com.connect.connector.dto.ConnectorImageDTO;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-
-import java.util.List;
-import java.util.Map;
 
 @AllArgsConstructor
 @EqualsAndHashCode
