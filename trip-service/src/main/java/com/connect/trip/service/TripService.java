@@ -5,7 +5,7 @@ import com.connect.trip.dto.response.TripResponseDTO;
 import com.connect.trip.enums.City;
 import com.connect.trip.enums.Country;
 import com.connect.trip.enums.util.EnumUtil;
-import com.connect.trip.exception.ExistingTripException;
+import com.connect.trip.exception.OverlapTripException;
 import com.connect.trip.exception.IllegalEnumException;
 import com.connect.trip.exception.TripNotFoundException;
 import com.connect.trip.mapper.TripMapper;
@@ -24,7 +24,7 @@ public class TripService {
     private final TripRepository tripRepository;
     private final TripMapper tripMapper;
 
-    public TripResponseDTO createTrip(TripRequestDTO request, UUID userId) throws ExistingTripException, IllegalEnumException {
+    public TripResponseDTO createTrip(TripRequestDTO request, UUID userId) throws OverlapTripException, IllegalEnumException {
         checkTripExists(request, userId);
         Trip trip = Trip.builder()
                 .userId(userId)
@@ -35,17 +35,6 @@ public class TripService {
                 .build();
         tripRepository.save(trip);
         return tripMapper.toDto(tripRepository.save(trip));
-    }
-
-    private void checkTripExists(TripRequestDTO request, UUID userId) throws ExistingTripException, IllegalEnumException {
-        Country country = getCountryEnumOrNull(request.getCountry());
-        City city = getCityEnumOrNull(request.getCity());
-        LocalDate startDate = parseDate(request.getStartDate());
-        LocalDate endDate = parseDate(request.getEndDate());
-
-        if (tripRepository.existsTrip(userId, country, city, startDate, endDate)) {
-            throw new ExistingTripException("Trip already exists for the user with the same details");
-        }
     }
 
     public List<TripResponseDTO> getTripsByUser(UUID userId) {
@@ -94,6 +83,15 @@ public class TripService {
                 ).stream()
                 .map(tripMapper::toDto)
                 .collect(Collectors.toList());
+    }
+
+    private void checkTripExists(TripRequestDTO request, UUID userId) throws OverlapTripException, IllegalEnumException {
+        LocalDate startDate = parseDate(request.getStartDate());
+        LocalDate endDate = parseDate(request.getEndDate());
+
+        if (tripRepository.existsOverlappingTripDates(userId, startDate, endDate)) {
+            throw new OverlapTripException("Trip dates overlap with an existing trip");
+        }
     }
 
     private LocalDate parseDate(String dateStr) {

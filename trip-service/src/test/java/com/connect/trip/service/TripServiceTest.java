@@ -4,7 +4,7 @@ import com.connect.trip.dto.request.TripRequestDTO;
 import com.connect.trip.dto.response.TripResponseDTO;
 import com.connect.trip.enums.City;
 import com.connect.trip.enums.Country;
-import com.connect.trip.exception.ExistingTripException;
+import com.connect.trip.exception.OverlapTripException;
 import com.connect.trip.exception.IllegalEnumException;
 import com.connect.trip.exception.TripNotFoundException;
 import com.connect.trip.mapper.TripMapper;
@@ -70,7 +70,7 @@ class TripServiceTest {
     }
 
     @Test
-    void createTrip_withValidRequest_shouldSaveAndReturnDto() throws ExistingTripException, IllegalEnumException {
+    void createTrip_withValidRequest_shouldSaveAndReturnDto() throws OverlapTripException, IllegalEnumException {
         when(tripRepository.save(any(Trip.class))).thenReturn(trip);
         when(tripMapper.toDto(trip)).thenReturn(responseDto);
 

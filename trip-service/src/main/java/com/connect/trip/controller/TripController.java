@@ -2,7 +2,7 @@ package com.connect.trip.controller;
 
 import com.connect.trip.dto.request.TripRequestDTO;
 import com.connect.trip.dto.response.TripResponseDTO;
-import com.connect.trip.exception.ExistingTripException;
+import com.connect.trip.exception.OverlapTripException;
 import com.connect.trip.exception.IllegalEnumException;
 import com.connect.trip.exception.TripNotFoundException;
 import com.connect.trip.service.TripService;
@@ -27,7 +27,7 @@ public class TripController {
     public ResponseEntity<TripResponseDTO> createTrip(
             @RequestBody @Valid TripRequestDTO request,
             Authentication authentication
-    ) throws ExistingTripException, IllegalEnumException {
+    ) throws OverlapTripException, IllegalEnumException {
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 tripService.createTrip(request, getUserIdFromAuth(authentication))
         );

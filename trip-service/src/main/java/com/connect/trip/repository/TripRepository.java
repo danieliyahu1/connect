@@ -34,18 +34,16 @@ public interface TripRepository extends JpaRepository<Trip, UUID> {
     );
 
     @Query("""
-        SELECT COUNT(t) > 0 FROM Trip t
-        WHERE t.userId = :userId
-          AND t.country = :country
-          AND ((:city IS NULL AND t.city IS NULL) OR t.city = :city)
-          AND ((:startDate IS NULL AND t.startDate IS NULL) OR t.startDate = :startDate)
-          AND ((:endDate IS NULL AND t.endDate IS NULL) OR t.endDate = :endDate)
-    """)
-    boolean existsTrip(
+    SELECT CASE WHEN COUNT(t) > 0 THEN true ELSE false END
+    FROM Trip t
+    WHERE t.userId = :userId
+      AND t.startDate <= :newEndDate
+      AND t.endDate >= :newStartDate
+""")
+    boolean existsOverlappingTripDates(
             @Param("userId") UUID userId,
-            @Param("country") Country country,
-            @Param("city") City city,
-            @Param("startDate") LocalDate startDate,
-            @Param("endDate") LocalDate endDate
+            @Param("newStartDate") LocalDate newStartDate,
+            @Param("newEndDate") LocalDate newEndDate
     );
+
 }

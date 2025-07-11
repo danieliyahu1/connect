@@ -1,6 +1,6 @@
 package com.connect.trip.exception.handler;
 
-import com.connect.trip.exception.ExistingTripException;
+import com.connect.trip.exception.OverlapTripException;
 import com.connect.trip.exception.IllegalEnumException;
 import com.connect.trip.exception.TripNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -22,10 +22,10 @@ public class TripExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 
-    @ExceptionHandler(ExistingTripException.class)
-    public ResponseEntity<Map<String, String>> handleExistingTripException(ExistingTripException ex) {
+    @ExceptionHandler(OverlapTripException.class)
+    public ResponseEntity<Map<String, String>> handleExistingTripException(OverlapTripException ex) {
         Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("error", "Existing Trip");
+        errorResponse.put("error", "Trip Overlap Detected");
         errorResponse.put("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
     }
