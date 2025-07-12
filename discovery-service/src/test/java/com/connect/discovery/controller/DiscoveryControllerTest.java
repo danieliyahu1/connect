@@ -2,7 +2,6 @@ package com.connect.discovery.controller;
 
 import com.connect.discovery.dto.UserSuggestionDTO;
 import com.connect.discovery.service.DiscoveryService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -38,19 +37,19 @@ class DiscoveryControllerTest {
                 new UserSuggestionDTO("user-2", "Bob", 30, "https://url.com/pic2", "Munich", "Germany", "You love techno and beer.")
         );
 
-        when(discoveryService.discoverLocals(UUID.fromString(userId))).thenReturn(mockSuggestions);
+        when(discoveryService.discoverLocals()).thenReturn(mockSuggestions);
 
         Authentication auth = new TestingAuthenticationToken(userId, null);
 
         mockMvc.perform(get("/discover/locals").principal(auth))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(2))
-                .andExpect(jsonPath("$[0].id").value("user-1"))
+                .andExpect(jsonPath("$[0].userId").value("user-1"))
                 .andExpect(jsonPath("$[0].name").value("Alice"))
                 .andExpect(jsonPath("$[0].reason").value("You both speak German."))
-                .andExpect(jsonPath("$[1].id").value("user-2"));
+                .andExpect(jsonPath("$[1].userId").value("user-2"));
 
-        verify(discoveryService).discoverLocals(UUID.fromString(userId));
+        verify(discoveryService).discoverLocals();
     }
 
     @Test
@@ -62,18 +61,18 @@ class DiscoveryControllerTest {
                 new UserSuggestionDTO("traveler-2", "David", 28, "https://url.com/pic4", "Lyon", "France", "You share interest in hiking.")
         );
 
-        when(discoveryService.discoverLocals(UUID.fromString(userId))).thenReturn(mockSuggestions);
+        when(discoveryService.discoverTravelers()).thenReturn(mockSuggestions);
 
         Authentication auth = new TestingAuthenticationToken(userId, null);
 
         mockMvc.perform(get("/discover/travelers").principal(auth))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(2))
-                .andExpect(jsonPath("$[0].id").value("traveler-1"))
+                .andExpect(jsonPath("$[0].userId").value("traveler-1"))
                 .andExpect(jsonPath("$[0].name").value("Claire"))
                 .andExpect(jsonPath("$[0].reason").value("You both love art and food."))
-                .andExpect(jsonPath("$[1].id").value("traveler-2"));
+                .andExpect(jsonPath("$[1].userId").value("traveler-2"));
 
-        verify(discoveryService).discoverLocals(UUID.fromString(userId));
+        verify(discoveryService).discoverTravelers();
     }
 }

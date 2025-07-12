@@ -15,6 +15,8 @@ import com.connect.connector.repository.ConnectorRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -30,6 +32,12 @@ public class ConnectorService {
     private final ConnectorSocialMediaService connectorSocialMediaService;
     private final ConnectorImageService connectorImageService;
     private final MediaStorageService mediaService;
+
+    public ConnectorResponseDTO getMyProfile(UUID userId) throws ConnectorNotFoundException {
+        return connectorRepository.findByUserId(userId)
+                .map(this::buildConnectorResponse)
+                .orElseThrow(() -> new ConnectorNotFoundException("Connector not found for user ID: " + userId));
+    }
 
     public ConnectorResponseDTO updateMyProfile(UUID userId, @Valid UpdateConnectorRequestDTO updateConnectorRequestDTO) throws ConnectorNotFoundException, IllegalEnumException {
         Connector connector = findConnectorByUserId(userId);
@@ -78,12 +86,25 @@ public class ConnectorService {
                 .orElseThrow(() -> new ConnectorNotFoundException("Connector not found for user ID: " + userId));
     }
 
-    public List<ConnectorResponseDTO> getPublicProfiles(List<UUID> userIds) {
+    public List<ConnectorResponseDTO> getPublicProfilesByIds(List<UUID> userIds) {
         return connectorRepository.findAllByUserIdIn(userIds)
                 .stream()
                 .map(this::buildConnectorResponse)
                 .toList();
     }
+
+    public List<ConnectorResponseDTO> getPublicProfilesByCountries(List<String> countries) throws IllegalEnumException {
+        List<Country> countryEnums = new ArrayList<>();
+        for (String country : countries) {
+            countryEnums.add(EnumUtil.getEnumFromDisplayName(Country.class, country));
+        }
+
+        return connectorRepository.findAllByCountryIn(countryEnums)
+                .stream()
+                .map(this::buildConnectorResponse)
+                .toList();
+    }
+
 
     public ConnectorResponseDTO deleteGalleryPhoto(UUID userId, int orderIndex) throws ImageIndexOutOfBoundException, ImageNotFoundException, ProfilePictureRequiredException, ConnectorNotFoundException {
         Connector connector = findConnectorByUserId(userId);
@@ -91,8 +112,8 @@ public class ConnectorService {
         return buildConnectorResponse(connector);
     }
 
-    public ConnectorResponseDTO addSocialMediaPlatformLink(UUID userIdFromAuth, @Valid ConnectorSocialMediaDTO dto) throws InvalidProfileUrlException, ConnectorNotFoundException, ExistingSocialMediaPlatformException, IllegalEnumException {
-        Connector connector = findConnectorByUserId(userIdFromAuth);
+    public ConnectorResponseDTO addSocialMediaPlatformLink(UUID userId, @Valid ConnectorSocialMediaDTO dto) throws InvalidProfileUrlException, ConnectorNotFoundException, ExistingSocialMediaPlatformException, IllegalEnumException {
+        Connector connector = findConnectorByUserId(userId);
         connectorSocialMediaService.addSocialMediaPlatformLink(connector, dto);
         return buildConnectorResponse(connector);
     }

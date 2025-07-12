@@ -283,9 +283,9 @@ class ConnectorControllerTest {
                 .socialMediaLinks(Collections.emptyList())
                 .build();
 
-        when(connectorService.getPublicProfiles(userIds)).thenReturn(List.of(profile1, profile2));
+        when(connectorService.getPublicProfilesByIds(userIds)).thenReturn(List.of(profile1, profile2));
 
-        mockMvc.perform(post(URIPREFIX + "/internal/batch")
+        mockMvc.perform(post(URIPREFIX + "/internal/batch/ids")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(userIds)))
                 .andExpect(status().isOk())
@@ -294,7 +294,7 @@ class ConnectorControllerTest {
                 .andExpect(jsonPath("$[1].userId").value(userId2.toString()))
                 .andExpect(jsonPath("$[1].firstName").value("User2"));
 
-        verify(connectorService).getPublicProfiles(userIds);
+        verify(connectorService).getPublicProfilesByIds(userIds);
     }
 
     @Test
@@ -597,4 +597,86 @@ class ConnectorControllerTest {
 
         verify(connectorService).generateGalleryUploadSignature(userId, invalidOrderIndex);
     }
+
+    @Test
+    void getMyProfile_returnsOwnProfile() throws Exception {
+        UUID userId = UUID.randomUUID();
+
+        ConnectorResponseDTO responseDTO = ConnectorResponseDTO.builder()
+                .userId(userId)
+                .firstName("Self User")
+                .bio("My bio")
+                .socialMediaLinks(Collections.emptyList())
+                .galleryImages(Collections.emptyList())
+                .build();
+
+        when(connectorService.getMyProfile(userId)).thenReturn(responseDTO);
+
+        Authentication auth = new TestingAuthenticationToken(userId.toString(), null);
+
+        mockMvc.perform(get(URIPREFIX + "/me")
+                        .principal(auth))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.userId").value(userId.toString()))
+                .andExpect(jsonPath("$.firstName").value("Self User"))
+                .andExpect(jsonPath("$.bio").value("My bio"))
+                .andExpect(jsonPath("$.socialMediaLinks").isArray())
+                .andExpect(jsonPath("$.galleryImages").isArray());
+
+        verify(connectorService).getMyProfile(userId);
+    }
+
+    @Test
+    void getPublicBatchByCountries_returnsProfiles() throws Exception {
+        List<String> countries = List.of("Israel", "Germany");
+
+        UUID userId1 = UUID.randomUUID();
+        UUID userId2 = UUID.randomUUID();
+
+        ConnectorResponseDTO profile1 = ConnectorResponseDTO.builder()
+                .userId(userId1)
+                .firstName("Israeli User")
+                .bio("From Israel")
+                .socialMediaLinks(Collections.emptyList())
+                .build();
+
+        ConnectorResponseDTO profile2 = ConnectorResponseDTO.builder()
+                .userId(userId2)
+                .firstName("German User")
+                .bio("From Germany")
+                .socialMediaLinks(Collections.emptyList())
+                .build();
+
+        when(connectorService.getPublicProfilesByCountries(countries))
+                .thenReturn(List.of(profile1, profile2));
+
+        mockMvc.perform(post(URIPREFIX + "/internal/batch/countries")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(countries)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].userId").value(userId1.toString()))
+                .andExpect(jsonPath("$[0].firstName").value("Israeli User"))
+                .andExpect(jsonPath("$[1].userId").value(userId2.toString()))
+                .andExpect(jsonPath("$[1].firstName").value("German User"));
+
+        verify(connectorService).getPublicProfilesByCountries(countries);
+    }
+
+    @Test
+    void getPublicBatchByCountries_whenIllegalEnumExceptionThrown_returnsBadRequest() throws Exception {
+        List<String> invalidCountries = List.of("Narnia", "Westeros");
+
+        when(connectorService.getPublicProfilesByCountries(invalidCountries))
+                .thenThrow(new IllegalEnumException("Invalid country: Narnia"));
+
+        mockMvc.perform(post(URIPREFIX + "/internal/batch/countries")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(invalidCountries)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Illegal Enum Value"))
+                .andExpect(jsonPath("$.message").value("Invalid country: Narnia"));
+
+        verify(connectorService).getPublicProfilesByCountries(invalidCountries);
+    }
+
 }

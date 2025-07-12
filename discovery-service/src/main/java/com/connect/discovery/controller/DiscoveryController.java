@@ -20,20 +20,12 @@ public class DiscoveryController {
     private final DiscoveryService discoveryService;
 
     @GetMapping("/locals")
-    public List<UserSuggestionDTO> discoverLocals(Authentication authentication,
-                                                  @RequestHeader("Authorization") String authorizationHeader) {
-        return discoveryService.discoverLocals(getUserIdFromAuth(authentication));
+    public List<UserSuggestionDTO> discoverLocals(Authentication authentication) {
+        return discoveryService.discoverLocals();
     }
 
     @GetMapping("/travelers")
     public List<UserSuggestionDTO> discoverTravelers(Authentication authentication) {
-        return discoveryService.discoverTravelers(getUserIdFromAuth(authentication));
-    }
-
-    private UUID getUserIdFromAuth(Authentication authentication) {
-        if (authentication == null) {
-            throw new IllegalStateException("Authentication not set in SecurityContext. This endpoint requires authentication.");
-        }
-        return UUID.fromString(authentication.getName());
+        return discoveryService.discoverTravelers();
     }
 }

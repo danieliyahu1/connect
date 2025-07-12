@@ -30,6 +30,11 @@
             return ResponseEntity.ok(connectorService.updateMyProfile(getUserIdFromAuth(authentication), updateConnectorRequestDTO));
         }
 
+        @GetMapping("/me")
+        public ResponseEntity<ConnectorResponseDTO> getMyProfile(Authentication authentication) throws ConnectorNotFoundException {
+            return ResponseEntity.ok(connectorService.getMyProfile(getUserIdFromAuth(authentication)));
+        }
+
         @PostMapping("/me")
         public ResponseEntity<ConnectorResponseDTO> createMyProfile(@RequestBody @Valid CreateConnectorRequestDTO createConnectorRequestDTO, Authentication authentication) throws ExistingConnectorException, IllegalEnumException {
             return ResponseEntity.status(HttpStatus.CREATED).body(connectorService.createMyProfile(getUserIdFromAuth(authentication), createConnectorRequestDTO));
@@ -67,11 +72,15 @@
             return ResponseEntity.ok(connectorService.deleteSocialMediaPlatformLink(getUserIdFromAuth(auth), platform));
         }
 
-        @PostMapping("/internal/batch")
+        @PostMapping("/internal/batch/ids")
         public ResponseEntity<List<ConnectorResponseDTO>> getPublicBatch(@RequestBody List<UUID> userIds) {
-            return ResponseEntity.ok(connectorService.getPublicProfiles(userIds));
+            return ResponseEntity.ok(connectorService.getPublicProfilesByIds(userIds));
         }
 
+        @PostMapping("/internal/batch/countries")
+        public ResponseEntity<List<ConnectorResponseDTO>> getPublicBatchByCountries(@RequestBody List<String> userCountriesDestinations) throws IllegalEnumException {
+            return ResponseEntity.ok(connectorService.getPublicProfilesByCountries(userCountriesDestinations));
+        }
         @PostMapping("/me/gallery/signature")
         public ResponseEntity<UploadSignatureResponseDTO> generateUploadSignature(
                 @RequestParam int orderIndex,

@@ -152,7 +152,7 @@ class ConnectorServiceTest {
         when(connectorImageService.findByConnector_ConnectorId(connector.getConnectorId())).thenReturn(Collections.emptyList());
         when(connectorSocialMediaService.findByConnector_ConnectorId(connector.getConnectorId())).thenReturn(Collections.emptyList());
 
-        List<ConnectorResponseDTO> result = connectorService.getPublicProfiles(userIds);
+        List<ConnectorResponseDTO> result = connectorService.getPublicProfilesByIds(userIds);
 
         assertEquals(1, result.size());
         assertEquals(userId, result.get(0).getUserId());
@@ -288,6 +288,50 @@ class ConnectorServiceTest {
         );
 
         assertTrue(exception.getMessage().contains("Order index must be between"));
+    }
+
+    @Test
+    void getMyProfile_shouldReturnProfile_whenFound() throws ConnectorNotFoundException {
+        when(connectorRepository.findByUserId(userId)).thenReturn(Optional.of(connector));
+        when(connectorImageService.findByConnector_ConnectorId(connector.getConnectorId())).thenReturn(Collections.emptyList());
+        when(connectorSocialMediaService.findByConnector_ConnectorId(connector.getConnectorId())).thenReturn(Collections.emptyList());
+
+        ConnectorResponseDTO response = connectorService.getMyProfile(userId);
+
+        assertNotNull(response);
+        assertEquals(userId, response.getUserId());
+        assertEquals(connector.getFirstName(), response.getFirstName());
+        assertEquals(connector.getCountry().getDisplayValue(), response.getCountry());
+        assertEquals(connector.getCity().getDisplayValue(), response.getCity());
+        assertEquals(connector.getBio(), response.getBio());
+    }
+
+    @Test
+    void getPublicProfilesByCountries_shouldReturnProfiles_whenValidCountries() throws IllegalEnumException {
+        List<String> countryStrings = List.of("Poland");
+        List<Country> countryEnums = List.of(Country.POLAND);
+        List<Connector> connectors = List.of(connector);
+
+        when(connectorRepository.findAllByCountryIn(countryEnums)).thenReturn(connectors);
+        when(connectorImageService.findByConnector_ConnectorId(connector.getConnectorId())).thenReturn(Collections.emptyList());
+        when(connectorSocialMediaService.findByConnector_ConnectorId(connector.getConnectorId())).thenReturn(Collections.emptyList());
+
+        List<ConnectorResponseDTO> response = connectorService.getPublicProfilesByCountries(countryStrings);
+
+        assertEquals(1, response.size());
+        assertEquals("Poland", response.get(0).getCountry());
+    }
+
+    @Test
+    void getPublicProfilesByCountries_shouldThrow_whenInvalidCountryName() {
+        List<String> invalidCountries = List.of("MiddleEarth");
+
+        IllegalEnumException exception = assertThrows(
+                IllegalEnumException.class,
+                () -> connectorService.getPublicProfilesByCountries(invalidCountries)
+        );
+
+        assertTrue(exception.getMessage().contains("MiddleEarth"));
     }
 
 }

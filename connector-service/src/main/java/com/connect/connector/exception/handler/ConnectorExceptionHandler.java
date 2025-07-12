@@ -88,4 +88,9 @@ public class ConnectorExceptionHandler {
 
         return createErrorResponse(HttpStatus.BAD_REQUEST, "Validation Error", message);
     }
+
+    @ExceptionHandler(IllegalEnumException.class)
+    public ResponseEntity<Map<String, String>> handleIllegalEnumException(IllegalEnumException ex) {
+        return createErrorResponse(HttpStatus.BAD_REQUEST, "Illegal Enum Value", ex.getMessage());
+    }
 }

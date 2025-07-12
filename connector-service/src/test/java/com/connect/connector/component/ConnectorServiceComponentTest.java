@@ -436,7 +436,6 @@ class ConnectorServiceComponentTest {
         ConnectorSocialMediaDTO dto = new ConnectorSocialMediaDTO("Instagram", "   "); // blank URL
         HttpEntity<ConnectorSocialMediaDTO> request = new HttpEntity<>(dto, jsonHeaders());
 
-
         when(connectorSocialMediaRepository.existsByConnector_ConnectorIdAndPlatform(
                 eq(mockConnector.getConnectorId()), eq(SocialMediaPlatform.INSTAGRAM)))
                 .thenReturn(false);
@@ -451,6 +450,30 @@ class ConnectorServiceComponentTest {
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertTrue(response.getBody().contains("Profile URL must not be blank"));
     }
+
+    @Test
+    void addSocialMediaLink_InvalidEnum_ReturnsBadRequest() {
+        String invalidPlatformJson = """
+        {
+          "platform": "TikTakk",
+          "profileUrl": "https://example.com/profile"
+        }
+        """;
+
+        HttpHeaders headers = jsonHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<String> request = new HttpEntity<>(invalidPlatformJson, headers);
+
+        when(connectorRepository.findByUserId(userId)).thenReturn(Optional.of(mockConnector));
+
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                getBaseUrl() + "/me/social-media", request, String.class);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertTrue(response.getBody().contains("Illegal Enum Value"));
+    }
+
 
     @Test
     void addSocialMediaLink_MissingPlatform_ReturnsBadRequest() {
@@ -612,7 +635,7 @@ class ConnectorServiceComponentTest {
         HttpEntity<List<UUID>> request = new HttpEntity<>(userIds, jsonHeaders());
 
         ResponseEntity<ConnectorResponseDTO[]> response = restTemplate.postForEntity(
-                getBaseUrl() + "/internal/batch",
+                getBaseUrl() + "/internal/batch/ids",
                 request,
                 ConnectorResponseDTO[].class
         );
@@ -689,5 +712,81 @@ class ConnectorServiceComponentTest {
         assertTrue(response.getBody().contains("Order index must be between 0 and 4"));
     }
 
+    @Test
+    void getConnectorsByCountries_ReturnsExpectedResults() {
+        // Arrange
+        Connector israelConnector = new Connector();
+        UUID israelUserId = UUID.fromString("11111111-aaaa-bbbb-cccc-222222222222");
+        setField(israelConnector, "userId", israelUserId);
+        setField(israelConnector, "connectorId", UUID.randomUUID());
+        israelConnector.setFirstName("Itai");
+        israelConnector.setCountry(Country.ISRAEL);
+        israelConnector.setCity(City.TEL_AVIV);
+        israelConnector.setBio("Hostel lover in TLV");
+
+        Connector polandConnector = new Connector();
+        UUID polandUserId = UUID.fromString("33333333-aaaa-bbbb-cccc-444444444444");
+        setField(polandConnector, "userId", polandUserId);
+        setField(polandConnector, "connectorId", UUID.randomUUID());
+        polandConnector.setFirstName("Magda");
+        polandConnector.setCountry(Country.POLAND);
+        polandConnector.setCity(City.KRAKOW);
+        polandConnector.setBio("Krakow explorer");
+
+        when(connectorRepository.findAllByCountryIn(List.of(Country.ISRAEL, Country.POLAND)))
+                .thenReturn(List.of(israelConnector, polandConnector));
+
+        HttpEntity<List<String>> request = new HttpEntity<>(
+                List.of("Israel", "Poland"),
+                jsonHeaders()
+        );
+
+        // Act
+        ResponseEntity<ConnectorResponseDTO[]> response = restTemplate.postForEntity(
+                getBaseUrl() + "/internal/batch/countries",
+                request,
+                ConnectorResponseDTO[].class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        ConnectorResponseDTO[] results = response.getBody();
+        assertNotNull(results);
+        assertEquals(2, results.length);
+
+        List<String> names = Arrays.stream(results).map(ConnectorResponseDTO::getFirstName).toList();
+        assertTrue(names.contains("Itai"));
+        assertTrue(names.contains("Magda"));
+
+        verify(connectorRepository).findAllByCountryIn(any());
+    }
+
+    @Test
+    void getMyConnectorProfile_WhenExists_ReturnsConnector() {
+        // Arrange
+        when(connectorRepository.findByUserId(userId)).thenReturn(Optional.of(mockConnector));
+        when(connectorImageRepository.findByConnector_ConnectorId(mockConnector.getConnectorId()))
+                .thenReturn(List.of());
+        when(connectorSocialMediaRepository.findByConnector_ConnectorId(mockConnector.getConnectorId()))
+                .thenReturn(List.of());
+
+        HttpEntity<Void> request = new HttpEntity<>(jsonHeaders());
+
+        // Act
+        ResponseEntity<ConnectorResponseDTO> response = restTemplate.exchange(
+                getBaseUrl() + "/me",
+                HttpMethod.GET,
+                request,
+                ConnectorResponseDTO.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        ConnectorResponseDTO body = response.getBody();
+        assertNotNull(body);
+        assertEquals(mockConnector.getFirstName(), body.getFirstName());
+        assertEquals(Country.POLAND.getDisplayValue(), body.getCountry());
+        assertEquals(City.KRAKOW.getDisplayValue(), body.getCity());
+    }
 
 }
