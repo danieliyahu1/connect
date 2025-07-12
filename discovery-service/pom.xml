@@ -30,6 +30,14 @@
 		<java.version>21</java.version>
 	</properties>
 
+	<repositories>
+		<repository>
+			<id>github-danieliyahu1</id>
+			<name>GitHub Packages</name>
+			<url>https://maven.pkg.github.com/danieliyahu1/auth-common</url>
+		</repository>
+	</repositories>
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -80,7 +88,20 @@
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
-    </dependencies>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-config</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.connect</groupId>
+			<artifactId>auth-common</artifactId>
+			<version>0.0.14-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-config</artifactId>
+		</dependency>
+	</dependencies>
 
 	<build>
 		<plugins>
