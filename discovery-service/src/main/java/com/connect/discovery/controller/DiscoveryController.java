@@ -19,12 +19,12 @@ public class DiscoveryController {
 
     private final DiscoveryService discoveryService;
 
-    @GetMapping("/locals")
+    @GetMapping("/public/locals")
     public List<UserSuggestionDTO> discoverLocals(Authentication authentication) {
         return discoveryService.discoverLocals();
     }
 
-    @GetMapping("/travelers")
+    @GetMapping("/public/travelers")
     public List<UserSuggestionDTO> discoverTravelers(Authentication authentication) {
         return discoveryService.discoverTravelers();
     }

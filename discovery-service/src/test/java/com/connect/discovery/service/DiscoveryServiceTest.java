@@ -22,13 +22,13 @@ import static org.mockito.Mockito.*;
 class DiscoveryServiceTest {
 
     @Mock
-    private TripServiceClient tripServiceClient;
+    private TripService tripService;
 
     @Mock
-    private ConnectorServiceClient connectorServiceClient;
+    private ConnectorService connectorService;
 
     @Mock
-    private OpenAiClient openAiClient;
+    private OpenAiService openAiService;
 
     @Mock
     private TripMapper tripMapper;
@@ -68,8 +68,8 @@ class DiscoveryServiceTest {
                 .build();
 
         mockSuggestions = List.of(
-                createUserSuggestionDTO(candidate1.getUserId(), "Bob", "Munich", "GERMANY", 30, "Matched on music"),
-                createUserSuggestionDTO(candidate2.getUserId(), "Eve", "Hamburg", "GERMANY", 25, "Matched on sports")
+                createUserSuggestionDTO(candidate1.getUserId(), "Bob", "Munich", "GERMANY", "Matched on music", 0.058386),
+                createUserSuggestionDTO(candidate2.getUserId(), "Eve", "Hamburg", "GERMANY", "Matched on sports", 0.32592)
         );
     }
 
@@ -79,10 +79,10 @@ class DiscoveryServiceTest {
         List<String> countries = List.of("GERMANY");
         List<ConnectorResponseDTO> candidates = List.of(candidate1, candidate2);
 
-        when(tripServiceClient.getMyTrips()).thenReturn(myTrips);
-        when(connectorServiceClient.getPublicProfile()).thenReturn(requester);
-        when(connectorServiceClient.fetchProfilesByCountry(countries)).thenReturn(candidates);
-        when(openAiClient.rankCandidatesByRelevance(requester, candidates)).thenReturn(mockSuggestions);
+        when(tripService.getMyTrips()).thenReturn(myTrips);
+        when(connectorService.fetchUserProfile()).thenReturn(requester);
+        when(connectorService.fetchProfilesByCountry(countries)).thenReturn(candidates);
+        when(openAiService.rankCandidatesByRelevance(requester, candidates)).thenReturn(mockSuggestions);
 
         List<UserSuggestionDTO> results = discoveryService.discoverLocals();
 
@@ -94,7 +94,6 @@ class DiscoveryServiceTest {
         assertEquals("Bob", suggestion1.getName());
         assertEquals("Munich", suggestion1.getCity());
         assertEquals("GERMANY", suggestion1.getCountry());
-        assertEquals(30, suggestion1.getAge());
         assertEquals("Matched on music", suggestion1.getReason());
         assertEquals("http://example.com/profile.jpg", suggestion1.getProfilePictureUrl());
 
@@ -103,14 +102,13 @@ class DiscoveryServiceTest {
         assertEquals("Eve", suggestion2.getName());
         assertEquals("Hamburg", suggestion2.getCity());
         assertEquals("GERMANY", suggestion2.getCountry());
-        assertEquals(25, suggestion2.getAge());
         assertEquals("Matched on sports", suggestion2.getReason());
         assertEquals("http://example.com/profile.jpg", suggestion2.getProfilePictureUrl());
 
-        verify(tripServiceClient).getMyTrips();
-        verify(connectorServiceClient).getPublicProfile();
-        verify(connectorServiceClient).fetchProfilesByCountry(countries);
-        verify(openAiClient).rankCandidatesByRelevance(requester, candidates);
+        verify(tripService).getMyTrips();
+        verify(connectorService).fetchUserProfile();
+        verify(connectorService).fetchProfilesByCountry(countries);
+        verify(openAiService).rankCandidatesByRelevance(requester, candidates);
     }
 
     @Test
@@ -118,10 +116,10 @@ class DiscoveryServiceTest {
         List<TripResponseDTO> trips = List.of(trip1, trip2);
         List<ConnectorResponseDTO> candidates = List.of(candidate1, candidate2);
 
-        when(connectorServiceClient.getPublicProfile()).thenReturn(requester);
-        when(tripServiceClient.getIncomingTrips(any(IncomingTripRequestDto.class))).thenReturn(trips);
-        when(connectorServiceClient.fetchProfilesById(anyList())).thenReturn(candidates);
-        when(openAiClient.rankCandidatesByRelevance(requester, candidates)).thenReturn(mockSuggestions);
+        when(connectorService.fetchUserProfile()).thenReturn(requester);
+        when(tripService.fetchTravelersVisiting(anyString())).thenReturn(trips);
+        when(connectorService.fetchProfilesById(anyList())).thenReturn(candidates);
+        when(openAiService.rankCandidatesByRelevance(requester, candidates)).thenReturn(mockSuggestions);
 
         List<UserSuggestionDTO> results = discoveryService.discoverTravelers();
 
@@ -130,18 +128,16 @@ class DiscoveryServiceTest {
 
         UserSuggestionDTO suggestion1 = results.get(0);
         assertEquals("Bob", suggestion1.getName());
-        assertEquals(30, suggestion1.getAge());
         assertEquals("GERMANY", suggestion1.getCountry());
 
         UserSuggestionDTO suggestion2 = results.get(1);
         assertEquals("Eve", suggestion2.getName());
-        assertEquals(25, suggestion2.getAge());
         assertEquals("Hamburg", suggestion2.getCity());
 
-        verify(connectorServiceClient).getPublicProfile();
-        verify(tripServiceClient).getIncomingTrips(any(IncomingTripRequestDto.class));
-        verify(connectorServiceClient).fetchProfilesById(anyList());
-        verify(openAiClient).rankCandidatesByRelevance(requester, candidates);
+        verify(connectorService).fetchUserProfile();
+        verify(tripService).fetchTravelersVisiting(anyString());
+        verify(connectorService).fetchProfilesById(anyList());
+        verify(openAiService).rankCandidatesByRelevance(requester, candidates);
     }
 
     // === Helpers ===
@@ -165,14 +161,14 @@ class DiscoveryServiceTest {
         return dto;
     }
 
-    private UserSuggestionDTO createUserSuggestionDTO(UUID userId, String name, String city, String country, int age, String reason) {
+    private UserSuggestionDTO createUserSuggestionDTO(UUID userId, String name, String city, String country, String reason, double score) {
         return UserSuggestionDTO.builder()
                 .userId(userId.toString())
                 .name(name)
                 .city(city)
                 .country(country)
-                .age(age)
                 .reason(reason)
+                .score(score)
                 .profilePictureUrl("http://example.com/profile.jpg")
                 .build();
     }

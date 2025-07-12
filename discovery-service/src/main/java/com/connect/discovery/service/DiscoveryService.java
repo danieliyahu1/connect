@@ -1,10 +1,6 @@
 package com.connect.discovery.service;
 
-import com.connect.discovery.client.ConnectorServiceClient;
-import com.connect.discovery.client.TripServiceClient;
-import com.connect.discovery.client.OpenAiClient;
 import com.connect.discovery.dto.ConnectorResponseDTO;
-import com.connect.discovery.dto.IncomingTripRequestDto;
 import com.connect.discovery.dto.TripResponseDTO;
 import com.connect.discovery.dto.UserSuggestionDTO;
 import com.connect.discovery.mapper.TripMapper;
@@ -12,15 +8,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class DiscoveryService {
 
-    private final TripServiceClient tripServiceClient;
-    private final ConnectorServiceClient connectorServiceClient;
-    private final OpenAiClient openAiClient;
+    private final TripService tripService;
+    private final ConnectorService connectorService;
+    private final OpenAiService openAiService;
     private final TripMapper tripMapper;
     /**
      * Called by /discover/locals — used by travelers to find locals at their destinations.
@@ -46,7 +41,7 @@ public class DiscoveryService {
     // ==== PRIVATE METHODS ====
 
     private List<TripResponseDTO> getTripDestinations() {
-        return tripServiceClient.getMyTrips();
+        return tripService.getMyTrips();
     }
 
     private List<String> getLocalCountries(List<TripResponseDTO> trips) {
@@ -57,32 +52,22 @@ public class DiscoveryService {
     }
 
     private List<TripResponseDTO> fetchTravelersVisiting(String country) {
-        return tripServiceClient.getIncomingTrips(
-                IncomingTripRequestDto.builder()
-                        .country(country)
-                        .build()
-        );
+        return tripService.fetchTravelersVisiting(country);
     }
 
     private ConnectorResponseDTO fetchUserProfile() {
-        return connectorServiceClient.getPublicProfile();
+        return connectorService.fetchUserProfile();
     }
 
     private List<ConnectorResponseDTO> fetchProfilesByCountry(List<String> userCountriesDestinations) {
-        return connectorServiceClient.fetchProfilesByCountry(userCountriesDestinations);
+        return connectorService.fetchProfilesByCountry(userCountriesDestinations);
     }
 
     private List<ConnectorResponseDTO> fetchProfilesById(List<TripResponseDTO> userCountriesDestinations) {
-        return connectorServiceClient.fetchProfilesById(
-                userCountriesDestinations.stream()
-                        .map(TripResponseDTO::getUserId)
-                        .distinct()
-                        .map(UUID::fromString)
-                        .toList()
-        );
+        return connectorService.fetchProfilesById(userCountriesDestinations);
     }
 
     private List<UserSuggestionDTO> scoreMatches(ConnectorResponseDTO requester, List<ConnectorResponseDTO> candidates) {
-        return openAiClient.rankCandidatesByRelevance(requester, candidates);
+        return openAiService.rankCandidatesByRelevance(requester, candidates);
     }
 }

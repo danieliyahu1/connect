@@ -7,11 +7,16 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserSuggestionDTO {
+    @NonNull
     private String userId;
+    @NonNull
     private String name;
-    private int age;
     private String profilePictureUrl;
     private String city;
+    @NonNull
     private String country;
+    @NonNull
     private String reason;
+    @NonNull
+    private double score;
 }

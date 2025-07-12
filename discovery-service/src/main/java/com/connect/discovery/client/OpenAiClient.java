@@ -1,12 +1,22 @@
 package com.connect.discovery.client;
 
-import com.connect.discovery.dto.ConnectorResponseDTO;
-import com.connect.discovery.dto.UserSuggestionDTO;
+import com.connect.discovery.dto.openai.OpenAiRequestDTO;
+import com.connect.discovery.dto.openai.OpenAiResponseDTO;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.List;
+@FeignClient(
+        name = "openAiClient",
+        url = "https://api.openai.com/v1"
+)
+public interface OpenAiClient {
 
-public class OpenAiClient {
-    public List<UserSuggestionDTO> rankCandidatesByRelevance(ConnectorResponseDTO requester, List<ConnectorResponseDTO> candidates) {
-        return null;
-    }
+    @PostMapping("/chat/completions")
+    OpenAiResponseDTO createChatCompletion(
+            @RequestHeader("Authorization") String authorization,
+            @RequestBody OpenAiRequestDTO request
+    );
+
 }

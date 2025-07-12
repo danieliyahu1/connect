@@ -30,3 +30,10 @@ spring:
                   args:
                     regexp: "/api/auth/(?<segment>.*)"
                     replacement: "/auth/public/${segment}"
+
+            - id: discovery-service-route
+              uri: http://connect-discovery-service:4004
+              predicates:
+                - Path=/api/discover/**
+              filters:
+                - StripPrefix=1

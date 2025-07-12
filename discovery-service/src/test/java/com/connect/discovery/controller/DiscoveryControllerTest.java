@@ -33,8 +33,8 @@ class DiscoveryControllerTest {
         String userId = UUID.randomUUID().toString();
 
         List<UserSuggestionDTO> mockSuggestions = List.of(
-                new UserSuggestionDTO("user-1", "Alice", 25, "https://url.com/pic1", "Berlin", "Germany", "You both speak German."),
-                new UserSuggestionDTO("user-2", "Bob", 30, "https://url.com/pic2", "Munich", "Germany", "You love techno and beer.")
+                new UserSuggestionDTO("user-1", "Alice", "https://url.com/pic1", "Berlin", "Germany", "You both speak German.", 0.00243),
+                new UserSuggestionDTO("user-2", "Bob", "https://url.com/pic2", "Munich", "Germany", "You love techno and beer.", 0.0000553)
         );
 
         when(discoveryService.discoverLocals()).thenReturn(mockSuggestions);
@@ -57,8 +57,8 @@ class DiscoveryControllerTest {
         String userId = UUID.randomUUID().toString();
 
         List<UserSuggestionDTO> mockSuggestions = List.of(
-                new UserSuggestionDTO("traveler-1", "Claire", 27, "https://url.com/pic3", "Paris", "France", "You both love art and food."),
-                new UserSuggestionDTO("traveler-2", "David", 28, "https://url.com/pic4", "Lyon", "France", "You share interest in hiking.")
+                new UserSuggestionDTO("traveler-1", "Claire", "https://url.com/pic3", "Paris", "France", "You both love art and food.", 0.3850234),
+                new UserSuggestionDTO("traveler-2", "David", "https://url.com/pic4", "Lyon", "France", "You share interest in hiking.", 0.3850234)
         );
 
         when(discoveryService.discoverTravelers()).thenReturn(mockSuggestions);
