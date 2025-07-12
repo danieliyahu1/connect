@@ -1,10 +1,14 @@
 package com.connect.discovery.controller;
 
+import com.connect.auth.common.util.AsymmetricJwtUtil;
+import com.connect.discovery.configuration.TestSecurityConfig;
 import com.connect.discovery.dto.UserSuggestionDTO;
 import com.connect.discovery.service.DiscoveryService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -19,10 +23,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(DiscoveryController.class)
+@Import(TestSecurityConfig.class)
+@AutoConfigureMockMvc(addFilters = false)
 class DiscoveryControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockitoBean
+    private AsymmetricJwtUtil jwtUtil;
 
     @MockitoBean
     private DiscoveryService discoveryService;
@@ -41,7 +50,7 @@ class DiscoveryControllerTest {
 
         Authentication auth = new TestingAuthenticationToken(userId, null);
 
-        mockMvc.perform(get("/discover/locals").principal(auth))
+        mockMvc.perform(get("/discover/public/locals").principal(auth))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(2))
                 .andExpect(jsonPath("$[0].userId").value("user-1"))
@@ -65,7 +74,7 @@ class DiscoveryControllerTest {
 
         Authentication auth = new TestingAuthenticationToken(userId, null);
 
-        mockMvc.perform(get("/discover/travelers").principal(auth))
+        mockMvc.perform(get("/discover/public/travelers").principal(auth))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(2))
                 .andExpect(jsonPath("$[0].userId").value("traveler-1"))
