@@ -1,6 +1,7 @@
 package com.connect.discovery.config;
 
 import feign.RequestInterceptor;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.request.RequestAttributes;
@@ -10,6 +11,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Configuration
+@EnableFeignClients(basePackages = "com.connect.discovery.client")
 public class FeignClientConfig {
 
     @Bean

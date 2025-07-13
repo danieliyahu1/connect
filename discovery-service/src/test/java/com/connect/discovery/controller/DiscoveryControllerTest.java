@@ -50,7 +50,7 @@ class DiscoveryControllerTest {
 
         Authentication auth = new TestingAuthenticationToken(userId, null);
 
-        mockMvc.perform(get("/discover/public/locals").principal(auth))
+        mockMvc.perform(get("/discovery/public/locals").principal(auth))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(2))
                 .andExpect(jsonPath("$[0].userId").value("user-1"))
@@ -74,7 +74,7 @@ class DiscoveryControllerTest {
 
         Authentication auth = new TestingAuthenticationToken(userId, null);
 
-        mockMvc.perform(get("/discover/public/travelers").principal(auth))
+        mockMvc.perform(get("/discovery/public/travelers").principal(auth))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(2))
                 .andExpect(jsonPath("$[0].userId").value("traveler-1"))

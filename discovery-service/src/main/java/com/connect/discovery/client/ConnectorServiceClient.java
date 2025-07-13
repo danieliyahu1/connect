@@ -3,14 +3,16 @@ package com.connect.discovery.client;
 import com.connect.discovery.config.FeignClientConfig;
 import com.connect.discovery.dto.ConnectorResponseDTO;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.UUID;
 
 @FeignClient(
         name = "connectorServiceClient",
-        url = "http://connect-connector-service:4001/api/connectors",
+        url = "${connector.service.base.url}",
         configuration = FeignClientConfig.class
 )
 public interface ConnectorServiceClient {

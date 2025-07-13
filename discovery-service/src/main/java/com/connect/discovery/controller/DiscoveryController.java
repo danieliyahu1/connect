@@ -14,7 +14,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/discover")
+@RequestMapping("/discovery")
 public class DiscoveryController {
 
     private final DiscoveryService discoveryService;

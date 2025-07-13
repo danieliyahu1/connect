@@ -11,7 +11,7 @@ import java.util.List;
 
 @FeignClient(
         name = "tripServiceClient",
-        url = "http://connect-trip-service:4002/api/trips",
+        url = "${trip.service.base.url}",
         configuration = FeignClientConfig.class
 )
 public interface TripServiceClient {

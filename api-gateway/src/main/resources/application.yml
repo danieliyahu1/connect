@@ -34,6 +34,6 @@ spring:
             - id: discovery-service-route
               uri: http://connect-discovery-service:4004
               predicates:
-                - Path=/api/discover/**
+                - Path=/api/discovery/**
               filters:
                 - StripPrefix=1
