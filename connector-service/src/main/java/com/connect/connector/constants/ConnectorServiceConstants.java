@@ -1,5 +1,9 @@
 package com.connect.connector.constants;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access= AccessLevel.PRIVATE)
 public class ConnectorServiceConstants {
 
     // cloudinary constants
@@ -17,5 +21,4 @@ public class ConnectorServiceConstants {
 
     public static final String ERROR = "error";
     public static final String MESSAGE = "message";
-
 }

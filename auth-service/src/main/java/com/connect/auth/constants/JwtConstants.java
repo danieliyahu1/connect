@@ -1,5 +1,9 @@
 package com.connect.auth.constants;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access= AccessLevel.PRIVATE)
 public class JwtConstants {
 
     public static final int ACCESS_TOKEN_LIFE_SPAN_IN_MINUTES = 10080;

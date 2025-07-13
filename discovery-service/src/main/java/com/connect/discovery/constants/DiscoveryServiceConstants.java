@@ -1,5 +1,9 @@
 package com.connect.discovery.constants;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access= AccessLevel.PRIVATE)
 public class DiscoveryServiceConstants {
 
     public static final String ROLE_SYSTEM = "system";
@@ -13,8 +17,4 @@ public class DiscoveryServiceConstants {
                     "return a relevance score from 0 to 1 excluding and a short explanation why they are a good match," +
                     "the response should be made for the requester he will be shown a list of each candidate. " +
                     "Format your response as a JSON array with fields: userId, score, and reason.";
-
-    private DiscoveryServiceConstants() {
-        // Prevent instantiation
-    }
 }
