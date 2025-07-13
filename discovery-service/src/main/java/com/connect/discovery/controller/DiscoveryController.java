@@ -2,6 +2,7 @@ package com.connect.discovery.controller;
 
 import com.connect.discovery.dto.UserSuggestionDTO;
 import com.connect.discovery.service.DiscoveryService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,12 +21,12 @@ public class DiscoveryController {
     private final DiscoveryService discoveryService;
 
     @GetMapping("/public/locals")
-    public List<UserSuggestionDTO> discoverLocals(Authentication authentication) {
+    public List<UserSuggestionDTO> discoverLocals(Authentication authentication) throws JsonProcessingException {
         return discoveryService.discoverLocals();
     }
 
     @GetMapping("/public/travelers")
-    public List<UserSuggestionDTO> discoverTravelers(Authentication authentication) {
+    public List<UserSuggestionDTO> discoverTravelers(Authentication authentication) throws JsonProcessingException {
         return discoveryService.discoverTravelers();
     }
 }

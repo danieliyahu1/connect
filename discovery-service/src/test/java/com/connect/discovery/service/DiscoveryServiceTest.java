@@ -1,10 +1,8 @@
 package com.connect.discovery.service;
 
-import com.connect.discovery.client.ConnectorServiceClient;
-import com.connect.discovery.client.OpenAiClient;
-import com.connect.discovery.client.TripServiceClient;
 import com.connect.discovery.dto.*;
 import com.connect.discovery.mapper.TripMapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -74,7 +72,7 @@ class DiscoveryServiceTest {
     }
 
     @Test
-    void discoverLocals_shouldReturnDetailedSuggestions() {
+    void discoverLocals_shouldReturnDetailedSuggestions() throws JsonProcessingException {
         List<TripResponseDTO> myTrips = List.of(trip1, trip2);
         List<String> countries = List.of("GERMANY");
         List<ConnectorResponseDTO> candidates = List.of(candidate1, candidate2);
@@ -112,7 +110,7 @@ class DiscoveryServiceTest {
     }
 
     @Test
-    void discoverTravelers_shouldReturnDetailedSuggestions() {
+    void discoverTravelers_shouldReturnDetailedSuggestions() throws JsonProcessingException {
         List<TripResponseDTO> trips = List.of(trip1, trip2);
         List<ConnectorResponseDTO> candidates = List.of(candidate1, candidate2);
 

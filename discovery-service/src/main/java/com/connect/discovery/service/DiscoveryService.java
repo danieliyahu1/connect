@@ -4,6 +4,7 @@ import com.connect.discovery.dto.ConnectorResponseDTO;
 import com.connect.discovery.dto.TripResponseDTO;
 import com.connect.discovery.dto.UserSuggestionDTO;
 import com.connect.discovery.mapper.TripMapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +21,7 @@ public class DiscoveryService {
     /**
      * Called by /discover/locals — used by travelers to find locals at their destinations.
      */
-    public List<UserSuggestionDTO> discoverLocals() {
+    public List<UserSuggestionDTO> discoverLocals() throws JsonProcessingException {
         List<TripResponseDTO> destinations = getTripDestinations();
         ConnectorResponseDTO requester = fetchUserProfile(); // Changed here
         List<String> localCountries = getLocalCountries(destinations);
@@ -31,7 +32,7 @@ public class DiscoveryService {
     /**
      * Called by /discover/travelers — used by locals to find travelers coming to their country.
      */
-    public List<UserSuggestionDTO> discoverTravelers() {
+    public List<UserSuggestionDTO> discoverTravelers() throws JsonProcessingException {
         ConnectorResponseDTO requester = fetchUserProfile(); // Changed here
         List<TripResponseDTO> tripsOfTravelersToLocalCountry = fetchTravelersVisiting(requester.getCountry());
         List<ConnectorResponseDTO> candidates = fetchProfilesById(tripsOfTravelersToLocalCountry); // Changed here
@@ -67,7 +68,7 @@ public class DiscoveryService {
         return connectorService.fetchProfilesById(userCountriesDestinations);
     }
 
-    private List<UserSuggestionDTO> scoreMatches(ConnectorResponseDTO requester, List<ConnectorResponseDTO> candidates) {
+    private List<UserSuggestionDTO> scoreMatches(ConnectorResponseDTO requester, List<ConnectorResponseDTO> candidates) throws JsonProcessingException {
         return openAiService.rankCandidatesByRelevance(requester, candidates);
     }
 }

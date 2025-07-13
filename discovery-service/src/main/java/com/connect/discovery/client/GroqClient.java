@@ -1,22 +1,21 @@
 package com.connect.discovery.client;
 
+import com.connect.discovery.config.GroqFeignConfig;
 import com.connect.discovery.dto.openai.OpenAiRequestDTO;
 import com.connect.discovery.dto.openai.OpenAiResponseDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(
-        name = "openAiClient",
-        url = "https://api.openai.com/v1"
+        name = "groqClient",
+        url = "https://api.groq.com/openai/v1",
+        configuration = GroqFeignConfig.class
 )
-public interface OpenAiClient {
+public interface GroqClient {
 
     @PostMapping("/chat/completions")
     OpenAiResponseDTO createChatCompletion(
-            @RequestHeader("Authorization") String authorization,
             @RequestBody OpenAiRequestDTO request
     );
-
 }

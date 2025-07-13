@@ -1,10 +1,11 @@
 package com.connect.discovery.service;
 
-import com.connect.discovery.client.OpenAiClient;
+import com.connect.discovery.client.GroqClient;
 import com.connect.discovery.dto.ConnectorResponseDTO;
 import com.connect.discovery.dto.ConnectorImageDTO;
 import com.connect.discovery.dto.UserSuggestionDTO;
 import com.connect.discovery.dto.openai.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +24,7 @@ import static org.mockito.Mockito.*;
 class OpenAiServiceTest {
 
     @Mock
-    private OpenAiClient openAiClient;
+    private GroqClient groqClient;
 
     @InjectMocks
     private OpenAiService openAiService;
@@ -36,7 +37,7 @@ class OpenAiServiceTest {
 
     @BeforeEach
     void setup() throws Exception {
-        openAiService = new OpenAiService(openAiClient, "test-key", objectMapper);
+        openAiService = new OpenAiService(groqClient, objectMapper);
 
         requester = createConnector("Alice", "Germany", "Berlin", "http://example.com/a.jpg");
         candidate1 = createConnector("Bob", "Germany", "Munich", "http://example.com/b.jpg");
@@ -61,11 +62,11 @@ class OpenAiServiceTest {
         assertEquals("Eve", results.get(1).getName());
         assertEquals(0.4, results.get(1).getScore());
 
-        verify(openAiClient, times(2)).createChatCompletion(anyString(), any());
+        verify(groqClient, times(2)).createChatCompletion(any());
     }
 
     @Test
-    void rankCandidatesByRelevance_shouldHandleInvalidJsonGracefully() {
+    void rankCandidatesByRelevance_shouldHandleInvalidJsonGracefully() throws JsonProcessingException {
         mockOpenAiResponse("INVALID_JSON");
 
         List<UserSuggestionDTO> results = openAiService.rankCandidatesByRelevance(requester, List.of(candidate1));
@@ -76,17 +77,17 @@ class OpenAiServiceTest {
     }
 
     @Test
-    void rankCandidatesByRelevance_shouldReturnEmptyWhenCandidatesEmpty() {
+    void rankCandidatesByRelevance_shouldReturnEmptyWhenCandidatesEmpty() throws JsonProcessingException {
         List<UserSuggestionDTO> results = openAiService.rankCandidatesByRelevance(requester, List.of());
 
         assertNotNull(results);
         assertTrue(results.isEmpty());
-        verifyNoInteractions(openAiClient);
+        verifyNoInteractions(groqClient);
     }
 
     @Test
     void rankCandidatesByRelevance_shouldThrowIfClientFails() {
-        when(openAiClient.createChatCompletion(anyString(), any())).thenThrow(new RuntimeException("OpenAI error"));
+        when(groqClient.createChatCompletion(any())).thenThrow(new RuntimeException("OpenAI error"));
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
                 openAiService.rankCandidatesByRelevance(requester, List.of(candidate1)));
@@ -111,7 +112,7 @@ class OpenAiServiceTest {
     }
 
     private void mockOpenAiResponse(String... responses) {
-        OngoingStubbing<OpenAiResponseDTO> stubbing = when(openAiClient.createChatCompletion(anyString(), any(OpenAiRequestDTO.class)));
+        OngoingStubbing<OpenAiResponseDTO> stubbing = when(groqClient.createChatCompletion(any(OpenAiRequestDTO.class)));
 
         for (String json : responses) {
             OpenAiResponseDTO mockResponse = new OpenAiResponseDTO();

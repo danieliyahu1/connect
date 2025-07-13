@@ -7,15 +7,18 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import lombok.extern.slf4j.Slf4j;
 
 import jakarta.servlet.http.HttpServletRequest;
 
 @Configuration
 @EnableFeignClients(basePackages = "com.connect.discovery.client")
+@Slf4j
 public class FeignClientConfig {
 
     @Bean
     public RequestInterceptor requestInterceptor() {
+        log.info("Feign Client Config initialized");
         return template -> {
             // Get current HTTP request
             RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
