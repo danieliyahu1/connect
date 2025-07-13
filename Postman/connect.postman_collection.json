@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "7cb10571-3757-40db-ba71-87fccededf10",
+		"_postman_id": "d005e18d-f39b-4365-8a44-fee8b2c279c8",
 		"name": "connect",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "39483808"
+		"_exporter_id": "45693417"
 	},
 	"item": [
 		{
@@ -16,7 +16,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"email\": \"user7@example.com\",\r\n  \"password\": \"MySecurePassword123\",\r\n  \"confirmed_password\": \"MySecurePassword123\"\r\n}\r\n",
+							"raw": "{\r\n  \"email\": \"user@example.com\",\r\n  \"password\": \"MySecurePassword123\",\r\n  \"confirmed_password\": \"MySecurePassword123\"\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -24,50 +24,16 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:4000/auth/register",
+							"raw": "http://localhost:4003/api/auth/register",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
-							"port": "4000",
+							"port": "4003",
 							"path": [
+								"api",
 								"auth",
 								"register"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "get all",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n  \"email\": \"user@example.com\",\r\n  \"password\": \"MySecurePassword123\"\r\n}\r\n",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:4000/auth/getAll",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4000",
-							"path": [
-								"auth",
-								"getAll"
 							]
 						}
 					},
@@ -88,13 +54,14 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:4000/auth/login",
+							"raw": "http://localhost:4003/api/auth/login",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
-							"port": "4000",
+							"port": "4003",
 							"path": [
+								"api",
 								"auth",
 								"login"
 							]
@@ -103,16 +70,16 @@
 					"response": []
 				},
 				{
-					"name": "get refresh token list",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
+					"name": "refresh",
 					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "GET",
-						"header": [],
+						"method": "POST",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "refreshToken=eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI5YzQzNmFiOC0yNDhiLTQwNDctOGU0ZC1lMmJhY2QwMWM0NDciLCJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImlhdCI6MTc1MjA3Mzk3NCwiZXhwIjoxNzUyMDc0ODc0fQ.akp4POPZaTF8lA4DUyG-9YU2AJLcAZPG_OG9TSlZAKbuvJShhAzkB3XlZBLiO2RoiHmBsw_waHRJsSTwqs_RmPCTGAkY77VxAc9QpbU18O7r0PuZerk-M1R_Pgh_EAPNmjYiGFjgojKEGASzlW45S1xaicQNoGY8aJTO3JaAsZIziYBaHPOeXDj3UV4UxNGwNCrbb3llw8tKtGEQZDTLHG43IfloOuqgKYn5_robUq3OSgGKNbIv0FvXB5pGGM1J2b0t4Dc3kfBqtoM0HZiEv9bqMtS6HFyCakSJZvCElsQGfI7xB-qQ_avRnmY4t4PL4UA-_ivGyf-2ZAcI_vEtKw",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\r\n  \"email\": \"user@example.com\",\r\n  \"password\": \"MySecurePassword123\"\r\n}\r\n",
@@ -123,45 +90,16 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:4000/auth/getRefreshTokenList",
+							"raw": "http://localhost:4003/api/auth/refresh",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
-							"port": "4000",
+							"port": "4003",
 							"path": [
+								"api",
 								"auth",
-								"getRefreshTokenList"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "delete user",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n  \"email\": \"user@example.com\",\r\n  \"password\": \"MySecurePassword123\"\r\n}\r\n",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:4000/auth/deleteUser/16ade4ac-04a5-4664-8454-ecc3170eadf1",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4000",
-							"path": [
-								"auth",
-								"deleteUser",
-								"16ade4ac-04a5-4664-8454-ecc3170eadf1"
+								"refresh"
 							]
 						}
 					},
@@ -171,7 +109,382 @@
 		},
 		{
 			"name": "connector-service",
-			"item": []
+			"item": [
+				{
+					"name": "create profile",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI5YzQzNmFiOC0yNDhiLTQwNDctOGU0ZC1lMmJhY2QwMWM0NDciLCJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiaWF0IjoxNzUyMDg5ODM1LCJleHAiOjE3NTI2OTQ2MzV9.nS7lhcGhSzLTLlI2czVBJ7P9EqkN5xvdpTmIvJckwZsACNT2IUndDclLAHDPxql3Rpqq-EQ0sLs45ZkeiW4DnkHNuE7TvMTNzPeh5ZjRzwj9BiRokmqRQVwHXUhJzsaW1HqFnLoHMXk9TkbqdfW6fnLVn8Ufey77KytCrvr3vz8P8jwZtAqbdKrqPyVEl_Z8oAiL-7Y1nYrZmhdQ0kj1cZRX7FQvk6nPNVl8bu244LjVFxBEOJdHyhiLQuf0wvVOIHz1jJAb0i36S2TyXFVBdzyNu28ujAJf1_IAAXkJzPk3B9lQ8CuWIY3Iiaqc5tVTY6miM0DEongO-x1DY2yALw",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"firstName\": \"Daniel\",\r\n  \"country\": \"Israel\",\r\n  \"city\": \"Tel-Aviv\",\r\n  \"bio\": \"Hi, I'm Daniel and I love meeting travelers!\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4003/api/connectors/me",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4003",
+							"path": [
+								"api",
+								"connectors",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "cloudinary-signature",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIyODUxODk1My0yYmVkLTQzYjgtOGI0NC0zYmQ0MTc5ZmRiZTIiLCJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiaWF0IjoxNzUxOTkxNTQ4LCJleHAiOjE3NTE5OTE3Mjh9.QXP37NV0-ZjN2Pt7JG21b5HqCtzxEdQvgHW_Uvg8Sc2v1d5OGL1er24G2Ydfukk0AYr8XQJ44_q7xaMWxBq0pdG1aPxHL6IDnsEOkbdG4xtIaj-3gDGlMCv_c5-w--prjZEOaOANpuaV4g8IBNXZrNtm0h_45e-d8S4Zl0q7g_uQTCGV5ca7J0x14QJhWp1XBeDjOz35unotZytzWzmB-t10P-gCisMTC4o2fv85-CYFM9g2RoSnXHs9hbdR0i_l69MJOuUaiML941eBGQfXtyI2EFt0cYkgWYfqDZI-8dph-UOBWSZqJFLpF7WrIM6tgxh5R12fO4ilGQXe3v29PA",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"firstName\": \"Daniel\",\r\n  \"country\": \"Israel\",\r\n  \"city\": \"Tel-Aviv\",\r\n  \"bio\": \"Hi, I'm Daniel and I love meeting travelers!\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4003/api/connectors/me/gallery/signature?orderIndex=0",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4003",
+							"path": [
+								"api",
+								"connectors",
+								"me",
+								"gallery",
+								"signature"
+							],
+							"query": [
+								{
+									"key": "orderIndex",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJmNjU1OGY4OC01ZDMwLTRjZTYtODk2My0yMzliMzVjZWViZTEiLCJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiaWF0IjoxNzUxMDM1OTg0LCJleHAiOjE3NTEwMzYxNjR9.U3ODaWJCi2J7XktW8mvZGgFZglfjqCHvGvPLo9BAzhlJ7mxt_YvtfgucaTNLWHY8prFO2LjU0ap67vQJ8oZ17mnWvlGxuzdAuf5nt7ldzV0oNWVv7Wt2wrsrDCQ0ZNu0-XLWC5IE0_19qFhq13vADGMNAxP9nfIb1-AqM3kDLi_yV5LYoY-haK1AllYRbaivZqcx89oWqfoe00erBHA2cxHu3kPtMz0437jMOdRlVT9u0MR3nYsKv9kMxOEYCk7Wcd6frao1o8ri_n0t-VF1d_ZnnnRoUAKTfzj6wcIfDJ1GBxbzcuLs-PnEztK2xp6B6tMVPDthdsyOcS11i_xfig",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"firstName\": \"Daniel2\",\r\n  \"country\": \"Israel\",\r\n  \"city\": \"Tel-Aviv\",\r\n  \"bio\": \"Hi, I'm Daniel and I love meeting travelers!\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4003/api/connectors/me",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4003",
+							"path": [
+								"api",
+								"connectors",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get profile by id",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI5YzQzNmFiOC0yNDhiLTQwNDctOGU0ZC1lMmJhY2QwMWM0NDciLCJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiaWF0IjoxNzUyMDg5ODM1LCJleHAiOjE3NTI2OTQ2MzV9.nS7lhcGhSzLTLlI2czVBJ7P9EqkN5xvdpTmIvJckwZsACNT2IUndDclLAHDPxql3Rpqq-EQ0sLs45ZkeiW4DnkHNuE7TvMTNzPeh5ZjRzwj9BiRokmqRQVwHXUhJzsaW1HqFnLoHMXk9TkbqdfW6fnLVn8Ufey77KytCrvr3vz8P8jwZtAqbdKrqPyVEl_Z8oAiL-7Y1nYrZmhdQ0kj1cZRX7FQvk6nPNVl8bu244LjVFxBEOJdHyhiLQuf0wvVOIHz1jJAb0i36S2TyXFVBdzyNu28ujAJf1_IAAXkJzPk3B9lQ8CuWIY3Iiaqc5tVTY6miM0DEongO-x1DY2yALw",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:4003/api/connectors/public/9c436ab8-248b-4047-8e4d-e2bacd01c447",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4003",
+							"path": [
+								"api",
+								"connectors",
+								"public",
+								"9c436ab8-248b-4047-8e4d-e2bacd01c447"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add image",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI5YzQzNmFiOC0yNDhiLTQwNDctOGU0ZC1lMmJhY2QwMWM0NDciLCJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiaWF0IjoxNzUyMDg0NzY5LCJleHAiOjE3NTIwODQ5NDl9.ijBzjPwPj1TknPQhkPa83BeqIxdljt9Lj_Gw_CNSsyE31Zjnwpy_QfTvFRyKB8VDYJTMDIjx3aWVnAueN1xwbhDLVb_PQUI6I7tJyO_iQJda5Vhvxtmb1fjkRFJRQ-7JPyfmNvrHn-g4HAge_6J5puxEsqxbHlI2Q5lauUq5CGqVXIwTjWRgRQSCjgvVDOPNJdjPCbnZaPIA9U048HHERkVRKpnQPX7v8ZnC6alMCMRkOwEv5cJfh5z1XbwKSxmIVjglcpvhVxpRYYRNKV2J_q64GXB0hq621-JQwC5uqE4vROrBZczzJPtJvRrZoEVkCxeatqx_qc3Ut1qip9JEvg",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"mediaUrl\": \"https://example.com/new-image.jpg\",\r\n    \"orderIndex\": 0\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4003/api/connectors/me/gallery",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4003",
+							"path": [
+								"api",
+								"connectors",
+								"me",
+								"gallery"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "trip-service",
+			"item": [
+				{
+					"name": "add trip",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI5YzQzNmFiOC0yNDhiLTQwNDctOGU0ZC1lMmJhY2QwMWM0NDciLCJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiaWF0IjoxNzUyMDg5ODM1LCJleHAiOjE3NTI2OTQ2MzV9.nS7lhcGhSzLTLlI2czVBJ7P9EqkN5xvdpTmIvJckwZsACNT2IUndDclLAHDPxql3Rpqq-EQ0sLs45ZkeiW4DnkHNuE7TvMTNzPeh5ZjRzwj9BiRokmqRQVwHXUhJzsaW1HqFnLoHMXk9TkbqdfW6fnLVn8Ufey77KytCrvr3vz8P8jwZtAqbdKrqPyVEl_Z8oAiL-7Y1nYrZmhdQ0kj1cZRX7FQvk6nPNVl8bu244LjVFxBEOJdHyhiLQuf0wvVOIHz1jJAb0i36S2TyXFVBdzyNu28ujAJf1_IAAXkJzPk3B9lQ8CuWIY3Iiaqc5tVTY6miM0DEongO-x1DY2yALw",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"country\": \"GERMANY\",\r\n  \"city\": \"BERLIN\",\r\n  \"startDate\": \"2025-08-01\",\r\n  \"endDate\": \"2025-08-10\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4003/api/trips/me",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4003",
+							"path": [
+								"api",
+								"trips",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get trips",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI5YzQzNmFiOC0yNDhiLTQwNDctOGU0ZC1lMmJhY2QwMWM0NDciLCJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiaWF0IjoxNzUyMDg5ODM1LCJleHAiOjE3NTI2OTQ2MzV9.nS7lhcGhSzLTLlI2czVBJ7P9EqkN5xvdpTmIvJckwZsACNT2IUndDclLAHDPxql3Rpqq-EQ0sLs45ZkeiW4DnkHNuE7TvMTNzPeh5ZjRzwj9BiRokmqRQVwHXUhJzsaW1HqFnLoHMXk9TkbqdfW6fnLVn8Ufey77KytCrvr3vz8P8jwZtAqbdKrqPyVEl_Z8oAiL-7Y1nYrZmhdQ0kj1cZRX7FQvk6nPNVl8bu244LjVFxBEOJdHyhiLQuf0wvVOIHz1jJAb0i36S2TyXFVBdzyNu28ujAJf1_IAAXkJzPk3B9lQ8CuWIY3Iiaqc5tVTY6miM0DEongO-x1DY2yALw",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:4003/api/discover/public/locals",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4003",
+							"path": [
+								"api",
+								"discover",
+								"public",
+								"locals"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "discovery-service",
+			"item": [
+				{
+					"name": "get locals",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI5YzQzNmFiOC0yNDhiLTQwNDctOGU0ZC1lMmJhY2QwMWM0NDciLCJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiaWF0IjoxNzUyMDg5ODM1LCJleHAiOjE3NTI2OTQ2MzV9.nS7lhcGhSzLTLlI2czVBJ7P9EqkN5xvdpTmIvJckwZsACNT2IUndDclLAHDPxql3Rpqq-EQ0sLs45ZkeiW4DnkHNuE7TvMTNzPeh5ZjRzwj9BiRokmqRQVwHXUhJzsaW1HqFnLoHMXk9TkbqdfW6fnLVn8Ufey77KytCrvr3vz8P8jwZtAqbdKrqPyVEl_Z8oAiL-7Y1nYrZmhdQ0kj1cZRX7FQvk6nPNVl8bu244LjVFxBEOJdHyhiLQuf0wvVOIHz1jJAb0i36S2TyXFVBdzyNu28ujAJf1_IAAXkJzPk3B9lQ8CuWIY3Iiaqc5tVTY6miM0DEongO-x1DY2yALw",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:4003/api/discovery/public/locals",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4003",
+							"path": [
+								"api",
+								"discovery",
+								"public",
+								"locals"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get travelers",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI5YzQzNmFiOC0yNDhiLTQwNDctOGU0ZC1lMmJhY2QwMWM0NDciLCJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiaWF0IjoxNzUyMDg5ODM1LCJleHAiOjE3NTI2OTQ2MzV9.nS7lhcGhSzLTLlI2czVBJ7P9EqkN5xvdpTmIvJckwZsACNT2IUndDclLAHDPxql3Rpqq-EQ0sLs45ZkeiW4DnkHNuE7TvMTNzPeh5ZjRzwj9BiRokmqRQVwHXUhJzsaW1HqFnLoHMXk9TkbqdfW6fnLVn8Ufey77KytCrvr3vz8P8jwZtAqbdKrqPyVEl_Z8oAiL-7Y1nYrZmhdQ0kj1cZRX7FQvk6nPNVl8bu244LjVFxBEOJdHyhiLQuf0wvVOIHz1jJAb0i36S2TyXFVBdzyNu28ujAJf1_IAAXkJzPk3B9lQ8CuWIY3Iiaqc5tVTY6miM0DEongO-x1DY2yALw",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:4003/api/discovery/public/travelers",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4003",
+							"path": [
+								"api",
+								"discovery",
+								"public",
+								"travelers"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	]
 }
