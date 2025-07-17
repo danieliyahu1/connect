@@ -21,13 +21,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class OpenAiServiceTest {
+class GroqServiceTest {
 
     @Mock
     private GroqClient groqClient;
 
     @InjectMocks
-    private OpenAiService openAiService;
+    private GroqService groqService;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -37,7 +37,7 @@ class OpenAiServiceTest {
 
     @BeforeEach
     void setup() throws Exception {
-        openAiService = new OpenAiService(groqClient, objectMapper);
+        groqService = new GroqService(groqClient, objectMapper);
 
         requester = createConnector("Alice", "Germany", "Berlin", "http://example.com/a.jpg");
         candidate1 = createConnector("Bob", "Germany", "Munich", "http://example.com/b.jpg");
@@ -51,7 +51,7 @@ class OpenAiServiceTest {
 
         mockOpenAiResponse(json1, json2);
 
-        List<UserSuggestionDTO> results = openAiService.rankCandidatesByRelevance(requester, List.of(candidate1, candidate2));
+        List<UserSuggestionDTO> results = groqService.rankCandidatesByRelevance(requester, List.of(candidate1, candidate2));
 
         assertNotNull(results);
         assertEquals(2, results.size());
@@ -69,7 +69,7 @@ class OpenAiServiceTest {
     void rankCandidatesByRelevance_shouldHandleInvalidJsonGracefully() throws JsonProcessingException {
         mockOpenAiResponse("INVALID_JSON");
 
-        List<UserSuggestionDTO> results = openAiService.rankCandidatesByRelevance(requester, List.of(candidate1));
+        List<UserSuggestionDTO> results = groqService.rankCandidatesByRelevance(requester, List.of(candidate1));
 
         assertEquals(1, results.size());
         assertEquals(0.0, results.get(0).getScore());
@@ -78,7 +78,7 @@ class OpenAiServiceTest {
 
     @Test
     void rankCandidatesByRelevance_shouldReturnEmptyWhenCandidatesEmpty() throws JsonProcessingException {
-        List<UserSuggestionDTO> results = openAiService.rankCandidatesByRelevance(requester, List.of());
+        List<UserSuggestionDTO> results = groqService.rankCandidatesByRelevance(requester, List.of());
 
         assertNotNull(results);
         assertTrue(results.isEmpty());
@@ -90,7 +90,7 @@ class OpenAiServiceTest {
         when(groqClient.createChatCompletion(any())).thenThrow(new RuntimeException("OpenAI error"));
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                openAiService.rankCandidatesByRelevance(requester, List.of(candidate1)));
+                groqService.rankCandidatesByRelevance(requester, List.of(candidate1)));
 
         assertEquals("OpenAI error", ex.getMessage());
     }

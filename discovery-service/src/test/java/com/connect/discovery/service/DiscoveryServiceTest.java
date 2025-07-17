@@ -26,7 +26,7 @@ class DiscoveryServiceTest {
     private ConnectorService connectorService;
 
     @Mock
-    private OpenAiService openAiService;
+    private AiService aiService;
 
     @Mock
     private TripMapper tripMapper;
@@ -80,7 +80,7 @@ class DiscoveryServiceTest {
         when(tripService.getMyTrips()).thenReturn(myTrips);
         when(connectorService.fetchUserProfile()).thenReturn(requester);
         when(connectorService.fetchProfilesByCountry(countries)).thenReturn(candidates);
-        when(openAiService.rankCandidatesByRelevance(requester, candidates)).thenReturn(mockSuggestions);
+        when(aiService.rankCandidatesByRelevance(requester, candidates)).thenReturn(mockSuggestions);
 
         List<UserSuggestionDTO> results = discoveryService.discoverLocals();
 
@@ -106,7 +106,7 @@ class DiscoveryServiceTest {
         verify(tripService).getMyTrips();
         verify(connectorService).fetchUserProfile();
         verify(connectorService).fetchProfilesByCountry(countries);
-        verify(openAiService).rankCandidatesByRelevance(requester, candidates);
+        verify(aiService).rankCandidatesByRelevance(requester, candidates);
     }
 
     @Test
@@ -117,7 +117,7 @@ class DiscoveryServiceTest {
         when(connectorService.fetchUserProfile()).thenReturn(requester);
         when(tripService.fetchTravelersVisiting(anyString())).thenReturn(trips);
         when(connectorService.fetchProfilesById(anyList())).thenReturn(candidates);
-        when(openAiService.rankCandidatesByRelevance(requester, candidates)).thenReturn(mockSuggestions);
+        when(aiService.rankCandidatesByRelevance(requester, candidates)).thenReturn(mockSuggestions);
 
         List<UserSuggestionDTO> results = discoveryService.discoverTravelers();
 
@@ -135,7 +135,7 @@ class DiscoveryServiceTest {
         verify(connectorService).fetchUserProfile();
         verify(tripService).fetchTravelersVisiting(anyString());
         verify(connectorService).fetchProfilesById(anyList());
-        verify(openAiService).rankCandidatesByRelevance(requester, candidates);
+        verify(aiService).rankCandidatesByRelevance(requester, candidates);
     }
 
     // === Helpers ===

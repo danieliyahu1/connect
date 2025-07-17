@@ -16,8 +16,8 @@ public class DiscoveryService {
 
     private final TripService tripService;
     private final ConnectorService connectorService;
-    private final OpenAiService openAiService;
-    private final TripMapper tripMapper;
+    private final AiService aiService;
+
     /**
      * Called by /discover/locals — used by travelers to find locals at their destinations.
      */
@@ -69,6 +69,6 @@ public class DiscoveryService {
     }
 
     private List<UserSuggestionDTO> scoreMatches(ConnectorResponseDTO requester, List<ConnectorResponseDTO> candidates) throws JsonProcessingException {
-        return openAiService.rankCandidatesByRelevance(requester, candidates);
+        return aiService.rankCandidatesByRelevance(requester, candidates);
     }
 }

@@ -9,7 +9,7 @@ public class DiscoveryServiceConstants {
     public static final String ROLE_SYSTEM = "system";
     public static final String ROLE_USER = "user";
     public static final String AUTHORIZATION_HEADER_BEARER_SPACE_PREFIX = "Bearer ";
-    public static final String MISTRAL_MODEL = "mixtral-8x7b-32768";
+    public static final String GROQ_MODEL = "gemma2-9b-it";
     public static final String SYSTEM_MESSAGE = """
         You are a social compatibility engine that evaluates how well a traveler and a local might connect based on potential for meaningful interaction.
         Given a requesting user and a candidate user, analyze their compatibility based on their travel interests, location, social media links, and other available profile information.

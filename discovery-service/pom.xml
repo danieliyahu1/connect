@@ -28,6 +28,7 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
+		<spring-ai.version>1.0.0</spring-ai.version>
 	</properties>
 
 	<repositories>
@@ -35,6 +36,11 @@
 			<id>github-danieliyahu1</id>
 			<name>GitHub Packages</name>
 			<url>https://maven.pkg.github.com/danieliyahu1/auth-common</url>
+		</repository>
+		<repository>
+			<id>spring-snapshots</id>
+			<name>Spring Snapshots</name>
+			<url>https://repo.spring.io/snapshot</url>
 		</repository>
 	</repositories>
 
@@ -44,6 +50,13 @@
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dependencies</artifactId>
 				<version>2025.0.0</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.ai</groupId>
+				<artifactId>spring-ai-bom</artifactId>
+				<version>${spring-ai.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -96,6 +109,10 @@
 			<groupId>com.connect</groupId>
 			<artifactId>auth-common</artifactId>
 			<version>0.0.14-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.ai</groupId>
+			<artifactId>spring-ai-starter-model-openai</artifactId>
 		</dependency>
 	</dependencies>
 
