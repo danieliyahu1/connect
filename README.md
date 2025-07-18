@@ -57,9 +57,9 @@ Each service maintains its own database and communicates with other services via
 ### Prerequisites
 
 - **Java 21** or later
-- **Maven 3.11.0** or later
-- **Spring Boot 3.5.3**
-- **PostgreSQL 12** or later (multiple instances)
+- **Maven 3.9.9** or later
+- **Spring Boot 3.5.3** or later
+- **PostgreSQL**
 - **Docker** (optional, for containerized deployment)
 
 ### Environment Setup
@@ -116,7 +116,12 @@ Each service maintains its own database and communicates with other services via
    **Discovery Service Environment Variables:**
    ```bash
    JWT_PUBLIC_KEY=your_public_key_here
-   OPENAI_API_KEY=your_openai_api_key
+   # OpenAI/Groq configuration
+   GROQ_API_KEY=your_groq_api_key
+   GROQ_BASE_URL=your_groq_base_url
+   GROQ_TEMPERATURE=0.7  # or your preferred value
+   GROQ_MODEL=llama3-70b-8192  # or your preferred model
+   # Service URLs
    TRIP_SERVICE_BASE_URL=http://localhost:4002
    CONNECTOR_SERVICE_BASE_URL=http://localhost:4001
    ```
