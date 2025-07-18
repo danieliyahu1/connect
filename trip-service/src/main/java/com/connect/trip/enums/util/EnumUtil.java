@@ -12,7 +12,7 @@ public class EnumUtil {
         try {
             return Enum.valueOf(enumClass, normalized);
         } catch (IllegalArgumentException e) {
-            throw new IllegalEnumException("Unknown enum name: " + displayName);
+            throw new IllegalEnumException("Unknown enum name: " + normalized + "\n Unknown display name: " + displayName);
         }
         catch (NullPointerException e) {
             throw new IllegalEnumException("Display name is invalid: " + displayName);

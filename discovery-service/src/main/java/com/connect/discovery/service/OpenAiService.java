@@ -5,7 +5,6 @@ import com.connect.discovery.dto.UserSuggestionDTO;
 import com.connect.discovery.dto.openai.OpenAiMatchResultDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
@@ -19,14 +18,11 @@ import static com.connect.discovery.constants.DiscoveryServiceConstants.*;
 public class OpenAiService implements AiService {
 
     private final ChatClient chatClient;
-    private final String apiKey;
     private final ObjectMapper objectMapper;
 
     public OpenAiService(ChatClient openAiClient,
-                         @Value("${openai.api.key}") String apiKey,
                          ObjectMapper objectMapper) {
         this.chatClient = openAiClient;
-        this.apiKey = apiKey;
         this.objectMapper = objectMapper;
     }
 

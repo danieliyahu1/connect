@@ -10,7 +10,7 @@ import static com.connect.discovery.constants.DiscoveryServiceConstants.SYSTEM_M
 public class AiClientConfig {
 
     @Bean
-    public ChatClient ChatClient(ChatClient.Builder builder) {
+    public ChatClient chatClient(ChatClient.Builder builder) {
         return builder
                 .defaultSystem(SYSTEM_MESSAGE)
                 .build();
