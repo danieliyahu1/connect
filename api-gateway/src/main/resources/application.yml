@@ -37,3 +37,17 @@ spring:
                 - Path=/api/discovery/**
               filters:
                 - StripPrefix=1
+
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "${FRONTEND_URL:http://localhost:5173}"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            allowCredentials: true

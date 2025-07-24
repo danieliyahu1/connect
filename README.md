@@ -82,6 +82,10 @@ Each service maintains its own database and communicates with other services via
 
    Each service requires its own environment configuration. You can use `.env` files, run configurations, or any method that injects variables into the application properties.
 
+   **API Gateway Environment Variables:**
+   ```bash
+   FRONTEND_URL=your_frontend_url #(if not set the default is http://localhost:5173)
+
    **Auth Service Environment Variables:**
    ```bash
    SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/connect_auth_db
