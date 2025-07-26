@@ -41,9 +41,11 @@ import static org.mockito.Mockito.*;
 @ActiveProfiles("component-test")
 class AuthServiceComponentTest {
 
-    private String publicPrefix = "/auth/public";
-    private String internalPrefix = "/auth/internal";
-    private String bearerPrefix = "Bearer ";
+    private String AUTH_PREFIX = "/auth";
+    private String PUBLIC_PREFIX = "/public";
+    private String INTERNAL_PREFIX = "/internal";
+    private String ME_PREFIX = "/me";
+    private String BEARER_SPACE_PREFIX = "Bearer ";
 
     @MockitoBean
     private AuthRepository authRepository;
@@ -64,15 +66,26 @@ class AuthServiceComponentTest {
     private TestRestTemplate restTemplate;
 
     private String getBaseUrl(String path) {
-        return "http://localhost:" + port + path;
+        return "http://localhost:" + port + AUTH_PREFIX + path;
     }
 
+    private String getPublicBaseUrl(String path) {
+        return getBaseUrl(PUBLIC_PREFIX + path);
+    }
+
+    private String getInternalBaseUrl(String path) {
+        return getBaseUrl(INTERNAL_PREFIX + path);
+    }
+
+    private String getMeBaseUrl(String path) {
+        return getBaseUrl(ME_PREFIX + path);
+    }
 
     // --- /auth/register ---
 
     @Test
     void register_ValidInput_ReturnsCreated() {
-        String url = getBaseUrl(publicPrefix + "/register");
+        String url = getPublicBaseUrl("/register");
         String requestJson = """
             {
               "email": "component-test@example.com",
@@ -99,7 +112,7 @@ class AuthServiceComponentTest {
 
     @Test
     void register_ExistingEmail_ReturnsConflict() {
-        String url = getBaseUrl(publicPrefix + "/register");
+        String url = getPublicBaseUrl("/register");
         String requestJson = """
             {
               "email": "existing@example.com",
@@ -119,7 +132,7 @@ class AuthServiceComponentTest {
 
     @Test
     void register_PasswordsDoNotMatch_ReturnsBadRequest() {
-        String url = getBaseUrl(publicPrefix + "/register");
+        String url = getPublicBaseUrl("/register");
         String requestJson = """
             {
               "email": "component-test@example.com",
@@ -142,7 +155,7 @@ class AuthServiceComponentTest {
 
     @Test
     void login_ValidCredentials_ReturnsOkAndTokens() {
-        String url = getBaseUrl(publicPrefix + "/login");
+        String url = getPublicBaseUrl("/login");
         String requestJson = """
             {
               "email": "component-test@example.com",
@@ -168,7 +181,7 @@ class AuthServiceComponentTest {
 
     @Test
     void login_InvalidCredentials_ReturnsUnauthorized() {
-        String url = getBaseUrl(publicPrefix + "/login");
+        String url = getPublicBaseUrl("/login");
         String requestJson = """
             {
               "email": "component-test@example.com",
@@ -192,7 +205,7 @@ class AuthServiceComponentTest {
 
     @Test
     void refresh_ValidRefreshToken_ReturnsNewTokens() {
-        String url = getBaseUrl(publicPrefix + "/refresh");
+        String url = getPublicBaseUrl("/refresh");
         String token = jwtGenerator.generateRefreshToken(UUID.randomUUID());
         User mockUser = new User("component@test.com", AuthProvider.LOCAL, "providerUserId123");
         RefreshToken mockRefreshToken = new RefreshToken();
@@ -214,7 +227,7 @@ class AuthServiceComponentTest {
 
     @Test
     void refresh_InvalidRefreshToken_ReturnsUnauthorized() {
-        String url = getBaseUrl(publicPrefix + "/refresh");
+        String url = getPublicBaseUrl("/refresh");
         HttpHeaders headers = new HttpHeaders();
         String invalidRefreshToken = jwtGenerator.generateAccessToken(UUID.randomUUID());
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -230,10 +243,10 @@ class AuthServiceComponentTest {
 
     @Test
     void logout_ValidAccessToken_ReturnsNoContent() {
-        String url = getBaseUrl(internalPrefix + "/logout");
+        String url = getMeBaseUrl("/logout");
         String accessToken = jwtGenerator.generateAccessToken(UUID.randomUUID());
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", bearerPrefix + accessToken);
+        headers.set("Authorization", BEARER_SPACE_PREFIX + accessToken);
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
         User mockUser = mock(User.class);
         when(mockUser.getId()).thenReturn(UUID.randomUUID());
@@ -246,10 +259,10 @@ class AuthServiceComponentTest {
 
     @Test
     void logout_InvalidAccessToken_ReturnsUnauthorized() {
-        String url = getBaseUrl("/auth/logout");
+        String url = getMeBaseUrl("/logout");
         String invalidAccessToken = jwtGenerator.generateRefreshToken(UUID.randomUUID());
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", bearerPrefix + invalidAccessToken);
+        headers.set("Authorization", BEARER_SPACE_PREFIX + invalidAccessToken);
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
 
         ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
@@ -258,10 +271,10 @@ class AuthServiceComponentTest {
 
     @Test
     void logout_userNotFound_ReturnsUnauthorized() {
-        String url = getBaseUrl(internalPrefix + "/logout");
+        String url = getMeBaseUrl("/logout");
         String accessToken = jwtGenerator.generateAccessToken(UUID.randomUUID());
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", bearerPrefix + accessToken);
+        headers.set("Authorization", BEARER_SPACE_PREFIX + accessToken);
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
 
         when(userRepository.getUserByUserId(any(UUID.class))).thenReturn(Optional.empty());
@@ -274,10 +287,10 @@ class AuthServiceComponentTest {
 
     @Test
     void deleteUser_ValidAccessToken_ReturnsNoContent() {
-        String url = getBaseUrl(internalPrefix + "/deleteUser");
+        String url = getInternalBaseUrl("/deleteUser");
         String accessToken = jwtGenerator.generateAccessToken(UUID.randomUUID());
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", bearerPrefix + accessToken);
+        headers.set("Authorization", BEARER_SPACE_PREFIX + accessToken);
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
         User mockUser = mock(User.class);
         when(mockUser.getId()).thenReturn(UUID.randomUUID());
@@ -290,10 +303,10 @@ class AuthServiceComponentTest {
 
     @Test
     void deleteUser_InvalidAccessToken_ReturnsUnauthorized() {
-        String url = getBaseUrl(internalPrefix + "/deleteUser");
+        String url = getInternalBaseUrl("/deleteUser");
         String invalidAccessToken = jwtGenerator.generateRefreshToken(UUID.randomUUID());
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", bearerPrefix + invalidAccessToken);
+        headers.set("Authorization", BEARER_SPACE_PREFIX + invalidAccessToken);
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
 
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.DELETE, entity, String.class);
@@ -302,10 +315,10 @@ class AuthServiceComponentTest {
 
     @Test
     void deleteUser_UserNotFound_ReturnsNoContent() {
-        String url = getBaseUrl(internalPrefix + "/deleteUser");
+        String url = getInternalBaseUrl("/deleteUser");
         String accessToken = jwtGenerator.generateAccessToken(UUID.randomUUID());
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", bearerPrefix + accessToken);
+        headers.set("Authorization", BEARER_SPACE_PREFIX + accessToken);
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
 
         when(userRepository.getUserByUserId(any(UUID.class))).thenReturn(Optional.empty());

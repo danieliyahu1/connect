@@ -8,19 +8,19 @@ import lombok.*;
 @EqualsAndHashCode
 @Getter
 public class CreateConnectorRequestDTO {
-    @NotBlank
-    @Size(min = 2, max = 20)
+    @NotBlank(message = "First name cannot be blank")
+    @Size(min = 2, max = 20, message = "First name must be between 2 and 20 characters")
     private String firstName;
 
-    @NotBlank
-    @Size(min = 2, max = 20)
+    @NotBlank(message = "Country cannot be blank")
+    @Size(min = 2, max = 20, message = "Country must be between 2 and 20 characters")
     private String country;
 
-    @NotBlank
-    @Size(min = 2, max = 20)
+    @NotBlank(message = "City cannot be blank")
+    @Size(min = 2, max = 20, message = "City must be between 2 and 20 characters")
     private String city;
 
-    @NotBlank
-    @Size(min = 15)
+    @NotBlank(message = "Bio cannot be blank")
+    @Size(min = 15, message = "Bio must be at least 15 characters long")
     private String bio;
 }

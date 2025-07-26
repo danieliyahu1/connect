@@ -51,9 +51,10 @@ public class AuthControllerTest {
     @MockitoBean
     private UserService userService;
 
-    private static final String URIPREFIX = "/auth";
-    private String PUBLICPREFIX = "/public";
-    private String INTERNALPREFIX = "/internal";
+    private static final String AUTH_PREFIX = "/auth";
+    private String PUBLIC_PREFIX = "/public";
+    private String INTERNAL_PREFIX = "/internal";
+    public String ME_PREFIX = "/me";
 
     //---------------------------------register tests---------------------------------
 
@@ -65,7 +66,7 @@ public class AuthControllerTest {
 
         when(authService.register(any(RegisterRequestDTO.class))).thenReturn(response);
 
-        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/register")
+        mockMvc.perform(post(AUTH_PREFIX + PUBLIC_PREFIX + "/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerJson))
                 .andExpect(status().isCreated())
@@ -80,7 +81,7 @@ public class AuthControllerTest {
         when(authService.register(any(RegisterRequestDTO.class)))
                 .thenThrow(new UserExistException("User already exists"));
 
-        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/register")
+        mockMvc.perform(post(AUTH_PREFIX + PUBLIC_PREFIX + "/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerJson))
                 .andExpect(status().isConflict());
@@ -90,7 +91,7 @@ public class AuthControllerTest {
     void register_missingEmail_returnsBadRequest() throws Exception {
         String registerJson = buildRegisterJson("", "password123", "password123");
 
-        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/register")
+        mockMvc.perform(post(AUTH_PREFIX + PUBLIC_PREFIX + "/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerJson))
                 .andExpect(status().isBadRequest());
@@ -100,7 +101,7 @@ public class AuthControllerTest {
     void register_missingPassword_returnsBadRequest() throws Exception {
         String registerJson = buildRegisterJson("user@example.com", "", "password123");
 
-        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/register")
+        mockMvc.perform(post(AUTH_PREFIX + PUBLIC_PREFIX + "/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerJson))
                 .andExpect(status().isBadRequest());
@@ -110,7 +111,7 @@ public class AuthControllerTest {
     void register_missingConfirmedPassword_returnsBadRequest() throws Exception {
         String registerJson = buildRegisterJson("user@example.com", "password123", "");
 
-        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/register")
+        mockMvc.perform(post(AUTH_PREFIX + PUBLIC_PREFIX + "/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerJson))
                 .andExpect(status().isBadRequest());
@@ -120,7 +121,7 @@ public class AuthControllerTest {
     void register_invalidEmailFormat_returnsBadRequest() throws Exception {
         String registerJson = buildRegisterJson("invalid-email", "password123", "password123");
 
-        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/register")
+        mockMvc.perform(post(AUTH_PREFIX + PUBLIC_PREFIX + "/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerJson))
                 .andExpect(status().isBadRequest());
@@ -133,7 +134,7 @@ public class AuthControllerTest {
         when(authService.register(any(RegisterRequestDTO.class)))
                 .thenThrow(new PasswordNotMatchException("Passwords do not match"));
 
-        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/register")
+        mockMvc.perform(post(AUTH_PREFIX + PUBLIC_PREFIX + "/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerJson))
                 .andExpect(status().isBadRequest());
@@ -143,7 +144,7 @@ public class AuthControllerTest {
     void register_passwordTooShort_returnsBadRequest() throws Exception {
         String registerJson = buildRegisterJson("user@example.com", "short", "validPassword");
 
-        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/register")
+        mockMvc.perform(post(AUTH_PREFIX + PUBLIC_PREFIX + "/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerJson))
                 .andExpect(status().isBadRequest());
@@ -153,7 +154,7 @@ public class AuthControllerTest {
     void register_confirmedPasswordTooShort_returnsBadRequest() throws Exception {
         String registerJson = buildRegisterJson("user@example.com", "validPassword", "short");
 
-        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/register")
+        mockMvc.perform(post(AUTH_PREFIX + PUBLIC_PREFIX + "/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerJson))
                 .andExpect(status().isBadRequest());
@@ -168,7 +169,7 @@ public class AuthControllerTest {
         AuthResponseDTO response = new AuthResponseDTO("accessToken", "refreshToken");
         when(authService.login(any(LoginRequestDTO.class))).thenReturn(response);
 
-        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/login")
+        mockMvc.perform(post(AUTH_PREFIX + PUBLIC_PREFIX + "/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginJson))
                 .andExpect(status().isOk())
@@ -182,7 +183,7 @@ public class AuthControllerTest {
         when(authService.login(any(LoginRequestDTO.class)))
                 .thenThrow(new AuthCommonUnauthorizedException("Invalid credentials"));
 
-        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/login")
+        mockMvc.perform(post(AUTH_PREFIX + PUBLIC_PREFIX + "/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginJson))
                 .andExpect(status().isUnauthorized());
@@ -192,7 +193,7 @@ public class AuthControllerTest {
     void login_missingEmail_returnsBadRequest() throws Exception {
         String loginJson = buildLoginJson("", "validPassword");
 
-        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/login")
+        mockMvc.perform(post(AUTH_PREFIX + PUBLIC_PREFIX + "/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginJson))
                 .andExpect(status().isBadRequest());
@@ -202,7 +203,7 @@ public class AuthControllerTest {
     void login_invalidEmailFormat_returnsBadRequest() throws Exception {
         String loginJson = buildLoginJson("not-an-email", "validPassword");
 
-        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/login")
+        mockMvc.perform(post(AUTH_PREFIX + PUBLIC_PREFIX + "/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginJson))
                 .andExpect(status().isBadRequest());
@@ -212,7 +213,7 @@ public class AuthControllerTest {
     void login_missingPassword_returnsBadRequest() throws Exception {
         String loginJson = buildLoginJson("user@example.com", "");
 
-        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/login")
+        mockMvc.perform(post(AUTH_PREFIX + PUBLIC_PREFIX + "/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginJson))
                 .andExpect(status().isBadRequest());
@@ -222,7 +223,7 @@ public class AuthControllerTest {
     void login_passwordTooShort_returnsBadRequest() throws Exception {
         String loginJson = buildLoginJson("user@example.com", "short");
 
-        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/login")
+        mockMvc.perform(post(AUTH_PREFIX + PUBLIC_PREFIX + "/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginJson))
                 .andExpect(status().isBadRequest());
@@ -235,7 +236,7 @@ public class AuthControllerTest {
         AuthResponseDTO response = new AuthResponseDTO("accessToken", "newRefreshToken");
         when(authService.refresh(eq("refreshTokenValue"))).thenReturn(response);
 
-        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/refresh")
+        mockMvc.perform(post(AUTH_PREFIX + PUBLIC_PREFIX + "/refresh")
                         .cookie(new Cookie("refreshToken", "refreshTokenValue")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken").value("accessToken"))
@@ -244,7 +245,7 @@ public class AuthControllerTest {
 
     @Test
     void refresh_MissingCookie_BadRequest() throws Exception {
-        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/refresh"))
+        mockMvc.perform(post(AUTH_PREFIX + PUBLIC_PREFIX + "/refresh"))
                 .andExpect(status().isBadRequest());
     }
 
@@ -253,7 +254,7 @@ public class AuthControllerTest {
         when(authService.refresh(any(String.class)))
                 .thenThrow(new AuthCommonInvalidRefreshTokenException("Invalid refresh token"));
 
-        mockMvc.perform(post(URIPREFIX + PUBLICPREFIX + "/refresh")
+        mockMvc.perform(post(AUTH_PREFIX + PUBLIC_PREFIX + "/refresh")
                         .cookie(new Cookie("refreshToken", "invalid")))
                 .andExpect(status().isUnauthorized());
     }
@@ -276,7 +277,7 @@ public class AuthControllerTest {
         Mockito.doNothing().when(authService).logout(any(String.class));
 
         try {
-            mockMvc.perform(post(URIPREFIX + INTERNALPREFIX + "/logout")
+            mockMvc.perform(post(AUTH_PREFIX + ME_PREFIX + "/logout")
                             .with(request -> {
                                 request.setUserPrincipal(authentication);
                                 return request;
@@ -304,7 +305,7 @@ public class AuthControllerTest {
                 .when(authService).logout(Mockito.anyString());
 
         try {
-            mockMvc.perform(post(URIPREFIX + INTERNALPREFIX + "/logout")
+            mockMvc.perform(post(AUTH_PREFIX + ME_PREFIX + "/logout")
                             .with(request -> {
                                 request.setUserPrincipal(authentication);
                                 return request;
@@ -333,7 +334,7 @@ public class AuthControllerTest {
         Mockito.doNothing().when(authService).deleteUserByUserId(userId);
 
         try {
-            mockMvc.perform(delete(URIPREFIX + INTERNALPREFIX + "/deleteUser")
+            mockMvc.perform(delete(AUTH_PREFIX + INTERNAL_PREFIX + "/deleteUser")
                             .with(request -> {
                                 request.setUserPrincipal(authentication);
                                 return request;
@@ -361,7 +362,7 @@ public class AuthControllerTest {
         doThrow(new AuthCommonUnauthorizedException("User not authenticated"))
                 .when(authService).deleteUserByUserId(userId);
         try {
-            mockMvc.perform(delete(URIPREFIX + INTERNALPREFIX + "/deleteUser")
+            mockMvc.perform(delete(AUTH_PREFIX + INTERNAL_PREFIX + "/deleteUser")
                             .with(request -> {
                                 request.setUserPrincipal(authentication);
                                 return request;

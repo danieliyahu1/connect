@@ -38,7 +38,7 @@ public class AuthController {
         return ResponseEntity.ok(authService.refresh(refreshToken));
     }
 
-    @PostMapping("/internal/logout")
+    @PostMapping("/me/logout")
     public ResponseEntity<Void> logout(Authentication authentication) throws AuthCommonUnauthorizedException {
         authService.logout(getUserId(authentication));
         return ResponseEntity.noContent().build(); // 204 No Content
