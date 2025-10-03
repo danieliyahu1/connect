@@ -1,6 +1,6 @@
-package com.connect.auth.repository;
+package com.akatsuki.auth.repository;
 
-import com.connect.auth.model.User;
+import com.akatsuki.auth.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

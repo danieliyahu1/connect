@@ -1,6 +1,6 @@
-package com.connect.connector.service;
+package com.akatsuki.connector.service;
 
-import com.connect.connector.dto.response.UploadSignatureResponseDTO;
+import com.akatsuki.connector.dto.response.UploadSignatureResponseDTO;
 
 public interface MediaStorageService {
     public UploadSignatureResponseDTO generateUploadSignature(String imageName, String folder);

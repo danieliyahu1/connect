@@ -1,7 +1,7 @@
-package com.connect.connector.dto.response;
+package com.akatsuki.connector.dto.response;
 
-import com.connect.connector.dto.ConnectorImageDTO;
-import com.connect.connector.dto.ConnectorSocialMediaDTO;
+import com.akatsuki.connector.dto.ConnectorImageDTO;
+import com.akatsuki.connector.dto.ConnectorSocialMediaDTO;
 import lombok.Builder;
 import lombok.Getter;
 

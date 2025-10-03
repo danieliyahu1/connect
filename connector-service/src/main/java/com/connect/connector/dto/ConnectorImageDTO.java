@@ -1,4 +1,4 @@
-package com.connect.connector.dto;
+package com.akatsuki.connector.dto;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

@@ -1,4 +1,4 @@
-package com.connect.auth.enums;
+package com.akatsuki.auth.enums;
 
 public enum AuthProvider {
     LOCAL,

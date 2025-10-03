@@ -1,6 +1,6 @@
-package com.connect.connector.config;
+package com.akatsuki.connector.config;
 
-import com.connect.auth.common.config.CommonSecurityConfig;
+import com.akatsuki.auth.common.config.CommonSecurityConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;

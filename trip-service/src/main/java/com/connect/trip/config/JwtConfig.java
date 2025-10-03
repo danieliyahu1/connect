@@ -1,4 +1,4 @@
-package com.connect.trip.config;
+package com.akatsuki.trip.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

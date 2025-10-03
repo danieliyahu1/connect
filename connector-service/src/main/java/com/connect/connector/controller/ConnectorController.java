@@ -1,13 +1,13 @@
-    package com.connect.connector.controller;
+    package com.akatsuki.connector.controller;
 
-    import com.connect.connector.dto.response.UploadSignatureResponseDTO;
-    import com.connect.connector.dto.ConnectorImageDTO;
-    import com.connect.connector.dto.ConnectorSocialMediaDTO;
-    import com.connect.connector.dto.request.CreateConnectorRequestDTO;
-    import com.connect.connector.exception.*;
-    import com.connect.connector.service.ConnectorService;
-    import com.connect.connector.dto.request.UpdateConnectorRequestDTO;
-    import com.connect.connector.dto.response.ConnectorResponseDTO;
+    import com.akatsuki.connector.dto.response.UploadSignatureResponseDTO;
+    import com.akatsuki.connector.dto.ConnectorImageDTO;
+    import com.akatsuki.connector.dto.ConnectorSocialMediaDTO;
+    import com.akatsuki.connector.dto.request.CreateConnectorRequestDTO;
+    import com.akatsuki.connector.exception.*;
+    import com.akatsuki.connector.service.ConnectorService;
+    import com.akatsuki.connector.dto.request.UpdateConnectorRequestDTO;
+    import com.akatsuki.connector.dto.response.ConnectorResponseDTO;
     import jakarta.validation.Valid;
     import lombok.RequiredArgsConstructor;
     import org.springframework.http.HttpStatus;

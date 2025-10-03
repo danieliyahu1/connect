@@ -1,9 +1,9 @@
-package com.connect.discovery.controller;
+package com.akatsuki.discovery.controller;
 
-import com.connect.auth.common.util.AsymmetricJwtUtil;
-import com.connect.discovery.configuration.TestSecurityConfig;
-import com.connect.discovery.dto.UserSuggestionDTO;
-import com.connect.discovery.service.DiscoveryService;
+import com.akatsuki.auth.common.util.AsymmetricJwtUtil;
+import com.akatsuki.discovery.configuration.TestSecurityConfig;
+import com.akatsuki.discovery.dto.UserSuggestionDTO;
+import com.akatsuki.discovery.service.DiscoveryService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

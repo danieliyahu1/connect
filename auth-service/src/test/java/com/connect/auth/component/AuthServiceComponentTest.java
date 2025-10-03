@@ -1,13 +1,13 @@
-package com.connect.auth.component;
+package com.akatsuki.auth.component;
 
-import com.connect.auth.configuration.ComponentTestSecurityConfig;
-import com.connect.auth.dto.AuthResponseDTO;
-import com.connect.auth.model.RefreshToken;
-import com.connect.auth.model.User;
-import com.connect.auth.repository.AuthRepository;
-import com.connect.auth.repository.UserRepository;
-import com.connect.auth.common.util.AsymmetricJwtUtil;
-import com.connect.auth.service.token.JwtGenerator;
+import com.akatsuki.auth.configuration.ComponentTestSecurityConfig;
+import com.akatsuki.auth.dto.AuthResponseDTO;
+import com.akatsuki.auth.model.RefreshToken;
+import com.akatsuki.auth.model.User;
+import com.akatsuki.auth.repository.AuthRepository;
+import com.akatsuki.auth.repository.UserRepository;
+import com.akatsuki.auth.common.util.AsymmetricJwtUtil;
+import com.akatsuki.auth.service.token.JwtGenerator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfig
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import com.connect.auth.enums.AuthProvider;
+import com.akatsuki.auth.enums.AuthProvider;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
@@ -90,7 +90,7 @@ class AuthServiceComponentTest {
             {
               "email": "component-test@example.com",
               "password": "password123",
-              "confirmed_password": "password123"
+              "confirmedPassword": "password123"
             }
             """;
 
@@ -117,7 +117,7 @@ class AuthServiceComponentTest {
             {
               "email": "existing@example.com",
               "password": "password123",
-              "confirmed_password": "password123"
+              "confirmedPassword": "password123"
             }
             """;
         HttpHeaders headers = new HttpHeaders();
@@ -137,7 +137,7 @@ class AuthServiceComponentTest {
             {
               "email": "component-test@example.com",
               "password": "password123",
-              "confirmed_password": "differentPassword"
+              "confirmedPassword": "differentPassword"
             }
             """;
         HttpHeaders headers = new HttpHeaders();

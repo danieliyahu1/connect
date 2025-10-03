@@ -1,8 +1,8 @@
-package com.connect.connector.enums.util;
+package com.akatsuki.connector.enums.util;
 
-import com.connect.connector.enums.City;
-import com.connect.connector.enums.Country;
-import com.connect.connector.exception.IllegalEnumException;
+import com.akatsuki.connector.enums.City;
+import com.akatsuki.connector.enums.Country;
+import com.akatsuki.connector.exception.IllegalEnumException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;

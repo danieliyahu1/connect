@@ -1,4 +1,4 @@
-package com.connect.auth.model;
+package com.akatsuki.auth.model;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -9,7 +9,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.Instant;
 import java.util.UUID;
-import com.connect.auth.enums.AuthProvider;
+import com.akatsuki.auth.enums.AuthProvider;
 
 @Entity
 @Table(name = "users")

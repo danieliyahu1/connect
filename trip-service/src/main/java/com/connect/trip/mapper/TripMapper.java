@@ -1,9 +1,9 @@
-package com.connect.trip.mapper;
+package com.akatsuki.trip.mapper;
 
-import com.connect.trip.dto.response.TripResponseDTO;
-import com.connect.trip.enums.City;
-import com.connect.trip.enums.Country;
-import com.connect.trip.model.Trip;
+import com.akatsuki.trip.dto.response.TripResponseDTO;
+import com.akatsuki.trip.enums.City;
+import com.akatsuki.trip.enums.Country;
+import com.akatsuki.trip.model.Trip;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

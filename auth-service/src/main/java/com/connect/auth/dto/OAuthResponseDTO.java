@@ -1,4 +1,4 @@
-package com.connect.auth.dto;
+package com.akatsuki.auth.dto;
 
 import lombok.Getter;
 

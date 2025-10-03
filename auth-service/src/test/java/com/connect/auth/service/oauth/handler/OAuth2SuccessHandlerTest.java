@@ -1,8 +1,8 @@
-package com.connect.auth.service.oauth.handler;
+package com.akatsuki.auth.service.oauth.handler;
 
-import com.connect.auth.dto.OAuthResponseDTO;
-import com.connect.auth.exception.WrongProviderException;
-import com.connect.auth.service.OAuthService;
+import com.akatsuki.auth.dto.OAuthResponseDTO;
+import com.akatsuki.auth.exception.WrongProviderException;
+import com.akatsuki.auth.service.OAuthService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

@@ -1,4 +1,4 @@
-package com.connect.connector.config;
+package com.akatsuki.connector.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

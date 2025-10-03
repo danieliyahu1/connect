@@ -1,11 +1,11 @@
-package com.connect.trip.controller;
+package com.akatsuki.trip.controller;
 
-import com.connect.auth.common.util.AsymmetricJwtUtil;
-import com.connect.trip.configuration.TestSecurityConfig;
-import com.connect.trip.dto.request.TripRequestDTO;
-import com.connect.trip.dto.response.TripResponseDTO;
-import com.connect.trip.exception.TripNotFoundException;
-import com.connect.trip.service.TripService;
+import com.akatsuki.auth.common.util.AsymmetricJwtUtil;
+import com.akatsuki.trip.configuration.TestSecurityConfig;
+import com.akatsuki.trip.dto.request.TripRequestDTO;
+import com.akatsuki.trip.dto.response.TripResponseDTO;
+import com.akatsuki.trip.exception.TripNotFoundException;
+import com.akatsuki.trip.service.TripService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

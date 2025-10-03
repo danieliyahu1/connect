@@ -1,7 +1,7 @@
-package com.connect.discovery.service;
+package com.akatsuki.discovery.service;
 
-import com.connect.discovery.dto.ConnectorResponseDTO;
-import com.connect.discovery.dto.UserSuggestionDTO;
+import com.akatsuki.discovery.dto.ConnectorResponseDTO;
+import com.akatsuki.discovery.dto.UserSuggestionDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import java.util.List;

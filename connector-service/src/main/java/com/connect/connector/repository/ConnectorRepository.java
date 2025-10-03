@@ -1,7 +1,7 @@
-package com.connect.connector.repository;
+package com.akatsuki.connector.repository;
 
-import com.connect.connector.enums.Country;
-import com.connect.connector.model.Connector;
+import com.akatsuki.connector.enums.Country;
+import com.akatsuki.connector.model.Connector;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

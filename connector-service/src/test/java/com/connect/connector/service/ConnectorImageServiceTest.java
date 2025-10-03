@@ -1,14 +1,14 @@
-package com.connect.connector.service;
+package com.akatsuki.connector.service;
 
-import com.connect.connector.dto.ConnectorImageDTO;
-import com.connect.connector.exception.ImageIndexOutOfBoundException;
-import com.connect.connector.exception.ImageNotFoundException;
-import com.connect.connector.exception.InvalidImageOrderException;
-import com.connect.connector.exception.ProfilePictureRequiredException;
-import com.connect.connector.mapper.ConnectorImageMapper;
-import com.connect.connector.model.Connector;
-import com.connect.connector.model.ConnectorImage;
-import com.connect.connector.repository.ConnectorImageRepository;
+import com.akatsuki.connector.dto.ConnectorImageDTO;
+import com.akatsuki.connector.exception.ImageIndexOutOfBoundException;
+import com.akatsuki.connector.exception.ImageNotFoundException;
+import com.akatsuki.connector.exception.InvalidImageOrderException;
+import com.akatsuki.connector.exception.ProfilePictureRequiredException;
+import com.akatsuki.connector.mapper.ConnectorImageMapper;
+import com.akatsuki.connector.model.Connector;
+import com.akatsuki.connector.model.ConnectorImage;
+import com.akatsuki.connector.repository.ConnectorImageRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -19,8 +19,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.*;
 
-import static com.connect.connector.constants.ConnectorServiceConstants.GALLERY_MAX_INDEX;
-import static com.connect.connector.constants.ConnectorServiceConstants.GALLERY_MIN_INDEX;
+import static com.akatsuki.connector.constants.ConnectorServiceConstants.GALLERY_MAX_INDEX;
+import static com.akatsuki.connector.constants.ConnectorServiceConstants.GALLERY_MIN_INDEX;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;

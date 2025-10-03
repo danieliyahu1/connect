@@ -1,4 +1,4 @@
-package com.connect.trip.dto.response;
+package com.akatsuki.trip.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;

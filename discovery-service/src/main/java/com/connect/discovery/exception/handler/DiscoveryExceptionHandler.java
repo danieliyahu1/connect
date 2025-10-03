@@ -1,4 +1,4 @@
-package com.connect.discovery.exception.handler;
+package com.akatsuki.discovery.exception.handler;
 
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;

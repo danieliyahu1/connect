@@ -1,7 +1,7 @@
-package com.connect.connector.service;
+package com.akatsuki.connector.service;
 
-import com.connect.connector.dto.response.UploadSignatureResponseDTO;
-import com.connect.connector.exception.MediaStorageSignatureGenerationException;
+import com.akatsuki.connector.dto.response.UploadSignatureResponseDTO;
+import com.akatsuki.connector.exception.MediaStorageSignatureGenerationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import static com.connect.connector.constants.ConnectorServiceConstants.*;
+import static com.akatsuki.connector.constants.ConnectorServiceConstants.*;
 
 @Service
 public class CloudinaryMediaStorageService  implements MediaStorageService{

@@ -1,4 +1,4 @@
-package com.connect.auth.constants;
+package com.akatsuki.auth.constants;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

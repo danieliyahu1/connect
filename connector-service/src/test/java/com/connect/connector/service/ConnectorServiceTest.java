@@ -1,15 +1,15 @@
-package com.connect.connector.service;
+package com.akatsuki.connector.service;
 
-import com.connect.connector.dto.ConnectorImageDTO;
-import com.connect.connector.dto.response.UploadSignatureResponseDTO;
-import com.connect.connector.dto.response.ConnectorResponseDTO;
-import com.connect.connector.dto.request.CreateConnectorRequestDTO;
-import com.connect.connector.dto.request.UpdateConnectorRequestDTO;
-import com.connect.connector.enums.City;
-import com.connect.connector.enums.Country;
-import com.connect.connector.exception.*;
-import com.connect.connector.model.Connector;
-import com.connect.connector.repository.ConnectorRepository;
+import com.akatsuki.connector.dto.ConnectorImageDTO;
+import com.akatsuki.connector.dto.response.UploadSignatureResponseDTO;
+import com.akatsuki.connector.dto.response.ConnectorResponseDTO;
+import com.akatsuki.connector.dto.request.CreateConnectorRequestDTO;
+import com.akatsuki.connector.dto.request.UpdateConnectorRequestDTO;
+import com.akatsuki.connector.enums.City;
+import com.akatsuki.connector.enums.Country;
+import com.akatsuki.connector.exception.*;
+import com.akatsuki.connector.model.Connector;
+import com.akatsuki.connector.repository.ConnectorRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

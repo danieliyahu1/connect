@@ -1,8 +1,8 @@
-package com.connect.discovery.client;
+package com.akatsuki.discovery.client;
 
-import com.connect.discovery.config.FeignClientConfig;
-import com.connect.discovery.dto.IncomingTripRequestDto;
-import com.connect.discovery.dto.TripResponseDTO;
+import com.akatsuki.discovery.config.FeignClientConfig;
+import com.akatsuki.discovery.dto.IncomingTripRequestDto;
+import com.akatsuki.discovery.dto.TripResponseDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.web.bind.annotation.GetMapping;

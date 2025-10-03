@@ -1,22 +1,22 @@
-package com.connect.connector.component;
+package com.akatsuki.connector.component;
 
-import com.connect.auth.common.exception.AuthCommonInvalidAccessTokenException;
-import com.connect.auth.common.exception.AuthCommonSignatureMismatchException;
-import com.connect.auth.common.util.AsymmetricJwtUtil;
-import com.connect.connector.dto.ConnectorImageDTO;
-import com.connect.connector.dto.ConnectorSocialMediaDTO;
-import com.connect.connector.dto.request.CreateConnectorRequestDTO;
-import com.connect.connector.dto.response.ConnectorResponseDTO;
-import com.connect.connector.dto.response.UploadSignatureResponseDTO;
-import com.connect.connector.enums.City;
-import com.connect.connector.enums.Country;
-import com.connect.connector.enums.SocialMediaPlatform;
-import com.connect.connector.model.Connector;
-import com.connect.connector.model.ConnectorImage;
-import com.connect.connector.model.ConnectorSocialMedia;
-import com.connect.connector.repository.ConnectorImageRepository;
-import com.connect.connector.repository.ConnectorRepository;
-import com.connect.connector.repository.ConnectorSocialMediaRepository;
+import com.akatsuki.auth.common.exception.AuthCommonInvalidAccessTokenException;
+import com.akatsuki.auth.common.exception.AuthCommonSignatureMismatchException;
+import com.akatsuki.auth.common.util.AsymmetricJwtUtil;
+import com.akatsuki.connector.dto.ConnectorImageDTO;
+import com.akatsuki.connector.dto.ConnectorSocialMediaDTO;
+import com.akatsuki.connector.dto.request.CreateConnectorRequestDTO;
+import com.akatsuki.connector.dto.response.ConnectorResponseDTO;
+import com.akatsuki.connector.dto.response.UploadSignatureResponseDTO;
+import com.akatsuki.connector.enums.City;
+import com.akatsuki.connector.enums.Country;
+import com.akatsuki.connector.enums.SocialMediaPlatform;
+import com.akatsuki.connector.model.Connector;
+import com.akatsuki.connector.model.ConnectorImage;
+import com.akatsuki.connector.model.ConnectorSocialMedia;
+import com.akatsuki.connector.repository.ConnectorImageRepository;
+import com.akatsuki.connector.repository.ConnectorRepository;
+import com.akatsuki.connector.repository.ConnectorSocialMediaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -133,7 +133,7 @@ class ConnectorServiceComponentTest {
     @Test
     void updateConnector_WhenUserHasNoProfile_ShouldReturnNotFound() {
         // Given: Update request for user with no connector profile
-        var updateRequest = new com.connect.connector.dto.request.UpdateConnectorRequestDTO(
+        var updateRequest = new com.akatsuki.connector.dto.request.UpdateConnectorRequestDTO(
                 "Name", "Israel", "Tel Aviv", "This is a valid bio with more than fifteen characters."
         );
 

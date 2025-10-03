@@ -1,7 +1,7 @@
-package com.connect.discovery.service;
+package com.akatsuki.discovery.service;
 
-import com.connect.discovery.dto.*;
-import com.connect.discovery.mapper.TripMapper;
+import com.akatsuki.discovery.dto.*;
+import com.akatsuki.discovery.mapper.TripMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

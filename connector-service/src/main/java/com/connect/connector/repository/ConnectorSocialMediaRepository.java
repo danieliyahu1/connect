@@ -1,7 +1,7 @@
-package com.connect.connector.repository;
+package com.akatsuki.connector.repository;
 
-import com.connect.connector.enums.SocialMediaPlatform;
-import com.connect.connector.model.ConnectorSocialMedia;
+import com.akatsuki.connector.enums.SocialMediaPlatform;
+import com.akatsuki.connector.model.ConnectorSocialMedia;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

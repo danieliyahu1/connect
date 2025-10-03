@@ -1,4 +1,4 @@
-package com.connect.trip.exception;
+package com.akatsuki.trip.exception;
 
 public class TripNotFoundException extends Exception {
     public TripNotFoundException(String message) {

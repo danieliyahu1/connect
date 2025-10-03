@@ -1,9 +1,9 @@
-package com.connect.discovery.service;
+package com.akatsuki.discovery.service;
 
-import com.connect.discovery.dto.ConnectorResponseDTO;
-import com.connect.discovery.dto.TripResponseDTO;
-import com.connect.discovery.dto.UserSuggestionDTO;
-import com.connect.discovery.mapper.TripMapper;
+import com.akatsuki.discovery.dto.ConnectorResponseDTO;
+import com.akatsuki.discovery.dto.TripResponseDTO;
+import com.akatsuki.discovery.dto.UserSuggestionDTO;
+import com.akatsuki.discovery.mapper.TripMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

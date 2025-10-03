@@ -1,18 +1,18 @@
-package com.connect.connector.service;
+package com.akatsuki.connector.service;
 
-import com.connect.connector.dto.ConnectorImageDTO;
-import com.connect.connector.exception.*;
-import com.connect.connector.mapper.ConnectorImageMapper;
-import com.connect.connector.model.Connector;
-import com.connect.connector.model.ConnectorImage;
-import com.connect.connector.repository.ConnectorImageRepository;
+import com.akatsuki.connector.dto.ConnectorImageDTO;
+import com.akatsuki.connector.exception.*;
+import com.akatsuki.connector.mapper.ConnectorImageMapper;
+import com.akatsuki.connector.model.Connector;
+import com.akatsuki.connector.model.ConnectorImage;
+import com.akatsuki.connector.repository.ConnectorImageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.connect.connector.constants.ConnectorServiceConstants.*;
+import static com.akatsuki.connector.constants.ConnectorServiceConstants.*;
 
 @Service
 @RequiredArgsConstructor

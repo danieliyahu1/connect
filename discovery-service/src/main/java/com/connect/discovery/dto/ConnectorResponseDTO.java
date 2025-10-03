@@ -1,4 +1,4 @@
-package com.connect.discovery.dto;
+package com.akatsuki.discovery.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

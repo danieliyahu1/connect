@@ -1,4 +1,4 @@
-package com.connect.auth.service.oauth.extractor;
+package com.akatsuki.auth.service.oauth.extractor;
 
 import org.springframework.security.oauth2.core.user.OAuth2User;
 

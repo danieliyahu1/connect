@@ -1,4 +1,4 @@
-package com.connect.discovery.dto;
+package com.akatsuki.discovery.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

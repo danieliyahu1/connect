@@ -1,4 +1,4 @@
-package com.connect.connector.exception;
+package com.akatsuki.connector.exception;
 
 public class ConnectorSocialMediaNotFoundException extends Exception {
     public ConnectorSocialMediaNotFoundException(String message) {

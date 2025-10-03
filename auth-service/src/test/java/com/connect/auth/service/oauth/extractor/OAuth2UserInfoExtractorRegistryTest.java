@@ -1,7 +1,7 @@
-package com.connect.auth.service.oauth.extractor;
+package com.akatsuki.auth.service.oauth.extractor;
 
-import com.connect.auth.enums.AuthProvider;
-import com.connect.auth.exception.UnsupportedProviderException;
+import com.akatsuki.auth.enums.AuthProvider;
+import com.akatsuki.auth.exception.UnsupportedProviderException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

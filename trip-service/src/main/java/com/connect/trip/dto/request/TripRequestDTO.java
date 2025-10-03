@@ -1,4 +1,4 @@
-package com.connect.trip.dto.request;
+package com.akatsuki.trip.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;

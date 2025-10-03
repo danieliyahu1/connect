@@ -1,7 +1,7 @@
-package com.connect.trip.model;
+package com.akatsuki.trip.model;
 
-import com.connect.trip.enums.City;
-import com.connect.trip.enums.Country;
+import com.akatsuki.trip.enums.City;
+import com.akatsuki.trip.enums.Country;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;

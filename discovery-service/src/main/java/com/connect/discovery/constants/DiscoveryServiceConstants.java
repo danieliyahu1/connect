@@ -1,4 +1,4 @@
-package com.connect.discovery.constants;
+package com.akatsuki.discovery.constants;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

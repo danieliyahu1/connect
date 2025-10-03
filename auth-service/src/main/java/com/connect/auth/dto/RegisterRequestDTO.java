@@ -1,4 +1,4 @@
-package com.connect.auth.dto;
+package com.akatsuki.auth.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
@@ -16,8 +16,7 @@ public class RegisterRequestDTO {
     @Size(min = 8, message = "Password should be at least 8 characters long")
     private String password;
 
-    @NotBlank(message = "Password is required")
+    @NotBlank(message = "Confirmed password is required")
     @Size(min = 8, message = "Password should be at least 8 characters long")
-    @JsonProperty("confirmed_password")
     private String confirmedPassword;
 }

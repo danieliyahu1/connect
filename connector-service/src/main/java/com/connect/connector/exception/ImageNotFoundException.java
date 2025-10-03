@@ -1,4 +1,4 @@
-package com.connect.connector.exception;
+package com.akatsuki.connector.exception;
 
 public class ImageNotFoundException extends Exception {
     public ImageNotFoundException(String message) {

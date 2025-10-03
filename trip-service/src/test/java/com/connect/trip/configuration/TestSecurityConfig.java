@@ -1,7 +1,7 @@
-package com.connect.trip.configuration;
+package com.akatsuki.trip.configuration;
 
-import com.connect.auth.common.security.JwtAuthenticationFilter;
-import com.connect.auth.common.util.AsymmetricJwtUtil;
+import com.akatsuki.auth.common.security.JwtAuthenticationFilter;
+import com.akatsuki.auth.common.util.AsymmetricJwtUtil;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;

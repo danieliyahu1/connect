@@ -1,6 +1,6 @@
-package com.connect.auth.repository;
+package com.akatsuki.auth.repository;
 
-import com.connect.auth.model.RefreshToken;
+import com.akatsuki.auth.model.RefreshToken;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

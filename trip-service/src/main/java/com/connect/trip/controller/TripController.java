@@ -1,12 +1,12 @@
-package com.connect.trip.controller;
+package com.akatsuki.trip.controller;
 
-import com.connect.trip.dto.request.TripRequestDTO;
-import com.connect.trip.dto.response.TripResponseDTO;
-import com.connect.trip.exception.InvalidDateException;
-import com.connect.trip.exception.OverlapTripException;
-import com.connect.trip.exception.IllegalEnumException;
-import com.connect.trip.exception.TripNotFoundException;
-import com.connect.trip.service.TripService;
+import com.akatsuki.trip.dto.request.TripRequestDTO;
+import com.akatsuki.trip.dto.response.TripResponseDTO;
+import com.akatsuki.trip.exception.InvalidDateException;
+import com.akatsuki.trip.exception.OverlapTripException;
+import com.akatsuki.trip.exception.IllegalEnumException;
+import com.akatsuki.trip.exception.TripNotFoundException;
+import com.akatsuki.trip.service.TripService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

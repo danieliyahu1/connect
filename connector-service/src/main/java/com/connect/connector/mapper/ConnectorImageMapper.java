@@ -1,7 +1,7 @@
-package com.connect.connector.mapper;
+package com.akatsuki.connector.mapper;
 
-import com.connect.connector.dto.ConnectorImageDTO;
-import com.connect.connector.model.ConnectorImage;
+import com.akatsuki.connector.dto.ConnectorImageDTO;
+import com.akatsuki.connector.model.ConnectorImage;
 import org.mapstruct.*;
 
 import java.util.List;

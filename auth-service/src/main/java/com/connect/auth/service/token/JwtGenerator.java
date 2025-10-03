@@ -1,4 +1,4 @@
-package com.connect.auth.service.token;
+package com.akatsuki.auth.service.token;
 
 import io.jsonwebtoken.Jwts;
 import org.slf4j.Logger;
@@ -12,8 +12,8 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.UUID;
 
-import static com.connect.auth.constants.JwtConstants.ACCESS_TOKEN_LIFE_SPAN;
-import static com.connect.auth.constants.JwtConstants.REFRESH_TOKEN_LIFE_SPAN;
+import static com.akatsuki.auth.constants.JwtConstants.ACCESS_TOKEN_LIFE_SPAN;
+import static com.akatsuki.auth.constants.JwtConstants.REFRESH_TOKEN_LIFE_SPAN;
 
 @Service
 public class JwtGenerator {

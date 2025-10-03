@@ -1,4 +1,4 @@
-package com.connect.api.gateway;
+package com.akatsuki.api.gateway;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

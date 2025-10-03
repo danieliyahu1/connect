@@ -1,14 +1,14 @@
-package com.connect.auth.controller;
+package com.akatsuki.auth.controller;
 
-import com.connect.auth.common.exception.AuthCommonInvalidRefreshTokenException;
-import com.connect.auth.common.exception.AuthCommonInvalidTokenException;
-import com.connect.auth.common.exception.AuthCommonSignatureMismatchException;
-import com.connect.auth.common.exception.AuthCommonUnauthorizedException;
-import com.connect.auth.dto.AuthResponseDTO;
-import com.connect.auth.dto.LoginRequestDTO;
-import com.connect.auth.dto.RegisterRequestDTO;
-import com.connect.auth.exception.*;
-import com.connect.auth.service.AuthService;
+import com.akatsuki.auth.common.exception.AuthCommonInvalidRefreshTokenException;
+import com.akatsuki.auth.common.exception.AuthCommonInvalidTokenException;
+import com.akatsuki.auth.common.exception.AuthCommonSignatureMismatchException;
+import com.akatsuki.auth.common.exception.AuthCommonUnauthorizedException;
+import com.akatsuki.auth.dto.AuthResponseDTO;
+import com.akatsuki.auth.dto.LoginRequestDTO;
+import com.akatsuki.auth.dto.RegisterRequestDTO;
+import com.akatsuki.auth.exception.*;
+import com.akatsuki.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

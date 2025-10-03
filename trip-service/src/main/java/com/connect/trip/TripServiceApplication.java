@@ -1,4 +1,4 @@
-package com.connect.trip;
+package com.akatsuki.trip;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,6 +1,6 @@
-package com.connect.connector.dto;
+package com.akatsuki.connector.dto;
 
-import com.connect.connector.enums.SocialMediaPlatform;
+import com.akatsuki.connector.enums.SocialMediaPlatform;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

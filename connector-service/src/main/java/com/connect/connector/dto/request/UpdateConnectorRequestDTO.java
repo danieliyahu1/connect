@@ -1,4 +1,4 @@
-package com.connect.connector.dto.request;
+package com.akatsuki.connector.dto.request;
 
 import jakarta.validation.constraints.Size;
 import lombok.*;

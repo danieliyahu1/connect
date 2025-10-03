@@ -1,8 +1,8 @@
-package com.connect.auth.exception.handler;
+package com.akatsuki.auth.exception.handler;
 
-import com.connect.auth.common.exception.AuthCommonInvalidRefreshTokenException;
-import com.connect.auth.common.exception.AuthCommonUnauthorizedException;
-import com.connect.auth.exception.*;
+import com.akatsuki.auth.common.exception.AuthCommonInvalidRefreshTokenException;
+import com.akatsuki.auth.common.exception.AuthCommonUnauthorizedException;
+import com.akatsuki.auth.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

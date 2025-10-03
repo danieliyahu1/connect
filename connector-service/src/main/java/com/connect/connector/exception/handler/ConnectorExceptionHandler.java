@@ -1,6 +1,6 @@
-package com.connect.connector.exception.handler;
+package com.akatsuki.connector.exception.handler;
 
-import com.connect.connector.exception.*;
+import com.akatsuki.connector.exception.*;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.connect.connector.constants.ConnectorServiceConstants.ERROR;
-import static com.connect.connector.constants.ConnectorServiceConstants.MESSAGE;
+import static com.akatsuki.connector.constants.ConnectorServiceConstants.ERROR;
+import static com.akatsuki.connector.constants.ConnectorServiceConstants.MESSAGE;
 
 @RestControllerAdvice
 public class ConnectorExceptionHandler {

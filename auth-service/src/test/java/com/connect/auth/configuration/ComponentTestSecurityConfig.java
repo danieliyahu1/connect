@@ -1,8 +1,8 @@
-package com.connect.auth.configuration;
+package com.akatsuki.auth.configuration;
 
-import com.connect.auth.common.security.JwtAuthenticationFilter;
-import com.connect.auth.common.util.AsymmetricJwtUtil;
-import com.connect.auth.config.JpaAuditingConfig;
+import com.akatsuki.auth.common.security.JwtAuthenticationFilter;
+import com.akatsuki.auth.common.util.AsymmetricJwtUtil;
+import com.akatsuki.auth.config.JpaAuditingConfig;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;

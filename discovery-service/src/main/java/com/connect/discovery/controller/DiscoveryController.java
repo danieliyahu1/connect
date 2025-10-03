@@ -1,7 +1,7 @@
-package com.connect.discovery.controller;
+package com.akatsuki.discovery.controller;
 
-import com.connect.discovery.dto.UserSuggestionDTO;
-import com.connect.discovery.service.DiscoveryService;
+import com.akatsuki.discovery.dto.UserSuggestionDTO;
+import com.akatsuki.discovery.service.DiscoveryService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;

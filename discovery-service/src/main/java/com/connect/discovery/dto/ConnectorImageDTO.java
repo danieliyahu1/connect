@@ -1,4 +1,4 @@
-package com.connect.discovery.dto;
+package com.akatsuki.discovery.dto;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

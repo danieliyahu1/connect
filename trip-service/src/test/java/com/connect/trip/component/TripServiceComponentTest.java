@@ -1,13 +1,13 @@
-package com.connect.trip.component;
+package com.akatsuki.trip.component;
 
-import com.connect.auth.common.exception.AuthCommonInvalidAccessTokenException;
-import com.connect.auth.common.exception.AuthCommonSignatureMismatchException;
-import com.connect.auth.common.util.AsymmetricJwtUtil;
-import com.connect.trip.dto.response.TripResponseDTO;
-import com.connect.trip.enums.City;
-import com.connect.trip.enums.Country;
-import com.connect.trip.model.Trip;
-import com.connect.trip.repository.TripRepository;
+import com.akatsuki.auth.common.exception.AuthCommonInvalidAccessTokenException;
+import com.akatsuki.auth.common.exception.AuthCommonSignatureMismatchException;
+import com.akatsuki.auth.common.util.AsymmetricJwtUtil;
+import com.akatsuki.trip.dto.response.TripResponseDTO;
+import com.akatsuki.trip.enums.City;
+import com.akatsuki.trip.enums.Country;
+import com.akatsuki.trip.model.Trip;
+import com.akatsuki.trip.repository.TripRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

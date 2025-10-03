@@ -1,4 +1,4 @@
-package com.connect.auth.model;
+package com.akatsuki.auth.model;
 
 import jakarta.persistence.*;
 import lombok.*;

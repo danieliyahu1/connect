@@ -1,6 +1,6 @@
-package com.connect.connector.enums.util;
+package com.akatsuki.connector.enums.util;
 
-import com.connect.connector.exception.IllegalEnumException;
+import com.akatsuki.connector.exception.IllegalEnumException;
 
 public class EnumUtil {
 

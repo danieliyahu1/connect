@@ -1,4 +1,4 @@
-package com.connect.trip.enums;
+package com.akatsuki.trip.enums;
 
 public enum Country {
     ISRAEL("Israel"),

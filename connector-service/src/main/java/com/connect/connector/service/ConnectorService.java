@@ -1,17 +1,17 @@
-package com.connect.connector.service;
+package com.akatsuki.connector.service;
 
-import com.connect.connector.dto.ConnectorImageDTO;
-import com.connect.connector.dto.ConnectorSocialMediaDTO;
-import com.connect.connector.dto.request.CreateConnectorRequestDTO;
-import com.connect.connector.dto.request.UpdateConnectorRequestDTO;
-import com.connect.connector.dto.response.UploadSignatureResponseDTO;
-import com.connect.connector.dto.response.ConnectorResponseDTO;
-import com.connect.connector.enums.City;
-import com.connect.connector.enums.Country;
-import com.connect.connector.enums.util.EnumUtil;
-import com.connect.connector.exception.*;
-import com.connect.connector.model.Connector;
-import com.connect.connector.repository.ConnectorRepository;
+import com.akatsuki.connector.dto.ConnectorImageDTO;
+import com.akatsuki.connector.dto.ConnectorSocialMediaDTO;
+import com.akatsuki.connector.dto.request.CreateConnectorRequestDTO;
+import com.akatsuki.connector.dto.request.UpdateConnectorRequestDTO;
+import com.akatsuki.connector.dto.response.UploadSignatureResponseDTO;
+import com.akatsuki.connector.dto.response.ConnectorResponseDTO;
+import com.akatsuki.connector.enums.City;
+import com.akatsuki.connector.enums.Country;
+import com.akatsuki.connector.enums.util.EnumUtil;
+import com.akatsuki.connector.exception.*;
+import com.akatsuki.connector.model.Connector;
+import com.akatsuki.connector.repository.ConnectorRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static com.connect.connector.constants.ConnectorServiceConstants.GALLERY_MAX_INDEX;
-import static com.connect.connector.constants.ConnectorServiceConstants.GALLERY_MIN_INDEX;
+import static com.akatsuki.connector.constants.ConnectorServiceConstants.GALLERY_MAX_INDEX;
+import static com.akatsuki.connector.constants.ConnectorServiceConstants.GALLERY_MIN_INDEX;
 
 @Service
 @RequiredArgsConstructor

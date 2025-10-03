@@ -1,6 +1,6 @@
-package com.connect.connector.model;
+package com.akatsuki.connector.model;
 
-import com.connect.connector.enums.SocialMediaPlatform;
+import com.akatsuki.connector.enums.SocialMediaPlatform;
 import jakarta.persistence.*;
 import lombok.*;
 

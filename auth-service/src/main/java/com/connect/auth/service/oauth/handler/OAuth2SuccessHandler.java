@@ -1,13 +1,13 @@
-package com.connect.auth.service.oauth.handler;
+package com.akatsuki.auth.service.oauth.handler;
 
 
-import com.connect.auth.common.exception.AuthCommonInvalidTokenException;
-import com.connect.auth.common.exception.AuthCommonSignatureMismatchException;
-import com.connect.auth.dto.AuthResponseDTO;
-import com.connect.auth.dto.OAuthResponseDTO;
-import com.connect.auth.exception.WrongProviderException;
-import com.connect.auth.repository.UserRepository;
-import com.connect.auth.service.OAuthService;
+import com.akatsuki.auth.common.exception.AuthCommonInvalidTokenException;
+import com.akatsuki.auth.common.exception.AuthCommonSignatureMismatchException;
+import com.akatsuki.auth.dto.AuthResponseDTO;
+import com.akatsuki.auth.dto.OAuthResponseDTO;
+import com.akatsuki.auth.exception.WrongProviderException;
+import com.akatsuki.auth.repository.UserRepository;
+import com.akatsuki.auth.service.OAuthService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

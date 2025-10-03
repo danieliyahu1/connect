@@ -1,8 +1,8 @@
-package com.connect.trip.repository;
+package com.akatsuki.trip.repository;
 
-import com.connect.trip.enums.City;
-import com.connect.trip.enums.Country;
-import com.connect.trip.model.Trip;
+import com.akatsuki.trip.enums.City;
+import com.akatsuki.trip.enums.Country;
+import com.akatsuki.trip.model.Trip;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

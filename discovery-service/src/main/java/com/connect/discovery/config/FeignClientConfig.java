@@ -1,4 +1,4 @@
-package com.connect.discovery.config;
+package com.akatsuki.discovery.config;
 
 import feign.RequestInterceptor;
 import org.springframework.cloud.openfeign.EnableFeignClients;
@@ -12,7 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Configuration
-@EnableFeignClients(basePackages = "com.connect.discovery.client")
+@EnableFeignClients(basePackages = "com.akatsuki.discovery.client")
 @Slf4j
 public class FeignClientConfig {
 

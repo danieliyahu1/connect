@@ -1,15 +1,15 @@
-package com.connect.connector.service;
+package com.akatsuki.connector.service;
 
-import com.connect.connector.dto.ConnectorSocialMediaDTO;
-import com.connect.connector.enums.SocialMediaPlatform;
-import com.connect.connector.enums.util.EnumUtil;
-import com.connect.connector.exception.ConnectorSocialMediaNotFoundException;
-import com.connect.connector.exception.ExistingSocialMediaPlatformException;
-import com.connect.connector.exception.IllegalEnumException;
-import com.connect.connector.exception.InvalidProfileUrlException;
-import com.connect.connector.model.Connector;
-import com.connect.connector.model.ConnectorSocialMedia;
-import com.connect.connector.repository.ConnectorSocialMediaRepository;
+import com.akatsuki.connector.dto.ConnectorSocialMediaDTO;
+import com.akatsuki.connector.enums.SocialMediaPlatform;
+import com.akatsuki.connector.enums.util.EnumUtil;
+import com.akatsuki.connector.exception.ConnectorSocialMediaNotFoundException;
+import com.akatsuki.connector.exception.ExistingSocialMediaPlatformException;
+import com.akatsuki.connector.exception.IllegalEnumException;
+import com.akatsuki.connector.exception.InvalidProfileUrlException;
+import com.akatsuki.connector.model.Connector;
+import com.akatsuki.connector.model.ConnectorSocialMedia;
+import com.akatsuki.connector.repository.ConnectorSocialMediaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;

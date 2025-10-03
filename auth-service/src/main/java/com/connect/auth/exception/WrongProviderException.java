@@ -1,4 +1,4 @@
-package com.connect.auth.exception;
+package com.akatsuki.auth.exception;
 
 public class WrongProviderException extends Exception {
     public WrongProviderException(String message) {

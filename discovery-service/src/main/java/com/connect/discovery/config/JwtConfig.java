@@ -1,4 +1,4 @@
-package com.connect.discovery.config;
+package com.akatsuki.discovery.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

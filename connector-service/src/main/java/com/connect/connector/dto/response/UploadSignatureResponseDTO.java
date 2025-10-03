@@ -1,4 +1,4 @@
-package com.connect.connector.dto.response;
+package com.akatsuki.connector.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

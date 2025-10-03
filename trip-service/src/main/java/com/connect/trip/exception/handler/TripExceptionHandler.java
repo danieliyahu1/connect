@@ -1,9 +1,9 @@
-package com.connect.trip.exception.handler;
+package com.akatsuki.trip.exception.handler;
 
-import com.connect.trip.exception.InvalidDateException;
-import com.connect.trip.exception.OverlapTripException;
-import com.connect.trip.exception.IllegalEnumException;
-import com.connect.trip.exception.TripNotFoundException;
+import com.akatsuki.trip.exception.InvalidDateException;
+import com.akatsuki.trip.exception.OverlapTripException;
+import com.akatsuki.trip.exception.IllegalEnumException;
+import com.akatsuki.trip.exception.TripNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

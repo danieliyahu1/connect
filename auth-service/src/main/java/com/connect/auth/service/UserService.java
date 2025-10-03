@@ -1,8 +1,8 @@
-package com.connect.auth.service;
+package com.akatsuki.auth.service;
 
 
-import com.connect.auth.model.User;
-import com.connect.auth.repository.UserRepository;
+import com.akatsuki.auth.model.User;
+import com.akatsuki.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -1,4 +1,4 @@
-package com.connect.auth.service.oauth.extractor;
+package com.akatsuki.auth.service.oauth.extractor;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

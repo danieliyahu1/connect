@@ -1,7 +1,7 @@
-package com.connect.connector.model;
+package com.akatsuki.connector.model;
 
-import com.connect.connector.enums.City;
-import com.connect.connector.enums.Country;
+import com.akatsuki.connector.enums.City;
+import com.akatsuki.connector.enums.Country;
 import jakarta.persistence.*;
 import lombok.*;
 

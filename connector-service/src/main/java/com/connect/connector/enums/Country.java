@@ -1,4 +1,4 @@
-package com.connect.connector.enums;
+package com.akatsuki.connector.enums;
 
 public enum Country {
     ISRAEL("Israel"),

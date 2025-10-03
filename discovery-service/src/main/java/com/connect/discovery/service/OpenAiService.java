@@ -1,8 +1,8 @@
-package com.connect.discovery.service;
+package com.akatsuki.discovery.service;
 
-import com.connect.discovery.dto.ConnectorResponseDTO;
-import com.connect.discovery.dto.UserSuggestionDTO;
-import com.connect.discovery.dto.openai.OpenAiMatchResultDTO;
+import com.akatsuki.discovery.dto.ConnectorResponseDTO;
+import com.akatsuki.discovery.dto.UserSuggestionDTO;
+import com.akatsuki.discovery.dto.openai.OpenAiMatchResultDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.context.annotation.Primary;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.connect.discovery.constants.DiscoveryServiceConstants.*;
+import static com.akatsuki.discovery.constants.DiscoveryServiceConstants.*;
 
 @Service
 @Primary

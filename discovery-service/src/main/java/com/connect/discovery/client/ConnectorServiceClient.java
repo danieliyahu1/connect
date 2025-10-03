@@ -1,7 +1,7 @@
-package com.connect.discovery.client;
+package com.akatsuki.discovery.client;
 
-import com.connect.discovery.config.FeignClientConfig;
-import com.connect.discovery.dto.ConnectorResponseDTO;
+import com.akatsuki.discovery.config.FeignClientConfig;
+import com.akatsuki.discovery.dto.ConnectorResponseDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;

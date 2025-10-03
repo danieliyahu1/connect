@@ -1,7 +1,7 @@
-package com.connect.auth.controller;
+package com.akatsuki.auth.controller;
 
-import com.connect.auth.common.exception.AuthCommonInvalidRefreshTokenException;
-import com.connect.auth.common.exception.AuthCommonUnauthorizedException;
+import com.akatsuki.auth.common.exception.AuthCommonInvalidRefreshTokenException;
+import com.akatsuki.auth.common.exception.AuthCommonUnauthorizedException;
 import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -22,15 +22,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import com.connect.auth.configuration.TestSecurityConfig;
-import com.connect.auth.dto.AuthResponseDTO;
-import com.connect.auth.dto.LoginRequestDTO;
-import com.connect.auth.dto.RegisterRequestDTO;
-import com.connect.auth.exception.PasswordNotMatchException;
-import com.connect.auth.exception.UserExistException;
-import com.connect.auth.service.AuthService;
-import com.connect.auth.service.UserService;
-import com.connect.auth.common.util.AsymmetricJwtUtil;
+import com.akatsuki.auth.configuration.TestSecurityConfig;
+import com.akatsuki.auth.dto.AuthResponseDTO;
+import com.akatsuki.auth.dto.LoginRequestDTO;
+import com.akatsuki.auth.dto.RegisterRequestDTO;
+import com.akatsuki.auth.exception.PasswordNotMatchException;
+import com.akatsuki.auth.exception.UserExistException;
+import com.akatsuki.auth.service.AuthService;
+import com.akatsuki.auth.service.UserService;
+import com.akatsuki.auth.common.util.AsymmetricJwtUtil;
 
 import jakarta.servlet.http.Cookie;
 
@@ -385,7 +385,7 @@ public class AuthControllerTest {
         {
           "email": "%s",
           "password": "%s",
-          "confirmed_password": "%s"
+          "confirmedPassword": "%s"
         }
         """.formatted(email, password, confirmedPassword);
     }

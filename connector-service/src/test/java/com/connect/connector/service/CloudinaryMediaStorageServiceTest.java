@@ -1,5 +1,5 @@
-package com.connect.connector.service;
-import com.connect.connector.dto.response.UploadSignatureResponseDTO;
+package com.akatsuki.connector.service;
+import com.akatsuki.connector.dto.response.UploadSignatureResponseDTO;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 

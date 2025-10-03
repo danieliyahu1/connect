@@ -8,7 +8,7 @@
 		<version>3.5.3</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.connect</groupId>
+	<groupId>com.akatsuki</groupId>
 	<artifactId>discovery-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>discovery-service</name>
@@ -106,9 +106,9 @@
 			<artifactId>spring-security-config</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.connect</groupId>
+			<groupId>com.akatsuki</groupId>
 			<artifactId>auth-common</artifactId>
-			<version>0.0.14-SNAPSHOT</version>
+			<version>0.0.15-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.ai</groupId>

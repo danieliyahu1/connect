@@ -16,7 +16,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"email\": \"user@example.com\",\r\n  \"password\": \"MySecurePassword123\",\r\n  \"confirmed_password\": \"MySecurePassword123\"\r\n}\r\n",
+							"raw": "{\r\n  \"email\": \"user@example.com\",\r\n  \"password\": \"MySecurePassword123\",\r\n  \"confirmedPassword\": \"MySecurePassword123\"\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"

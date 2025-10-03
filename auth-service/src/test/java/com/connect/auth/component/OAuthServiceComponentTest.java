@@ -1,12 +1,12 @@
-//package com.connect.auth.component;
+//package com.akatsuki.auth.component;
 //
-//import com.connect.auth.configuration.ComponentTestSecurityConfig;
-//import com.connect.auth.dto.OAuthResponseDTO;
-//import com.connect.auth.enums.AuthProvider;
-//import com.connect.auth.model.RefreshToken;
-//import com.connect.auth.model.User;
-//import com.connect.auth.repository.AuthRepository;
-//import com.connect.auth.repository.UserRepository;
+//import com.akatsuki.auth.configuration.ComponentTestSecurityConfig;
+//import com.akatsuki.auth.dto.OAuthResponseDTO;
+//import com.akatsuki.auth.enums.AuthProvider;
+//import com.akatsuki.auth.model.RefreshToken;
+//import com.akatsuki.auth.model.User;
+//import com.akatsuki.auth.repository.AuthRepository;
+//import com.akatsuki.auth.repository.UserRepository;
 //import com.fasterxml.jackson.databind.ObjectMapper;
 //import org.junit.jupiter.api.Test;
 //import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oauth2Login;

@@ -1,4 +1,4 @@
-package com.connect.discovery.dto.openai;
+package com.akatsuki.discovery.dto.openai;
 
 import lombok.*;
 

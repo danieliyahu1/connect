@@ -1,4 +1,4 @@
-package com.connect.connector.model;
+package com.akatsuki.connector.model;
 
 import jakarta.persistence.*;
 import lombok.*;

@@ -1,8 +1,8 @@
-package com.connect.discovery.service;
+package com.akatsuki.discovery.service;
 
-import com.connect.discovery.client.TripServiceClient;
-import com.connect.discovery.dto.IncomingTripRequestDto;
-import com.connect.discovery.dto.TripResponseDTO;
+import com.akatsuki.discovery.client.TripServiceClient;
+import com.akatsuki.discovery.dto.IncomingTripRequestDto;
+import com.akatsuki.discovery.dto.TripResponseDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

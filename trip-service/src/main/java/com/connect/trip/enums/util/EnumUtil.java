@@ -1,6 +1,6 @@
-package com.connect.trip.enums.util;
+package com.akatsuki.trip.enums.util;
 
-import com.connect.trip.exception.IllegalEnumException;
+import com.akatsuki.trip.exception.IllegalEnumException;
 
 public class EnumUtil {
 
